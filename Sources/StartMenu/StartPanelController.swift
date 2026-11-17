@@ -95,6 +95,10 @@ final class StartPanelController: NSObject, NSWindowDelegate {
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)
             panel.animator().alphaValue = 1
             panel.animator().setFrame(frame, display: true)
+        } completionHandler: { [panel] in
+            // The shadow was computed for the first animation frame and showed
+            // as a gray band under the rounded bottom edge.
+            panel.invalidateShadow()
         }
     }
 
@@ -115,10 +119,29 @@ final class StartPanelController: NSObject, NSWindowDelegate {
         self.hosting = hosting
 
         let glass = NSGlassEffectView()
-        glass.cornerRadius = model.style.panelCornerRadius
         glass.contentView = hosting
-        styleObserver = model.$style.sink { [weak glass] in glass?.cornerRadius = $0.panelCornerRadius }
-        return glass
+
+        // Everything is clipped to the panel's rounded shape: unclipped, a
+        // faint rectangle showed in the bottom corners, and the window shadow
+        // followed it as a gray band.
+        let container = NSView()
+        container.wantsLayer = true
+        container.layer?.masksToBounds = true
+        container.layer?.cornerCurve = .continuous
+        glass.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(glass)
+        NSLayoutConstraint.activate([
+            glass.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            glass.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            glass.topAnchor.constraint(equalTo: container.topAnchor),
+            glass.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+        ])
+        styleObserver = model.$style.sink { [weak self, weak glass, weak container] style in
+            glass?.cornerRadius = style.panelCornerRadius
+            container?.layer?.cornerRadius = style.panelCornerRadius
+            self?.panel.invalidateShadow()
+        }
+        return container
     }
 
     /// Arrow keys move the selection, Return opens it, Escape closes.
