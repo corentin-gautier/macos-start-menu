@@ -1,45 +1,46 @@
 import AppKit
 
+struct UninstallRequest: Identifiable {
+    let app: AppEntry
+    let leftovers: [URL]
+    var id: String { app.id }
+}
+
 /// Moves an app and the files it left in ~/Library to the Trash, after
-/// confirmation. Everything stays recoverable with the Finder's "Put Back".
+/// confirmation in the panel (an NSAlert can't get the keyboard: Start Menu is
+/// never the active app). Everything stays recoverable with "Put Back".
 enum AppUninstaller {
     /// System apps live on the read-only system volume (Safari is a link to it).
     static func canUninstall(_ app: AppEntry) -> Bool {
         !app.path.hasPrefix("/System/") && app.bundleID != "com.apple.Safari"
     }
 
-    /// Returns true if the app was moved to the Trash.
+    /// What an uninstall would remove, shown for confirmation in the panel.
+    static func request(_ app: AppEntry, installed: [AppEntry]) -> UninstallRequest {
+        UninstallRequest(app: app, leftovers: Leftovers.find(for: app, installed: installed))
+    }
+
+    /// Quits the app, then trashes it and its leftovers. Returns true if the
+    /// app itself was moved to the Trash.
     @discardableResult
-    static func uninstall(_ app: AppEntry, installed: [AppEntry]) -> Bool {
-        let leftovers = Leftovers.find(for: app, installed: installed)
-        NSApp.activate(ignoringOtherApps: true)
-
-        let alert = NSAlert()
-        alert.messageText = "Uninstall “\(app.name)”?"
-        alert.informativeText = leftovers.isEmpty
-            ? "The app will be moved to the Trash."
-            : "The app and the \(leftovers.count) item\(leftovers.count == 1 ? "" : "s") it left in your Library "
-                + "(settings, caches, data) will be moved to the Trash."
-        alert.icon = IconCache.shared.icon(for: app.url)
-        if !leftovers.isEmpty { alert.accessoryView = listView(leftovers) }
-        // Cancel is the default (Return) so a reflex keypress never uninstalls.
-        // No `hasDestructiveAction`: its red-on-red styling is unreadable.
-        alert.addButton(withTitle: "Move to Trash").keyEquivalent = ""
-        alert.addButton(withTitle: "Cancel").keyEquivalent = "\r"
-        guard alert.runModal() == .alertFirstButtonReturn else { return false }
-
+    static func perform(_ request: UninstallRequest) -> Bool {
+        let app = request.app
         quitIfRunning(app)
 
         guard trash(app.url) else {
             showError("“\(app.name)” couldn’t be moved to the Trash.")
             return false
         }
-        let failed = leftovers.filter { !trash($0) }
+        let failed = request.leftovers.filter { !trash($0) }
         if !failed.isEmpty {
             showError("Some of “\(app.name)”’s files couldn’t be removed:\n"
                 + failed.map { abbreviate($0) }.joined(separator: "\n"))
         }
         return true
+    }
+
+    static func abbreviate(_ url: URL) -> String {
+        (url.path as NSString).abbreviatingWithTildeInPath
     }
 
     // MARK: - Helpers
@@ -69,32 +70,11 @@ enum AppUninstaller {
     }
 
     private static func showError(_ message: String) {
+        NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
         alert.alertStyle = .warning
         alert.messageText = message
         alert.runModal()
-    }
-
-    private static func abbreviate(_ url: URL) -> String {
-        (url.path as NSString).abbreviatingWithTildeInPath
-    }
-
-    private static func listView(_ urls: [URL]) -> NSView {
-        let text = NSTextView(frame: NSRect(x: 0, y: 0, width: 420, height: 10))
-        text.string = urls.map(abbreviate).joined(separator: "\n")
-        text.isEditable = false
-        text.drawsBackground = false
-        text.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        text.textColor = .secondaryLabelColor
-        text.isVerticallyResizable = true
-        text.textContainer?.widthTracksTextView = true
-
-        let scroll = NSScrollView(frame: NSRect(x: 0, y: 0, width: 420, height: min(160, CGFloat(urls.count) * 16 + 8)))
-        scroll.documentView = text
-        scroll.hasVerticalScroller = true
-        scroll.drawsBackground = false
-        scroll.borderType = .noBorder
-        return scroll
     }
 }
 

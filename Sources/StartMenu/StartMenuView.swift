@@ -38,6 +38,11 @@ struct StartMenuView: View {
                 .padding(.vertical, 10)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay {
+            if let request = model.pendingUninstall {
+                UninstallConfirmation(request: request, model: model)
+            }
+        }
         .onAppear { searchFocused = true }
         .onChange(of: model.showToken) { _, _ in searchFocused = true }
     }
@@ -329,5 +334,70 @@ private enum SortMenu {
         }
         menu.popUp(positioning: nil, at: origin, in: nil)
         withExtendedLifetime(target) {}
+    }
+}
+
+/// Confirmation card shown over the panel before uninstalling an app.
+private struct UninstallConfirmation: View {
+    let request: UninstallRequest
+    @ObservedObject var model: StartMenuModel
+
+    private var message: String {
+        let count = request.leftovers.count
+        return count == 0
+            ? "The app will be moved to the Trash."
+            : "The app and the \(count) item\(count == 1 ? "" : "s") it left in your Library "
+                + "(settings, caches, data) will be moved to the Trash."
+    }
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.25)
+                .contentShape(Rectangle())
+                .onTapGesture { model.cancelUninstall() }
+
+            VStack(alignment: .leading, spacing: 12) {
+                Image(nsImage: IconCache.shared.icon(for: request.app.url))
+                    .resizable()
+                    .frame(width: 56, height: 56)
+                Text("Uninstall “\(request.app.name)”?")
+                    .font(.system(size: 15, weight: .semibold))
+                Text(message)
+                    .font(.system(size: 13))
+                    .fixedSize(horizontal: false, vertical: true)
+                if !request.leftovers.isEmpty {
+                    ScrollView {
+                        Text(request.leftovers.map(AppUninstaller.abbreviate).joined(separator: "\n"))
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(maxHeight: 140)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack(spacing: 10) {
+                    Button("Move to Trash") { model.confirmUninstall() }
+                        .controlSize(.large)
+                        .frame(maxWidth: .infinity)
+                    Button("Cancel") { model.cancelUninstall() }
+                        .controlSize(.large)
+                        .buttonStyle(.borderedProminent)
+                        .frame(maxWidth: .infinity)
+                }
+                .padding(.top, 4)
+                Text("Esc or Return to cancel")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(20)
+            .frame(width: 400)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(nsColor: .windowBackgroundColor))
+                    .shadow(radius: 20)
+            )
+        }
     }
 }

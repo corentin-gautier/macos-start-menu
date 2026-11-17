@@ -125,6 +125,15 @@ final class StartPanelController: NSObject, NSWindowDelegate {
             guard let self, self.panel.isKeyWindow else { return event }
             let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
 
+            // Uninstall confirmation: Escape and Return (the default) cancel.
+            if self.model.pendingUninstall != nil {
+                if [53, 36, 76].contains(event.keyCode) {
+                    self.model.cancelUninstall()
+                    return nil
+                }
+                return modifiers.contains(.command) ? event : nil
+            }
+
             // An agent app has no Edit menu, so its standard shortcuts are
             // routed by hand to the search field's editor.
             if modifiers == .command || modifiers == [.command, .shift] {

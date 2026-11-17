@@ -66,6 +66,7 @@ final class StartMenuModel: ObservableObject {
     @Published private(set) var showToken = UUID()
     @Published private(set) var avatar: NSImage?
     @Published var hoveredAction: SystemAction?
+    @Published private(set) var pendingUninstall: UninstallRequest?
 
     let userName = UserProfile.fullName
     var dismiss: () -> Void = {}
@@ -96,6 +97,7 @@ final class StartMenuModel: ObservableObject {
         selection = 0
         showsSelection = false
         hoveredAction = nil
+        pendingUninstall = nil
         updateResults() // usage may have changed since last time
         showToken = UUID()
         // Pick up apps installed or removed since last time.
@@ -249,14 +251,21 @@ final class StartMenuModel: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { action.perform() }
     }
 
+    /// Asks for confirmation inside the panel.
     func uninstall(_ app: AppEntry) {
-        dismiss()
-        // After the context menu has closed.
-        DispatchQueue.main.async {
-            guard AppUninstaller.uninstall(app, installed: self.apps) else { return }
-            self.apps = AppCatalog.scan()
-            self.updateResults()
-        }
+        pendingUninstall = AppUninstaller.request(app, installed: apps)
+    }
+
+    func cancelUninstall() {
+        pendingUninstall = nil
+    }
+
+    func confirmUninstall() {
+        guard let request = pendingUninstall else { return }
+        pendingUninstall = nil
+        guard AppUninstaller.perform(request) else { return }
+        apps = AppCatalog.scan()
+        updateResults()
     }
 
     func openUserSettings() {
