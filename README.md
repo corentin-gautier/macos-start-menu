@@ -8,6 +8,8 @@ release, no other key) and a panel opens right below the Apple menu with:
 - A **search field, already focused**: typing filters and ranks the apps and
   also suggests the matching **System Settings** panes (English and French
   keywords: "wifi", "dark mode", "mode sombre", "luminosité"…).
+- A **grid or list** view (list rows show the app's category), picked in the
+  sort menu.
 - Two **styles**, picked in the sort menu: **Liquid Glass** (glass capsules,
   grouped buttons, glass highlights, the default) or **Classic** (flat fills).
 - A **sort button** next to the search field: A–Z, Recent (grouped by Today,

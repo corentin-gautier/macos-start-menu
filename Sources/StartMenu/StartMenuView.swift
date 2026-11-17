@@ -147,6 +147,7 @@ struct StartMenuView: View {
                 case .app(let app):
                     AppTile(
                         app: app,
+                        asRow: !section.isGrid,
                         state: state,
                         isHidden: model.isHidden(app),
                         onToggleHidden: { model.setHidden(app, !model.isHidden(app)) },
@@ -241,33 +242,30 @@ private struct SectionHeader: View {
     }
 }
 
+/// An app as a grid tile, or as a list row (icon, name, category).
 private struct AppTile: View {
     let app: AppEntry
+    let asRow: Bool
     let state: HighlightState
     let isHidden: Bool
     let onToggleHidden: () -> Void
     let onUninstall: (() -> Void)?
 
-    private var cornerRadius: CGFloat { state.style == .glass ? 18 : 10 }
+    private var cornerRadius: CGFloat {
+        switch (state.style, asRow) {
+        case (.glass, false): 18
+        case (.glass, true): 14
+        case (.classic, _): 10
+        }
+    }
     /// Text on tinted glass needs to be white to stay readable.
     private var whiteText: Bool { state.style == .glass && state.selected }
 
     var body: some View {
-        VStack(spacing: 6) {
-            Image(nsImage: IconCache.shared.icon(for: app.url))
-                .resizable()
-                .frame(width: 50, height: 50)
-            Text(app.name)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(whiteText ? .white : .primary)
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
-                .frame(height: 28, alignment: .top)
+        Group {
+            if asRow { row } else { tile }
         }
         .opacity(isHidden ? 0.4 : 1)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-        .padding(.horizontal, 4)
         .modifier(ResultHighlight(state: state, cornerRadius: cornerRadius))
         .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .contextMenu {
@@ -280,6 +278,42 @@ private struct AppTile: View {
                 Button("Uninstall…", systemImage: "trash", role: .destructive, action: onUninstall)
             }
         }
+    }
+
+    private var tile: some View {
+        VStack(spacing: 6) {
+            Image(nsImage: IconCache.shared.icon(for: app.url))
+                .resizable()
+                .frame(width: 50, height: 50)
+            Text(app.name)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(whiteText ? .white : .primary)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+                .frame(height: 28, alignment: .top)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 4)
+    }
+
+    private var row: some View {
+        HStack(spacing: 12) {
+            Image(nsImage: IconCache.shared.icon(for: app.url))
+                .resizable()
+                .frame(width: 32, height: 32)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(app.name).font(.system(size: 13, weight: .medium))
+                Text(app.category.title)
+                    .font(.system(size: 11))
+                    .foregroundStyle(whiteText ? .white.opacity(0.8) : .secondary)
+            }
+            .foregroundStyle(whiteText ? .white : .primary)
+            .lineLimit(1)
+            Spacer()
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
     }
 }
 
@@ -480,7 +514,7 @@ private struct TooltipSurface: ViewModifier {
 
 // MARK: - Sort menu
 
-/// Sort choices, hidden apps and style as a native menu, right-aligned under
+/// Sort choices, hidden apps, view and style as a native menu, right-aligned under
 /// the sort button.
 private enum SortMenu {
     private final class Target: NSObject {
@@ -489,6 +523,10 @@ private enum SortMenu {
 
         @objc func pickSort(_ item: NSMenuItem) {
             if let mode = item.representedObject as? SortMode { model.sortMode = mode }
+        }
+
+        @objc func pickLayout(_ item: NSMenuItem) {
+            if let layout = item.representedObject as? AppLayout { model.layout = layout }
         }
 
         @objc func pickStyle(_ item: NSMenuItem) {
@@ -525,6 +563,13 @@ private enum SortMenu {
         let hidden = addItem(count == 0 ? "No Hidden Apps" : "Show Hidden Apps (\(count))", symbol: "eye.slash",
                              action: #selector(Target.toggleHidden(_:)), object: nil, checked: model.showsHidden)
         hidden.isEnabled = count > 0
+
+        menu.addItem(.separator())
+        menu.addItem(NSMenuItem.sectionHeader(title: "View"))
+        for layout in AppLayout.allCases {
+            _ = addItem(layout.title, symbol: layout.symbol, action: #selector(Target.pickLayout(_:)),
+                        object: layout, checked: layout == model.layout)
+        }
 
         menu.addItem(.separator())
         menu.addItem(NSMenuItem.sectionHeader(title: "Style"))

@@ -56,6 +56,14 @@ enum UIStyle: String, CaseIterable, Identifiable {
     var symbol: String { self == .glass ? "drop" : "square" }
 }
 
+enum AppLayout: String, CaseIterable, Identifiable {
+    case grid, list
+
+    var id: String { rawValue }
+    var title: String { self == .grid ? "Grid" : "List" }
+    var symbol: String { self == .grid ? "square.grid.3x3" : "list.bullet" }
+}
+
 enum MoveDirection { case left, right, up, down }
 
 final class StartMenuModel: ObservableObject {
@@ -68,6 +76,12 @@ final class StartMenuModel: ObservableObject {
     }
     @Published var style: UIStyle {
         didSet { UserDefaults.standard.set(style.rawValue, forKey: "style") }
+    }
+    @Published var layout: AppLayout {
+        didSet {
+            UserDefaults.standard.set(layout.rawValue, forKey: "layout")
+            updateResults()
+        }
     }
     @Published private(set) var sections: [ResultSection] = []
     @Published private(set) var selection = 0
@@ -99,6 +113,7 @@ final class StartMenuModel: ObservableObject {
         let saved = UserDefaults.standard.string(forKey: "sortMode").flatMap(SortMode.init(rawValue:))
         sortMode = saved ?? .alphabetical
         style = UserDefaults.standard.string(forKey: "style").flatMap(UIStyle.init(rawValue:)) ?? .glass
+        layout = UserDefaults.standard.string(forKey: "layout").flatMap(AppLayout.init(rawValue:)) ?? .grid
         updateResults()
         avatar = UserProfile.loadAvatar()
         IconCache.shared.preload(apps.map(\.url))
@@ -143,14 +158,14 @@ final class StartMenuModel: ObservableObject {
         var groups: [(title: String, isGrid: Bool, items: [StartResult])]
 
         if q.isEmpty {
-            groups = browseGroups().map { ($0.title, true, $0.apps.map(StartResult.app)) }
+            groups = browseGroups().map { ($0.title, layout == .grid, $0.apps.map(StartResult.app)) }
             showsSelection = false
         } else {
             let matchedApps = Self.ranked(visibleApps, name: \.name) { Search.score(q, $0.key) }
             let matchedSettings = Self.ranked(SettingsCatalog.all, name: \.name) { $0.score(q) }
                 .prefix(maxSettingResults)
             groups = [
-                ("Apps", true, matchedApps.map(StartResult.app)),
+                ("Apps", layout == .grid, matchedApps.map(StartResult.app)),
                 ("Settings", false, matchedSettings.map(StartResult.setting)),
             ]
             showsSelection = true
