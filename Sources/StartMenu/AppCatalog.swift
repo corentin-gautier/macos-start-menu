@@ -1,15 +1,22 @@
 import AppKit
+import CoreServices
 
 struct AppEntry: Identifiable, Hashable {
-    var id: String { url.path }
+    var id: String { path }
     let name: String
     let url: URL
+    /// Symlink-resolved path, also the key for usage statistics.
+    let path: String
     let bundleID: String?
+    let category: AppCategory
+    /// Spotlight's usage data, used until Start Menu has its own.
+    let spotlightLastUsed: Date?
+    let spotlightUseCount: Int
     let key: SearchKey
 }
 
 /// Lists the installed applications by reading the app folders directly
-/// (no Spotlight), so only `.app` bundles ever show up.
+/// (no Spotlight search), so only `.app` bundles ever show up.
 enum AppCatalog {
     private static let roots: [(URL, Int)] = [
         (URL(fileURLWithPath: "/Applications"), 2),
@@ -27,14 +34,25 @@ enum AppCatalog {
             for url in findApps(in: root, depth: depth) {
                 let path = url.resolvingSymlinksInPath().path
                 guard seenPaths.insert(path).inserted else { continue }
-                let bundleID = Bundle(url: url)?.bundleIdentifier
+                let bundle = Bundle(url: url)
+                let bundleID = bundle?.bundleIdentifier
                 if let bundleID {
                     if bundleID == ownBundleID { continue }
                     guard seenBundleIDs.insert(bundleID).inserted else { continue }
                 }
                 let name = FileManager.default.displayName(atPath: url.path)
                     .replacingOccurrences(of: ".app", with: "")
-                entries.append(AppEntry(name: name, url: url, bundleID: bundleID, key: SearchKey(name)))
+                let usage = spotlightUsage(url)
+                entries.append(AppEntry(
+                    name: name,
+                    url: url,
+                    path: path,
+                    bundleID: bundleID,
+                    category: AppCategory.of(url: url, bundle: bundle),
+                    spotlightLastUsed: usage.lastUsed,
+                    spotlightUseCount: usage.count,
+                    key: SearchKey(name)
+                ))
             }
         }
         return entries.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
@@ -58,6 +76,13 @@ enum AppCatalog {
             }
         }
         return apps
+    }
+
+    private static func spotlightUsage(_ url: URL) -> (lastUsed: Date?, count: Int) {
+        guard let item = MDItemCreateWithURL(nil, url as CFURL) else { return (nil, 0) }
+        let lastUsed = MDItemCopyAttribute(item, kMDItemLastUsedDate) as? Date
+        let count = (MDItemCopyAttribute(item, "kMDItemUseCount" as CFString) as? NSNumber)?.intValue ?? 0
+        return (lastUsed, count)
     }
 }
 

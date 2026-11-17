@@ -5,6 +5,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var commandMonitor: CommandKeyMonitor!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        _ = UsageStore.shared // starts recording app usage
         panelController = StartPanelController()
         commandMonitor = CommandKeyMonitor { [weak self] in
             self?.panelController.toggle()

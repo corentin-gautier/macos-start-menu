@@ -7,7 +7,10 @@ struct StartMenuView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            searchBar
+            HStack(spacing: 8) {
+                searchBar
+                sortMenu
+            }
                 .padding(.horizontal, 18)
                 .padding(.top, 18)
                 .padding(.bottom, 12)
@@ -62,30 +65,64 @@ struct StartMenuView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 60)
         } else {
-            VStack(alignment: .leading, spacing: 6) {
+            LazyVStack(alignment: .leading, spacing: 6) {
                 Color.clear.frame(height: 0).id(Self.topID)
-                if !model.appResults.isEmpty {
-                    SectionHeader(title: model.isSearching ? "Apps" : "All apps")
-                    LazyVGrid(
-                        columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: Layout.gridColumns),
-                        spacing: 2
-                    ) {
-                        ForEach(Array(model.appResults.enumerated()), id: \.element.id) { index, app in
-                            AppTile(app: app, selected: model.highlightedIndex == index)
-                                .onTapGesture { model.activate(index: index) }
+                ForEach(model.sections) { section in
+                    SectionHeader(title: section.title)
+                    if section.isGrid {
+                        LazyVGrid(
+                            columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: Layout.gridColumns),
+                            spacing: 2
+                        ) {
+                            items(of: section)
                         }
-                    }
-                }
-                if !model.settingResults.isEmpty {
-                    SectionHeader(title: "Settings").padding(.top, 6)
-                    ForEach(Array(model.settingResults.enumerated()), id: \.element.id) { offset, setting in
-                        let index = model.appResults.count + offset
-                        SettingRow(setting: setting, selected: model.highlightedIndex == index)
-                            .onTapGesture { model.activate(index: index) }
+                        .padding(.bottom, 6)
+                    } else {
+                        items(of: section)
                     }
                 }
             }
         }
+    }
+
+    private func items(of section: ResultSection) -> some View {
+        ForEach(Array(section.items.enumerated()), id: \.element.id) { offset, result in
+            let index = section.startIndex + offset
+            let selected = model.highlightedIndex == index
+            Group {
+                switch result {
+                case .app(let app): AppTile(app: app, selected: selected)
+                case .setting(let setting): SettingRow(setting: setting, selected: selected)
+                }
+            }
+            .onTapGesture { model.activate(index: index) }
+        }
+    }
+
+    private var sortMenu: some View {
+        Menu {
+            Picker("Sort apps", selection: $model.sortMode) {
+                ForEach(SortMode.allCases) { mode in
+                    Label(mode.title, systemImage: mode.symbol).tag(mode)
+                }
+            }
+            .pickerStyle(.inline)
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "arrow.up.arrow.down")
+                Text(model.sortMode.title)
+            }
+            .font(.system(size: 12, weight: .medium))
+        }
+        .menuStyle(.button)
+        .buttonStyle(.plain)
+        .menuIndicator(.visible)
+        .fixedSize()
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.07)))
+        .opacity(model.isSearching ? 0.4 : 1)
+        .help("Sort apps")
     }
 }
 
@@ -174,6 +211,8 @@ private struct BottomBar: View {
     var body: some View {
         HStack(spacing: 2) {
             UserButton(model: model)
+            Divider().frame(height: 20).padding(.horizontal, 6)
+            ForEach(SystemAction.session) { IconButton(action: $0, model: model) }
             Spacer(minLength: 8)
             // Tooltips don't show in a panel of an inactive app, so the hovered
             // button's name is shown here instead.
@@ -228,8 +267,13 @@ private struct IconButton: View {
 
     var body: some View {
         Button { model.perform(action) } label: {
-            Image(systemName: action.symbol)
-                .font(.system(size: 14, weight: .medium))
+            Group {
+                if let url = action.appIconURL {
+                    Image(nsImage: IconCache.shared.icon(for: url)).resizable().frame(width: 22, height: 22)
+                } else {
+                    Image(systemName: action.symbol).font(.system(size: 14, weight: .medium))
+                }
+            }
                 .frame(width: 30, height: 30)
                 .background(Circle().fill(hovered ? Color.primary.opacity(0.1) : .clear))
                 .contentShape(Circle())

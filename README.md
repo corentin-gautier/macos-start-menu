@@ -8,9 +8,12 @@ release, no other key) and a panel opens right below the Apple menu with:
 - A **search field, already focused**: typing filters and ranks the apps and
   also suggests the matching **System Settings** panes (English and French
   keywords: "wifi", "dark mode", "mode sombre", "luminosité"…).
+- A **sort button** next to the search field: A–Z, Recent (grouped by Today,
+  This week…), Most used, or Categories (Productivity, Music, Games…).
+- **Your account** with its avatar (opens Users & Groups), followed by the
+  session buttons: Lock and Log Out.
 - **Icon buttons**: App Store, Activity Monitor, Force Quit, System Settings,
-  About This Mac, then Lock, Log Out, Sleep, Restart, Shut Down.
-- **Your account** with its avatar (opens Users & Groups).
+  About This Mac, then the power buttons: Sleep, Restart, Shut Down.
 
 | Key | Action |
 | --- | --- |
@@ -55,6 +58,11 @@ Uninstall: `scripts/uninstall.sh`.
 - **Apps**: `/Applications`, `/System/Applications` and `~/Applications`,
   scanned two levels deep (Utilities and vendor folders included), rescanned
   every time the menu opens.
+- **Sorting**: Start Menu records every app that comes to the front (stored
+  in its user defaults) for Recent and Most used; Spotlight's usage data is only
+  a fallback since it is often missing. Categories come from the bundle ID
+  rules in `AppCategory.swift`, then the app's declared
+  `LSApplicationCategoryType`, then its install folder.
 - **Settings**: a curated list of System Settings panes, opened through
   `x-apple.systempreferences:<extension bundle id>`.
 - **Signing**: builds are signed with a self-signed certificate so the
@@ -73,6 +81,8 @@ Sources/StartMenu/
   StartMenuModel.swift        search state, ranking, navigation, actions
   StartMenuView.swift         SwiftUI interface
   AppCatalog.swift            app discovery and icon cache
+  AppCategory.swift           groups for the Categories sort
+  UsageStore.swift            recent / most used tracking
   SettingsCatalog.swift       System Settings panes and keywords
   Search.swift                matching and scoring
   SystemActions.swift         power, lock, force quit, avatar

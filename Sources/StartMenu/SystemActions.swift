@@ -8,7 +8,16 @@ enum SystemAction: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 
     static let tools: [SystemAction] = [.appStore, .activityMonitor, .forceQuit, .settings, .aboutThisMac]
-    static let power: [SystemAction] = [.lock, .logOut, .sleep, .restart, .shutDown]
+    static let session: [SystemAction] = [.lock, .logOut]
+    static let power: [SystemAction] = [.sleep, .restart, .shutDown]
+
+    /// Shown with the app's real icon instead of a symbol.
+    var appIconURL: URL? {
+        switch self {
+        case .appStore: NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.AppStore")
+        default: nil
+        }
+    }
 
     var title: String {
         switch self {
