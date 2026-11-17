@@ -8,8 +8,8 @@ import SwiftUI
 
 enum HoverSpace {
     static let name = "startMenu"
-    /// Frame of the scrolling area: results outside it are clipped, not hoverable.
-    static let viewportID = "viewport"
+    /// Floating bars: results scrolled under them are not hoverable.
+    static func blockerID(_ name: String) -> String { "block:\(name)" }
     static func resultID(_ id: String) -> String { "result:\(id)" }
     static func actionID(_ action: SystemAction) -> String { "action:\(action.rawValue)" }
     static let userID = "user"

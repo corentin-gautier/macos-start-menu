@@ -260,11 +260,9 @@ final class StartMenuModel: ObservableObject {
     private func refreshHover() {
         var hit: String?
         if let point = mouseLocation, pendingUninstall == nil {
-            let viewport = hoverFrames[HoverSpace.viewportID]
-            hit = hoverFrames.first { id, frame in
-                id != HoverSpace.viewportID && frame.contains(point)
-                    && (!id.hasPrefix("result:") || viewport?.contains(point) == true)
-            }?.key
+            let under = hoverFrames.filter { $0.value.contains(point) }.map(\.key)
+            let overBar = under.contains { $0.hasPrefix("block:") }
+            hit = under.first { !$0.hasPrefix("block:") && !(overBar && $0.hasPrefix("result:")) }
         }
         if hit != hoveredID { hoveredID = hit }
     }

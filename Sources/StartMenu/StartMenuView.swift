@@ -1,44 +1,46 @@
 import SwiftUI
 
+/// Liquid Glass layout: the results scroll under the floating glass search
+/// and sort controls, with the system's soft scroll edge effect; the glass
+/// account and action capsules sit below the list. Corner radii are concentric with the
+/// panel's (`Layout.cornerRadius`).
 struct StartMenuView: View {
     @ObservedObject var model: StartMenuModel
     @FocusState private var searchFocused: Bool
     private static let topID = "top"
 
+    /// Height of the search field and sort button.
+    static let controlHeight: CGFloat = 44
+    /// Gap between the panel edge and the floating controls.
+    static let inset: CGFloat = 12
+
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                searchBar
-                sortMenu
+        ScrollViewReader { proxy in
+            ScrollView {
+                results
+                    .padding(.horizontal, Self.inset)
+                    .padding(.vertical, 4)
             }
-                .padding(.horizontal, Self.topBarInset)
-                .padding(.top, Self.topBarInset)
-                .padding(.bottom, 12)
-
-            ScrollViewReader { proxy in
-                ScrollView {
-                    results
-                        .padding(.horizontal, 12)
-                        .padding(.bottom, 12)
-                }
-                .scrollIndicators(.never)
-                .hoverFrame(HoverSpace.viewportID)
-                .onChange(of: model.selection) { _, index in
-                    guard model.showsSelection, let id = model.resultID(at: index) else { return }
-                    withAnimation(.easeOut(duration: 0.1)) { proxy.scrollTo(id) }
-                }
-                .onChange(of: model.showToken) { _, _ in
-                    proxy.scrollTo(Self.topID, anchor: .top)
-                }
+            .scrollIndicators(.never)
+            .scrollEdgeEffectStyle(.soft, for: .vertical)
+            .safeAreaInset(edge: .top, spacing: 6) { topBar }
+            .onChange(of: model.selection) { _, index in
+                guard model.showsSelection, let id = model.resultID(at: index) else { return }
+                withAnimation(.easeOut(duration: 0.1)) { proxy.scrollTo(id) }
             }
-
-            Divider().opacity(0.6)
-
+            .onChange(of: model.showToken) { _, _ in
+                proxy.scrollTo(Self.topID, anchor: .top)
+            }
+        }
+            // The bottom bar sits below the list: content scrolling under it
+            // showed between the capsules and the panel edge.
             BottomBar(model: model)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
+                .padding(.top, 6)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // NSGlassEffectView doesn't clip its content to its rounded shape.
+        .clipShape(RoundedRectangle(cornerRadius: Layout.cornerRadius, style: .continuous))
         .coordinateSpace(name: HoverSpace.name)
         .onPreferenceChange(HoverFramesKey.self) { model.updateHoverFrames($0) }
         .overlay {
@@ -50,45 +52,77 @@ struct StartMenuView: View {
         .onChange(of: model.showToken) { _, _ in searchFocused = true }
     }
 
-    private var searchBar: some View {
-        HStack(spacing: 10) {
+    // MARK: - Top bar
+
+    private var topBar: some View {
+        GlassEffectContainer(spacing: 8) {
+            HStack(spacing: 8) {
+                searchField
+                sortButton
+            }
+        }
+        .padding([.horizontal, .top], Self.inset)
+        .hoverFrame(HoverSpace.blockerID("top"))
+    }
+
+    private var searchField: some View {
+        HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 17, weight: .medium))
+                .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(.secondary)
             TextField("Search apps and settings", text: $model.query)
                 .textFieldStyle(.plain)
-                .font(.system(size: 18))
+                .font(.system(size: 17))
                 .focused($searchFocused)
         }
-        .padding(.horizontal, 14)
-        .frame(height: Self.topBarHeight)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(0.07)))
+        .padding(.horizontal, 16)
+        .frame(height: Self.controlHeight)
+        .glassEffect(.regular, in: .capsule)
     }
 
-    /// Shared by the search field and the sort button.
-    static let topBarHeight: CGFloat = 46
-    static let topBarInset: CGFloat = 18
+    private var sortButton: some View {
+        // A plain button over the whole capsule (a SwiftUI Menu only reacts
+        // on its label), opening a native menu below itself.
+        Button { SortMenu.show(model: model) } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.up.arrow.down")
+                Text(model.sortMode.title)
+            }
+            .font(.system(size: 14, weight: .medium))
+            .padding(.horizontal, 16)
+            .frame(height: Self.controlHeight)
+            .contentShape(.capsule)
+        }
+        .buttonStyle(.plain)
+        .glassEffect(.regular.interactive(), in: .capsule)
+        .fixedSize()
+        .opacity(model.isSearching ? 0.5 : 1)
+        .help("Sort apps")
+    }
+
+    // MARK: - Results
 
     @ViewBuilder
     private var results: some View {
         if model.isSearching && model.resultCount == 0 {
-            Text("No results for “\(model.query)”")
+            Text("No Results")
+                .font(.title3.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 60)
+                .padding(.top, 80)
         } else {
-            LazyVStack(alignment: .leading, spacing: 6) {
+            LazyVStack(alignment: .leading, spacing: 4) {
                 Color.clear.frame(height: 0).id(Self.topID)
                 ForEach(model.sections) { section in
                     SectionHeader(title: section.title)
                     if section.isGrid {
                         LazyVGrid(
-                            columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: Layout.gridColumns),
-                            spacing: 2
+                            columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: Layout.gridColumns),
+                            spacing: 4
                         ) {
                             items(of: section)
                         }
-                        .padding(.bottom, 6)
+                        .padding(.bottom, 10)
                     } else {
                         items(of: section)
                     }
@@ -100,91 +134,96 @@ struct StartMenuView: View {
     private func items(of section: ResultSection) -> some View {
         ForEach(Array(section.items.enumerated()), id: \.element.id) { offset, result in
             let index = section.startIndex + offset
-            let selected = model.highlightedIndex == index
-            let hovered = model.hoveredID == HoverSpace.resultID(result.id)
+            let state = HighlightState(
+                selected: model.highlightedIndex == index,
+                hovered: model.hoveredID == HoverSpace.resultID(result.id)
+            )
             Group {
                 switch result {
                 case .app(let app):
                     AppTile(
                         app: app,
-                        selected: selected,
-                        hovered: hovered,
+                        state: state,
                         isHidden: model.isHidden(app),
                         onToggleHidden: { model.setHidden(app, !model.isHidden(app)) },
                         onUninstall: AppUninstaller.canUninstall(app) ? { model.uninstall(app) } : nil
                     )
-                case .setting(let setting): SettingRow(setting: setting, selected: selected, hovered: hovered)
+                case .setting(let setting):
+                    SettingRow(setting: setting, state: state)
                 }
             }
             .hoverFrame(HoverSpace.resultID(result.id))
             .onTapGesture { model.activate(index: index) }
         }
     }
-
-    private var sortMenu: some View {
-        // A plain button over the whole surface (a SwiftUI Menu only reacts
-        // on its label), opening a native menu below itself.
-        Button { SortMenu.show(model: model) } label: {
-            HStack(spacing: 5) {
-                Image(systemName: "arrow.up.arrow.down")
-                Text(model.sortMode.title)
-            }
-            .font(.system(size: 15, weight: .medium))
-            .padding(.horizontal, 14)
-            .frame(height: Self.topBarHeight)
-            .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(0.07)))
-            .contentShape(RoundedRectangle(cornerRadius: 12))
-        }
-        .buttonStyle(.plain)
-        .fixedSize()
-        .opacity(model.isSearching ? 0.4 : 1)
-        .help("Sort apps")
-    }
 }
+
+// MARK: - Results views
 
 private struct SectionHeader: View {
     let title: String
 
     var body: some View {
         Text(title)
-            .font(.system(size: 12, weight: .semibold))
+            .font(.system(size: 13, weight: .semibold))
             .foregroundStyle(.secondary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.horizontal, 10)
+            .padding(.top, 8)
+            .padding(.bottom, 2)
+    }
+}
+
+struct HighlightState {
+    let selected: Bool
+    let hovered: Bool
+}
+
+/// Selection is tinted glass, hover is plain glass, both concentric with the panel.
+private struct GlassHighlight: ViewModifier {
+    let state: HighlightState
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        let glass: Glass = state.selected
+            ? .regular.tint(.accentColor.opacity(0.55))
+            : state.hovered ? .regular : .identity
+        content.glassEffect(glass, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 }
 
 private struct AppTile: View {
     let app: AppEntry
-    let selected: Bool
-    let hovered: Bool
+    let state: HighlightState
     let isHidden: Bool
     let onToggleHidden: () -> Void
     let onUninstall: (() -> Void)?
 
     var body: some View {
-        VStack(spacing: 5) {
+        VStack(spacing: 6) {
             Image(nsImage: IconCache.shared.icon(for: app.url))
                 .resizable()
-                .frame(width: 46, height: 46)
+                .frame(width: 52, height: 52)
             Text(app.name)
-                .font(.system(size: 11))
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(state.selected ? .white : .primary)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
                 .frame(height: 28, alignment: .top)
         }
         .opacity(isHidden ? 0.4 : 1)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .padding(.vertical, 10)
         .padding(.horizontal, 4)
-        .background(Highlight(selected: selected, hovered: hovered))
-        .contentShape(Rectangle())
+        .modifier(GlassHighlight(state: state, cornerRadius: 18))
+        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .contextMenu {
-            Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([app.url]) }
-            Button(isHidden ? "Unhide" : "Hide", action: onToggleHidden)
+            Button("Show in Finder", systemImage: "folder") {
+                NSWorkspace.shared.activateFileViewerSelecting([app.url])
+            }
+            Button(isHidden ? "Unhide" : "Hide", systemImage: isHidden ? "eye" : "eye.slash", action: onToggleHidden)
             if let onUninstall {
                 Divider()
-                Button("Uninstall…", role: .destructive, action: onUninstall)
+                Button("Uninstall…", systemImage: "trash", role: .destructive, action: onUninstall)
             }
         }
     }
@@ -192,62 +231,58 @@ private struct AppTile: View {
 
 private struct SettingRow: View {
     let setting: SettingEntry
-    let selected: Bool
-    let hovered: Bool
+    let state: HighlightState
 
     var body: some View {
-        HStack(spacing: 10) {
-            RoundedRectangle(cornerRadius: 7)
+        HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(setting.color.gradient)
-                .frame(width: 28, height: 28)
+                .frame(width: 30, height: 30)
                 .overlay(
                     Image(systemName: setting.symbol)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.white)
                 )
             VStack(alignment: .leading, spacing: 1) {
-                Text(setting.name).font(.system(size: 13))
-                Text("System Settings").font(.system(size: 11)).foregroundStyle(.secondary)
+                Text(setting.name).font(.system(size: 13, weight: .medium))
+                Text("System Settings")
+                    .font(.system(size: 11))
+                    .foregroundStyle(state.selected ? .white.opacity(0.8) : .secondary)
             }
+            .foregroundStyle(state.selected ? .white : .primary)
             Spacer()
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .background(Highlight(selected: selected, hovered: hovered))
-        .contentShape(Rectangle())
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .modifier(GlassHighlight(state: state, cornerRadius: 14))
+        .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 
-private struct Highlight: View {
-    let selected: Bool
-    let hovered: Bool
+// MARK: - Bottom bar
 
-    var body: some View {
-        RoundedRectangle(cornerRadius: 10)
-            .fill(selected ? Color.accentColor.opacity(0.3) : hovered ? Color.primary.opacity(0.08) : .clear)
-    }
-}
-
+/// Floating glass capsules: account, session, tools, power.
 private struct BottomBar: View {
     @ObservedObject var model: StartMenuModel
 
     var body: some View {
-        HStack(spacing: 2) {
-            UserButton(model: model)
-            Divider().frame(height: 20).padding(.horizontal, 6)
-            ForEach(SystemAction.session) { IconButton(action: $0, model: model) }
-            Spacer(minLength: 8)
-            // Tooltips don't show in a panel of an inactive app, so the hovered
-            // button's name is shown here instead.
-            Text(model.hoveredAction?.title ?? "")
-                .font(.system(size: 11))
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .padding(.trailing, 6)
-            ForEach(SystemAction.tools) { IconButton(action: $0, model: model) }
-            Divider().frame(height: 20).padding(.horizontal, 6)
-            ForEach(SystemAction.power) { IconButton(action: $0, model: model) }
+        GlassEffectContainer(spacing: 8) {
+            HStack(spacing: 8) {
+                UserButton(model: model)
+                ButtonGroup(actions: SystemAction.session, model: model)
+                Spacer(minLength: 4)
+                // Tooltips don't show in a panel of an inactive app, so the
+                // hovered button's name is shown here instead.
+                Text(model.hoveredAction?.title ?? "")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                ButtonGroup(actions: SystemAction.tools, model: model)
+                ButtonGroup(actions: SystemAction.power, model: model)
+            }
         }
+        .padding([.horizontal, .bottom], StartMenuView.inset)
+        .hoverFrame(HoverSpace.blockerID("bottom"))
     }
 }
 
@@ -265,21 +300,37 @@ private struct UserButton: View {
                         Image(systemName: "person.crop.circle.fill").resizable().foregroundStyle(.secondary)
                     }
                 }
-                .frame(width: 28, height: 28)
+                .frame(width: 30, height: 30)
                 .clipShape(Circle())
                 Text(model.userName)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 13, weight: .semibold))
                     .lineLimit(1)
             }
-            .padding(.leading, 4)
-            .padding(.trailing, 10)
-            .padding(.vertical, 4)
-            .background(Capsule().fill(hovered ? Color.primary.opacity(0.08) : .clear))
-            .contentShape(Capsule())
+            .padding(.leading, 5)
+            .padding(.trailing, 14)
+            .frame(height: 40)
+            .background(Capsule().fill(Color.primary.opacity(hovered ? 0.08 : 0)))
+            .contentShape(.capsule)
         }
         .buttonStyle(.plain)
+        .glassEffect(.regular.interactive(), in: .capsule)
         .hoverFrame(HoverSpace.userID)
         .help("Users & Groups")
+    }
+}
+
+/// Several icon buttons sharing one glass capsule, like a toolbar group.
+private struct ButtonGroup: View {
+    let actions: [SystemAction]
+    @ObservedObject var model: StartMenuModel
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(actions) { IconButton(action: $0, model: model) }
+        }
+        .padding(.horizontal, 3)
+        .frame(height: 40)
+        .glassEffect(.regular, in: .capsule)
     }
 }
 
@@ -297,15 +348,17 @@ private struct IconButton: View {
                     Image(systemName: action.symbol).font(.system(size: 14, weight: .medium))
                 }
             }
-                .frame(width: 30, height: 30)
-                .background(Circle().fill(hovered ? Color.primary.opacity(0.1) : .clear))
-                .contentShape(Circle())
+            .frame(width: 34, height: 34)
+            .background(Circle().fill(Color.primary.opacity(hovered ? 0.1 : 0)))
+            .contentShape(Circle())
         }
         .buttonStyle(.plain)
         .help(action.title)
         .hoverFrame(HoverSpace.actionID(action))
     }
 }
+
+// MARK: - Sort menu
 
 /// The sort choices as a native menu, right-aligned under the sort button.
 private enum SortMenu {
@@ -325,6 +378,7 @@ private enum SortMenu {
     static func show(model: StartMenuModel) {
         let target = Target(model: model)
         let menu = NSMenu()
+        menu.autoenablesItems = false
         menu.addItem(NSMenuItem.sectionHeader(title: "Sort apps"))
         for mode in SortMode.allCases {
             let item = NSMenuItem(title: mode.title, action: #selector(Target.pick(_:)), keyEquivalent: "")
@@ -338,29 +392,31 @@ private enum SortMenu {
         let count = model.hiddenCount
         let hiddenItem = NSMenuItem(
             title: count == 0 ? "No Hidden Apps" : "Show Hidden Apps (\(count))",
-            action: count == 0 ? nil : #selector(Target.toggleHidden(_:)),
+            action: #selector(Target.toggleHidden(_:)),
             keyEquivalent: ""
         )
         hiddenItem.target = target
         hiddenItem.image = NSImage(systemSymbolName: "eye.slash", accessibilityDescription: nil)
         hiddenItem.state = model.showsHidden ? .on : .off
-        menu.autoenablesItems = false
         hiddenItem.isEnabled = count > 0
         menu.addItem(hiddenItem)
-        // popUp blocks until the menu closes, which keeps `target` alive.
+
         var origin = NSEvent.mouseLocation
         if let panel = NSApp.windows.first(where: { $0 is StartPanel && $0.isVisible }) {
             origin = NSPoint(
-                x: panel.frame.maxX - StartMenuView.topBarInset - menu.size.width,
-                y: panel.frame.maxY - StartMenuView.topBarInset - StartMenuView.topBarHeight - 6
+                x: panel.frame.maxX - StartMenuView.inset - menu.size.width,
+                y: panel.frame.maxY - StartMenuView.inset - StartMenuView.controlHeight - 6
             )
         }
+        // popUp blocks until the menu closes, which keeps `target` alive.
         menu.popUp(positioning: nil, at: origin, in: nil)
         withExtendedLifetime(target) {}
     }
 }
 
-/// Confirmation card shown over the panel before uninstalling an app.
+// MARK: - Uninstall confirmation
+
+/// Glass card shown over the panel before uninstalling an app.
 private struct UninstallConfirmation: View {
     let request: UninstallRequest
     @ObservedObject var model: StartMenuModel
@@ -375,16 +431,16 @@ private struct UninstallConfirmation: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.25)
+            Color.black.opacity(0.2)
                 .contentShape(Rectangle())
                 .onTapGesture { model.cancelUninstall() }
 
             VStack(alignment: .leading, spacing: 12) {
                 Image(nsImage: IconCache.shared.icon(for: request.app.url))
                     .resizable()
-                    .frame(width: 56, height: 56)
+                    .frame(width: 64, height: 64)
                 Text("Uninstall “\(request.app.name)”?")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 15, weight: .bold))
                 Text(message)
                     .font(.system(size: 13))
                     .fixedSize(horizontal: false, vertical: true)
@@ -399,30 +455,23 @@ private struct UninstallConfirmation: View {
                     .frame(maxHeight: 140)
                     .fixedSize(horizontal: false, vertical: true)
                 }
-                // Stacked full-width buttons, like macOS alerts.
+                // Stacked full-width capsules, like macOS alerts.
                 VStack(spacing: 8) {
                     Button { model.confirmUninstall() } label: {
                         Text("Move to Trash").frame(maxWidth: .infinity)
                     }
+                    .buttonStyle(.glass)
                     Button { model.cancelUninstall() } label: {
                         Text("Cancel").frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glassProminent)
                 }
                 .controlSize(.large)
                 .padding(.top, 6)
-                Text("Esc or Return to cancel")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.tertiary)
-                    .frame(maxWidth: .infinity)
             }
-            .padding(20)
-            .frame(width: 400)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(nsColor: .windowBackgroundColor))
-                    .shadow(radius: 20)
-            )
+            .padding(22)
+            .frame(width: 360)
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         }
     }
 }

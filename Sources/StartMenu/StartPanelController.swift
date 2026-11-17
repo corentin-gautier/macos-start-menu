@@ -29,7 +29,7 @@ final class StartPanel: NSPanel {
 enum Layout {
     static let panelWidth: CGFloat = 640
     static let panelHeight: CGFloat = 640
-    static let cornerRadius: CGFloat = 20
+    static let cornerRadius: CGFloat = 28
     static let gridColumns = 6
     /// Gap between the menu bar and the panel, and from the screen's left edge.
     static let margin: CGFloat = 6
@@ -105,29 +105,10 @@ final class StartPanelController: NSObject, NSWindowDelegate {
         hosting.onMouseMove = { [weak model] in model?.mouseMoved(to: $0) }
         self.hosting = hosting
 
-        if #available(macOS 26.0, *) {
-            let glass = NSGlassEffectView()
-            glass.cornerRadius = Layout.cornerRadius
-            glass.contentView = hosting
-            return glass
-        }
-
-        let effect = NSVisualEffectView()
-        effect.material = .popover
-        effect.blendingMode = .behindWindow
-        effect.state = .active
-        effect.wantsLayer = true
-        effect.layer?.cornerRadius = Layout.cornerRadius
-        effect.layer?.masksToBounds = true
-        hosting.translatesAutoresizingMaskIntoConstraints = false
-        effect.addSubview(hosting)
-        NSLayoutConstraint.activate([
-            hosting.leadingAnchor.constraint(equalTo: effect.leadingAnchor),
-            hosting.trailingAnchor.constraint(equalTo: effect.trailingAnchor),
-            hosting.topAnchor.constraint(equalTo: effect.topAnchor),
-            hosting.bottomAnchor.constraint(equalTo: effect.bottomAnchor),
-        ])
-        return effect
+        let glass = NSGlassEffectView()
+        glass.cornerRadius = Layout.cornerRadius
+        glass.contentView = hosting
+        return glass
     }
 
     /// Arrow keys move the selection, Return opens it, Escape closes.
