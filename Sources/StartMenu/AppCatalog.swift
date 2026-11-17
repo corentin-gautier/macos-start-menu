@@ -21,7 +21,12 @@ enum AppCatalog {
     private static let roots: [(URL, Int)] = [
         (URL(fileURLWithPath: "/Applications"), 2),
         (URL(fileURLWithPath: "/System/Applications"), 2),
+        (URL(fileURLWithPath: "/System/Library/CoreServices/Applications"), 1),
         (FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications"), 2),
+    ]
+    /// System apps that live outside the app folders.
+    private static let extraApps: [URL] = [
+        URL(fileURLWithPath: "/System/Library/CoreServices/Finder.app"),
     ]
 
     static func scan() -> [AppEntry] {
@@ -30,30 +35,30 @@ enum AppCatalog {
         var entries: [AppEntry] = []
         let ownBundleID = Bundle.main.bundleIdentifier
 
-        for (root, depth) in roots {
-            for url in findApps(in: root, depth: depth) {
-                let path = url.resolvingSymlinksInPath().path
-                guard seenPaths.insert(path).inserted else { continue }
-                let bundle = Bundle(url: url)
-                let bundleID = bundle?.bundleIdentifier
-                if let bundleID {
-                    if bundleID == ownBundleID { continue }
-                    guard seenBundleIDs.insert(bundleID).inserted else { continue }
-                }
-                let name = FileManager.default.displayName(atPath: url.path)
-                    .replacingOccurrences(of: ".app", with: "")
-                let usage = spotlightUsage(url)
-                entries.append(AppEntry(
-                    name: name,
-                    url: url,
-                    path: path,
-                    bundleID: bundleID,
-                    category: AppCategory.of(url: url, bundle: bundle),
-                    spotlightLastUsed: usage.lastUsed,
-                    spotlightUseCount: usage.count,
-                    key: SearchKey(name)
-                ))
+        let candidates = roots.flatMap { findApps(in: $0.0, depth: $0.1) }
+            + extraApps.filter { FileManager.default.fileExists(atPath: $0.path) }
+        for url in candidates {
+            let path = url.resolvingSymlinksInPath().path
+            guard seenPaths.insert(path).inserted else { continue }
+            let bundle = Bundle(url: url)
+            let bundleID = bundle?.bundleIdentifier
+            if let bundleID {
+                if bundleID == ownBundleID { continue }
+                guard seenBundleIDs.insert(bundleID).inserted else { continue }
             }
+            let name = FileManager.default.displayName(atPath: url.path)
+                .replacingOccurrences(of: ".app", with: "")
+            let usage = spotlightUsage(url)
+            entries.append(AppEntry(
+                name: name,
+                url: url,
+                path: path,
+                bundleID: bundleID,
+                category: AppCategory.of(url: url, bundle: bundle),
+                spotlightLastUsed: usage.lastUsed,
+                spotlightUseCount: usage.count,
+                key: SearchKey(name)
+            ))
         }
         return entries.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
