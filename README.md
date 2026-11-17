@@ -1,6 +1,6 @@
 # macOS Start Menu
 
-**[Website](https://corentin-gautier.github.io/macos-start-menu/) · [Download](https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip)**
+**[Website](https://corentingautier.dev/macos-start-menu/) · [Download](https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip)**
 
 A Windows-style start menu for macOS. Tap **⌘ Command** on its own (press and
 release, no other key) and a panel opens right below the Apple menu with:
