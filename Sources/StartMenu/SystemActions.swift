@@ -11,6 +11,16 @@ enum SystemAction: String, CaseIterable, Identifiable {
     static let session: [SystemAction] = [.lock, .logOut]
     static let power: [SystemAction] = [.sleep, .restart, .shutDown]
 
+    /// The macOS shortcut doing the same thing, shown in the tooltip.
+    var shortcut: String? {
+        switch self {
+        case .lock: "⌃⌘Q"
+        case .logOut: "⇧⌘Q"
+        case .forceQuit: "⌥⌘⎋"
+        default: nil
+        }
+    }
+
     /// Symbol point size: narrow glyphs are bumped up to look as big as the
     /// others (the lock looked smaller than the log out arrow).
     var symbolSize: CGFloat {

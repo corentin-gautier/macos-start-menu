@@ -261,6 +261,7 @@ final class StartMenuModel: ObservableObject {
 
     struct Tooltip: Equatable {
         let text: String
+        let shortcut: String?
         let anchor: CGRect
     }
 
@@ -268,27 +269,27 @@ final class StartMenuModel: ObservableObject {
     @Published private(set) var tooltip: Tooltip?
     private var tooltipTask: DispatchWorkItem?
 
-    private func tooltipText(for id: String?) -> String? {
+    private func tooltipText(for id: String?) -> (text: String, shortcut: String?)? {
         guard let id else { return nil }
-        if id == HoverSpace.userID { return "Users & Groups" }
-        if id == HoverSpace.sortID { return "Sort, hidden apps and style" }
-        return SystemAction.allCases.first { HoverSpace.actionID($0) == id }?.title
+        if id == HoverSpace.userID { return ("Users & Groups", nil) }
+        if id == HoverSpace.sortID { return ("Sort, hidden apps and style", nil) }
+        return SystemAction.allCases.first { HoverSpace.actionID($0) == id }.map { ($0.title, $0.shortcut) }
     }
 
     private func updateTooltip() {
         tooltipTask?.cancel()
-        guard let id = hoveredID, let text = tooltipText(for: id), let anchor = hoverFrames[id] else {
+        guard let id = hoveredID, let content = tooltipText(for: id), let anchor = hoverFrames[id] else {
             tooltip = nil
             return
         }
         // Moving between buttons keeps the tooltip up, like macOS.
         if tooltip != nil {
-            tooltip = Tooltip(text: text, anchor: anchor)
+            tooltip = Tooltip(text: content.text, shortcut: content.shortcut, anchor: anchor)
             return
         }
         let task = DispatchWorkItem { [weak self] in
             guard let self, self.hoveredID == id else { return }
-            self.tooltip = Tooltip(text: text, anchor: anchor)
+            self.tooltip = Tooltip(text: content.text, shortcut: content.shortcut, anchor: anchor)
         }
         tooltipTask = task
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: task)

@@ -436,7 +436,12 @@ private struct TooltipLayer: View {
     var body: some View {
         GeometryReader { geometry in
             if let tooltip = model.tooltip {
-                let label = Text(tooltip.text)
+                let label = HStack(spacing: 8) {
+                    Text(tooltip.text)
+                    if let shortcut = tooltip.shortcut {
+                        Text(shortcut).foregroundStyle(.secondary)
+                    }
+                }
                     .font(.system(size: 11, weight: .medium))
                     .lineLimit(1)
                     .fixedSize()
