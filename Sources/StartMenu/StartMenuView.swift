@@ -169,11 +169,13 @@ struct StartMenuView: View {
     private func items(of section: ResultSection) -> some View {
         ForEach(Array(section.items.enumerated()), id: \.element.id) { offset, result in
             let index = section.startIndex + offset
+            let key = section.key(for: result)
             let state = HighlightState(
                 style: style,
                 selected: model.highlightedIndex == index,
-                hovered: model.hoveredID == HoverSpace.resultID(result.id)
+                hovered: model.hoveredID == HoverSpace.resultID(key)
             )
+            let pin = PinToggle(isPinned: model.isPinned(result)) { model.togglePinned(result) }
             Group {
                 switch result {
                 case .app(let app):
@@ -181,17 +183,19 @@ struct StartMenuView: View {
                         app: app,
                         asRow: !section.isGrid,
                         state: state,
+                        pin: pin,
                         isHidden: model.isHidden(app),
                         onToggleHidden: { model.setHidden(app, !model.isHidden(app)) },
                         onUninstall: AppUninstaller.canUninstall(app) ? { model.uninstall(app) } : nil
                     )
                 case .setting(let setting):
-                    SettingRow(setting: setting, state: state)
+                    SettingRow(setting: setting, asTile: section.isGrid, state: state, pin: pin)
                 case .folder(let folder):
                     FolderRow(folder: folder, state: state)
                 }
             }
-            .hoverFrame(HoverSpace.resultID(result.id))
+            .id(key)
+            .hoverFrame(HoverSpace.resultID(key))
             .onTapGesture { model.activate(index: index) }
         }
     }
@@ -263,6 +267,16 @@ private struct ResultHighlight: ViewModifier {
 
 // MARK: - Results views
 
+/// Pin / Unpin context menu item of apps and settings.
+private struct PinToggle {
+    let isPinned: Bool
+    let toggle: () -> Void
+
+    var button: some View {
+        Button(isPinned ? L("Unpin") : L("Pin"), systemImage: isPinned ? "pin.slash" : "pin", action: toggle)
+    }
+}
+
 private struct SectionHeader: View {
     let title: String
 
@@ -281,6 +295,7 @@ private struct AppTile: View {
     let app: AppEntry
     let asRow: Bool
     let state: HighlightState
+    let pin: PinToggle
     let isHidden: Bool
     let onToggleHidden: () -> Void
     let onUninstall: (() -> Void)?
@@ -303,6 +318,7 @@ private struct AppTile: View {
         .modifier(ResultHighlight(state: state, cornerRadius: cornerRadius))
         .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .contextMenu {
+            pin.button
             Button("Show in Finder", systemImage: "folder") {
                 NSWorkspace.shared.activateFileViewerSelecting([app.url])
             }
@@ -351,22 +367,61 @@ private struct AppTile: View {
     }
 }
 
+/// A System Settings pane as a list row, or as a grid tile (pinned, grid view).
 private struct SettingRow: View {
     let setting: SettingEntry
+    let asTile: Bool
     let state: HighlightState
+    let pin: PinToggle
 
     private var whiteText: Bool { state.style == .glass && state.selected }
+    private var cornerRadius: CGFloat {
+        switch (state.style, asTile) {
+        case (.glass, true): 18
+        case (.glass, false): 14
+        case (.classic, _): 10
+        }
+    }
 
     var body: some View {
+        Group {
+            if asTile { tile } else { row }
+        }
+        .modifier(ResultHighlight(state: state, cornerRadius: cornerRadius))
+        .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .contextMenu { pin.button }
+    }
+
+    private func icon(size: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: size * 0.27, style: .continuous)
+            .fill(setting.color.gradient)
+            .frame(width: size, height: size)
+            .overlay(
+                Image(systemName: setting.symbol)
+                    .font(.system(size: size / 2, weight: .semibold))
+                    .foregroundStyle(.white)
+            )
+    }
+
+    private var tile: some View {
+        VStack(spacing: 6) {
+            // Same footprint as an app icon, whose artwork has a margin.
+            icon(size: 42).frame(width: 50, height: 50)
+            Text(setting.name)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(whiteText ? .white : .primary)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+                .frame(height: 28, alignment: .top)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 4)
+    }
+
+    private var row: some View {
         HStack(spacing: 12) {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(setting.color.gradient)
-                .frame(width: 30, height: 30)
-                .overlay(
-                    Image(systemName: setting.symbol)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.white)
-                )
+            icon(size: 30)
             VStack(alignment: .leading, spacing: 1) {
                 Text(setting.name).font(.system(size: 13, weight: .medium))
                 Text("System Settings")
@@ -378,8 +433,6 @@ private struct SettingRow: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
-        .modifier(ResultHighlight(state: state, cornerRadius: state.style == .glass ? 14 : 10))
-        .contentShape(Rectangle())
     }
 }
 

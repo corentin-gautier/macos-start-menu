@@ -35,6 +35,9 @@
 "Sort, hidden apps and style" = "Sort, hidden apps and style";
 "Unhide" = "Unhide";
 "Hide" = "Hide";
+"Pin" = "Pin";
+"Unpin" = "Unpin";
+"Pinned" = "Pinned";
 "Sort apps" = "Sort apps";
 "No Hidden Apps" = "No Hidden Apps";
 "Show Hidden Apps (%d)" = "Show Hidden Apps (%d)";

@@ -35,6 +35,9 @@
 "Sort, hidden apps and style" = "सॉर्ट, छिपे ऐप्स और शैली";
 "Unhide" = "न छिपाएँ";
 "Hide" = "छिपाएँ";
+"Pin" = "पिन करें";
+"Unpin" = "अनपिन करें";
+"Pinned" = "पिन किए गए";
 "Sort apps" = "ऐप्स सॉर्ट करें";
 "No Hidden Apps" = "कोई छिपा ऐप नहीं";
 "Show Hidden Apps (%d)" = "छिपे ऐप्स दिखाएँ (%d)";

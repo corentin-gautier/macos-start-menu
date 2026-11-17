@@ -35,6 +35,9 @@
 "Sort, hidden apps and style" = "Ordem, apps ocultos e estilo";
 "Unhide" = "Mostrar";
 "Hide" = "Ocultar";
+"Pin" = "Fixar";
+"Unpin" = "Desafixar";
+"Pinned" = "Fixados";
 "Sort apps" = "Ordenar apps";
 "No Hidden Apps" = "Nenhum App Oculto";
 "Show Hidden Apps (%d)" = "Mostrar Apps Ocultos (%d)";

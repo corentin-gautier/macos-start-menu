@@ -35,6 +35,9 @@
 "Sort, hidden apps and style" = "সাজানো, লুকানো অ্যাপ ও স্টাইল";
 "Unhide" = "দেখান";
 "Hide" = "লুকান";
+"Pin" = "পিন করুন";
+"Unpin" = "আনপিন করুন";
+"Pinned" = "পিন করা";
 "Sort apps" = "অ্যাপ সাজান";
 "No Hidden Apps" = "কোনো লুকানো অ্যাপ নেই";
 "Show Hidden Apps (%d)" = "লুকানো অ্যাপ দেখান (%d)";

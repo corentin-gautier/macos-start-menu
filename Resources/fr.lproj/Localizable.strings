@@ -35,6 +35,9 @@
 "Sort, hidden apps and style" = "Tri, apps masquées et style";
 "Unhide" = "Afficher";
 "Hide" = "Masquer";
+"Pin" = "Épingler";
+"Unpin" = "Désépingler";
+"Pinned" = "Épinglés";
 "Sort apps" = "Trier les apps";
 "No Hidden Apps" = "Aucune app masquée";
 "Show Hidden Apps (%d)" = "Afficher les apps masquées (%d)";

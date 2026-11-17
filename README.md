@@ -39,6 +39,9 @@ release, no other key) and a panel opens right below the Apple menu with:
 | Escape, or click outside | Close |
 | ⌘Q (menu open) | Quit Start Menu |
 
+Right-click an app or a setting to **pin** it: pinned items stay at the top
+of the menu, above the apps, in every sort.
+
 Right-click an app to **hide** it (system apps can't be deleted: they live on
 macOS's sealed, read-only system volume). Hidden apps leave the list and the
 search; the sort menu's "Show Hidden Apps" lists them dimmed so they can be

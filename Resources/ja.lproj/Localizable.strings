@@ -35,6 +35,9 @@
 "Sort, hidden apps and style" = "並べ替え、非表示のアプリ、スタイル";
 "Unhide" = "表示";
 "Hide" = "非表示";
+"Pin" = "ピン留め";
+"Unpin" = "ピン留めを解除";
+"Pinned" = "ピン留め";
 "Sort apps" = "アプリを並べ替え";
 "No Hidden Apps" = "非表示のアプリはありません";
 "Show Hidden Apps (%d)" = "非表示のアプリを表示（%d）";

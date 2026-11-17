@@ -35,6 +35,9 @@
 "Sort, hidden apps and style" = "排序、隐藏的 App 与样式";
 "Unhide" = "取消隐藏";
 "Hide" = "隐藏";
+"Pin" = "固定";
+"Unpin" = "取消固定";
+"Pinned" = "已固定";
 "Sort apps" = "App 排序";
 "No Hidden Apps" = "没有隐藏的 App";
 "Show Hidden Apps (%d)" = "显示隐藏的 App（%d）";
