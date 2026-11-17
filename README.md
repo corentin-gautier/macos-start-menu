@@ -124,8 +124,10 @@ file the website's Download button points to (latest GitHub release).
 ## Screenshots
 
 `docs/img` screenshots are taken in demo mode (`STARTMENU_DEMO=1` shows a
-generic account, `STARTMENU_DEMO_QUERY` pre-fills the search), capturing the
-panel window only (`screencapture -l <window id>`).
+generic account, `STARTMENU_DEMO_QUERY` pre-fills the search,
+`STARTMENU_DEMO_BACKDROP=<image>` centers the panel over that image so the
+glass has colors to refract), capturing the panel and its backdrop with
+`screencapture -R`.
 
 ## License
 

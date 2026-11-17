@@ -39,6 +39,7 @@ final class StartPanelController: NSObject, NSWindowDelegate {
     private let panel = StartPanel()
     private let model = StartMenuModel()
     private var keyMonitor: Any?
+    private let demoBackdrop = DemoBackdrop.fromEnvironment()
     private var styleObserver: AnyCancellable?
     private weak var hosting: TrackingHostingView<StartMenuView>?
 
@@ -72,12 +73,18 @@ final class StartPanelController: NSObject, NSWindowDelegate {
         guard let screen else { return }
         let visible = screen.visibleFrame
         let height = min(Layout.panelHeight, visible.height - Layout.margin * 2)
-        let frame = NSRect(
+        var frame = NSRect(
             x: visible.minX + Layout.margin,
             y: visible.maxY - Layout.margin - height,
             width: Layout.panelWidth,
             height: height
         )
+        if let backdrop = demoBackdrop {
+            // Screenshots: centered on the main screen, over a wallpaper.
+            let main = NSScreen.screens[0].frame
+            frame.origin = NSPoint(x: main.midX - frame.width / 2, y: main.midY - frame.height / 2)
+            backdrop.show(around: frame, below: panel)
+        }
 
         panel.setFrame(frame.offsetBy(dx: 0, dy: 8), display: false)
         panel.alphaValue = 0
@@ -94,6 +101,7 @@ final class StartPanelController: NSObject, NSWindowDelegate {
     func hide() {
         guard panel.isVisible else { return }
         panel.orderOut(nil)
+        demoBackdrop?.hide()
     }
 
     func windowDidResignKey(_ notification: Notification) {
@@ -167,5 +175,39 @@ final class StartPanelController: NSObject, NSWindowDelegate {
             }
             return nil
         }
+    }
+}
+
+/// Screenshot helper: `STARTMENU_DEMO_BACKDROP=<image>` puts that image in a
+/// window behind the panel, so the glass has something to refract instead of
+/// the flat gray of a window-only capture.
+final class DemoBackdrop {
+    /// Space around the panel.
+    static let margin: CGFloat = 70
+    private let window: NSWindow
+
+    static func fromEnvironment() -> DemoBackdrop? {
+        guard let path = ProcessInfo.processInfo.environment["STARTMENU_DEMO_BACKDROP"],
+              let image = NSImage(contentsOfFile: path) else { return nil }
+        return DemoBackdrop(image: image)
+    }
+
+    private init(image: NSImage) {
+        window = NSWindow(contentRect: .zero, styleMask: .borderless, backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.hasShadow = false
+        let view = NSImageView(image: image)
+        view.imageScaling = .scaleAxesIndependently
+        window.contentView = view
+    }
+
+    func show(around frame: NSRect, below panel: NSWindow) {
+        window.setFrame(frame.insetBy(dx: -Self.margin, dy: -Self.margin), display: true)
+        window.level = NSWindow.Level(rawValue: panel.level.rawValue - 1)
+        window.orderFront(nil)
+    }
+
+    func hide() {
+        window.orderOut(nil)
     }
 }

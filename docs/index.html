@@ -59,7 +59,9 @@
   }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  img { max-width: 100%; display: block; }
+  /* height: auto keeps the ratio when the width shrinks (width/height
+     attributes alone stretched the screenshots). */
+  img { max-width: 100%; height: auto; display: block; }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
 
   /* Hero */
@@ -224,7 +226,7 @@
     <p class="note">Free · source on GitHub · macOS 26 Tahoe or later · Apple silicon</p>
   </div>
   <div class="shot-hero">
-    <img src="img/glass-categories.png" width="1000" height="1000" alt="The Start Menu panel in the Liquid Glass style, showing apps grouped by category with the account and power buttons at the bottom.">
+    <img src="img/glass-categories.png" width="1200" height="1200" alt="The Start Menu panel in the Liquid Glass style, showing apps grouped by category with the account and power buttons at the bottom.">
   </div>
 </header>
 
@@ -255,7 +257,7 @@
           <li><strong>Keyboard first</strong> — arrows to move, Return to open, Escape to close.</li>
         </ul>
       </div>
-      <img class="shot" src="img/glass-search.png" width="1000" height="1000" loading="lazy" alt="Searching “dis” shows Discord and Disk Utility, then the Displays, Storage and Startup Disk settings.">
+      <img class="shot" src="img/glass-search.png" width="1200" height="1200" loading="lazy" alt="Searching “dis” shows Discord and Disk Utility, then the Displays, Storage and Startup Disk settings.">
     </div>
   </section>
 
@@ -265,11 +267,11 @@
       <p class="lead">Built with the native Liquid Glass of macOS Tahoe. Prefer something flatter? Switch styles from the sort menu.</p>
       <div class="styles">
         <figure>
-          <img class="shot" src="img/glass-categories.png" width="1000" height="1000" loading="lazy" alt="Liquid Glass style with glass capsules and grouped buttons.">
+          <img class="shot" src="img/glass-categories.png" width="1200" height="1200" loading="lazy" alt="Liquid Glass style with glass capsules and grouped buttons.">
           <figcaption>Liquid Glass<span>Glass capsules, grouped controls</span></figcaption>
         </figure>
         <figure>
-          <img class="shot" src="img/classic-list.png" width="1000" height="1000" loading="lazy" alt="Classic style in list view, each app with its category.">
+          <img class="shot" src="img/classic-list.png" width="1200" height="1200" loading="lazy" alt="Classic style in list view, each app with its category.">
           <figcaption>Classic<span>Flat and quiet, shown here as a list</span></figcaption>
         </figure>
       </div>
