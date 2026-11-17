@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>macOS Start Menu</title>
+<meta name="description" content="A start menu for macOS. Tap ⌘ alone to open all your apps, search them and System Settings, and reach power and session controls.">
+<meta property="og:title" content="macOS Start Menu">
+<meta property="og:description" content="Tap ⌘. Every app, every setting, nothing else.">
+<meta property="og:image" content="img/glass-categories.png">
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: rgba(0, 0, 0, 0.08);
+    --accent: #0071e3;
+    --accent-text: #ffffff;
+    --key-bg: linear-gradient(#ffffff, #e9e9ee);
+    --key-border: rgba(0, 0, 0, 0.14);
+    --hero-a: #c9d8ff;
+    --hero-b: #f3d5ff;
+    --hero-c: #d6f2ff;
+    --shadow: 0 30px 80px rgba(20, 30, 60, 0.25), 0 6px 20px rgba(20, 30, 60, 0.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0b0d;
+      --surface: #161618;
+      --text: #f5f5f7;
+      --muted: #a1a1a6;
+      --line: rgba(255, 255, 255, 0.1);
+      --accent: #2997ff;
+      --key-bg: linear-gradient(#3a3a3e, #26262a);
+      --key-border: rgba(255, 255, 255, 0.16);
+      --hero-a: #1b2a55;
+      --hero-b: #3a1d4f;
+      --hero-c: #0f3a4a;
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0b0d; --surface: #161618; --text: #f5f5f7; --muted: #a1a1a6;
+    --line: rgba(255, 255, 255, 0.1); --accent: #2997ff;
+    --key-bg: linear-gradient(#3a3a3e, #26262a); --key-border: rgba(255, 255, 255, 0.16);
+    --hero-a: #1b2a55; --hero-b: #3a1d4f; --hero-c: #0f3a4a;
+    --shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 6px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  img { max-width: 100%; display: block; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 96px 0 0;
+    background:
+      radial-gradient(60% 50% at 15% 10%, var(--hero-a), transparent 70%),
+      radial-gradient(50% 45% at 85% 20%, var(--hero-b), transparent 70%),
+      radial-gradient(60% 50% at 50% 100%, var(--hero-c), transparent 70%),
+      var(--bg);
+    text-align: center;
+  }
+  h1 {
+    font: 700 clamp(44px, 8vw, 80px)/1.04 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -0.03em;
+    margin: 0 0 18px;
+  }
+  .tagline {
+    font-size: clamp(20px, 3vw, 26px);
+    line-height: 1.35;
+    color: var(--muted);
+    margin: 0 auto 32px;
+    max-width: 640px;
+  }
+  .tagline strong { color: var(--text); font-weight: 600; }
+  .key {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.7em;
+    height: 1.7em;
+    padding: 0 0.35em;
+    margin: 0 0.1em;
+    border-radius: 0.38em;
+    border: 1px solid var(--key-border);
+    background: var(--key-bg);
+    box-shadow: 0 2px 0 var(--key-border);
+    font-weight: 600;
+    color: var(--text);
+    vertical-align: 0.05em;
+    font-size: 0.85em;
+  }
+  .key.pulse { animation: tap 2.4s ease-in-out infinite; }
+  @keyframes tap {
+    0%, 70%, 100% { transform: translateY(0); box-shadow: 0 2px 0 var(--key-border); }
+    78% { transform: translateY(2px); box-shadow: 0 0 0 var(--key-border); }
+  }
+  @media (prefers-reduced-motion: reduce) { .key.pulse { animation: none; } }
+
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .button {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 24px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 17px;
+  }
+  .button.primary { background: var(--accent); color: var(--accent-text); }
+  .button.secondary { background: var(--surface); color: var(--text); border: 1px solid var(--line); }
+  .button:hover { text-decoration: none; filter: brightness(1.06); }
+  .note { color: var(--muted); font-size: 14px; margin: 0 0 56px; }
+
+  /* The hero shows the top of the panel, cut by the section edge. */
+  .shot-hero {
+    width: min(620px, 92%);
+    aspect-ratio: 1 / 0.8;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 22px 22px 0 0;
+    box-shadow: var(--shadow);
+  }
+  .shot-hero img { width: 100%; height: auto; }
+
+  /* Sections */
+  section { padding: 100px 0; border-top: 1px solid var(--line); }
+  h2 {
+    font: 700 clamp(32px, 5vw, 48px)/1.1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+  }
+  .lead { color: var(--muted); font-size: 21px; max-width: 680px; margin: 0 0 48px; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .feature {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 26px;
+  }
+  .feature .icon { font-size: 28px; line-height: 1; margin-bottom: 14px; }
+  .feature h3 { font-size: 19px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .feature p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .split.reverse > :first-child { order: 2; }
+  .shot { border-radius: 22px; box-shadow: var(--shadow); }
+  .bullets { list-style: none; padding: 0; margin: 0; }
+  .bullets li { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+  .bullets li strong { color: var(--text); font-weight: 600; }
+
+  .styles { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .styles figure { margin: 0; }
+  .styles figcaption { text-align: center; margin-top: 16px; font-weight: 600; }
+  .styles figcaption span { display: block; font-weight: 400; color: var(--muted); font-size: 15px; }
+
+  .steps { counter-reset: step; display: grid; gap: 16px; max-width: 760px; }
+  .step {
+    counter-increment: step;
+    display: grid; grid-template-columns: 44px 1fr; gap: 16px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px;
+  }
+  .step::before {
+    content: counter(step);
+    display: grid; place-items: center;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-text); font-weight: 700;
+  }
+  .step h3 { margin: 4px 0 4px; font-size: 18px; }
+  .step p { margin: 0; color: var(--muted); font-size: 15px; }
+  code, pre {
+    font: 14px/1.5 ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  code { background: var(--line); padding: 2px 6px; border-radius: 6px; color: var(--text); }
+  pre {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px; overflow-x: auto; margin: 16px 0 0;
+  }
+  pre code { background: none; padding: 0; }
+
+  .shortcuts { width: 100%; max-width: 560px; border-collapse: collapse; }
+  .shortcuts td { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .shortcuts td:first-child { width: 45%; white-space: nowrap; }
+  .shortcuts td:last-child { color: var(--muted); }
+
+  footer { padding: 48px 0 64px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  @media (max-width: 860px) {
+    .features { grid-template-columns: 1fr 1fr; }
+    .split, .styles { grid-template-columns: 1fr; gap: 32px; }
+    .split.reverse > :first-child { order: 0; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 0 16px; }
+    .hero { padding-top: 64px; }
+    .features { grid-template-columns: 1fr; }
+    section { padding: 72px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>macOS Start Menu</h1>
+    <p class="tagline">Tap <span class="key pulse">⌘</span> on its own. <strong>Every app, every setting</strong> — and none of the files Spotlight keeps showing you.</p>
+    <div class="actions">
+      <a class="button primary" href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip">Download for Mac</a>
+      <a class="button secondary" href="https://github.com/corentin-gautier/macos-start-menu">View on GitHub</a>
+    </div>
+    <p class="note">Free and open source · macOS 26 Tahoe or later · Apple silicon</p>
+  </div>
+  <div class="shot-hero">
+    <img src="img/glass-categories.png" width="1000" height="1000" alt="The Start Menu panel in the Liquid Glass style, showing apps grouped by category with the account and power buttons at the bottom.">
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <h2>One key away from everything.</h2>
+      <p class="lead">A panel opens right below the menu bar, with the search field already focused. It shows apps and settings — never documents, archives or caches.</p>
+      <div class="features">
+        <div class="feature"><div class="icon">⌘</div><h3>Tap Command</h3><p>Press and release ⌘ alone, like the Windows key. Shortcuts such as ⌘C are never affected.</p></div>
+        <div class="feature"><div class="icon">⌕</div><h3>Instant search</h3><p>Typing ranks your apps and suggests the matching System Settings panes, in English and French.</p></div>
+        <div class="feature"><div class="icon">⇅</div><h3>Sort your way</h3><p>A–Z, recently used, most used or by category — in a grid or a list.</p></div>
+        <div class="feature"><div class="icon">⏻</div><h3>Power at hand</h3><p>Lock, log out, sleep, restart and shut down, plus App Store, Activity Monitor and Force Quit.</p></div>
+        <div class="feature"><div class="icon">🗑</div><h3>Clean uninstall</h3><p>Right-click an app to move it to the Trash along with the preferences and caches it left behind.</p></div>
+        <div class="feature"><div class="icon">◐</div><h3>Hide the noise</h3><p>System apps can’t be deleted, but you can hide the ones you never use.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split">
+      <div>
+        <h2>Apps and settings, side by side.</h2>
+        <p class="lead">Type a few letters: matching apps come first, then the System Settings panes they relate to.</p>
+        <ul class="bullets">
+          <li><strong>Forgiving matching</strong> — word starts, initials and typos all find their app.</li>
+          <li><strong>Settings by meaning</strong> — “dark mode”, “wifi” or “luminosité” open the right pane.</li>
+          <li><strong>Keyboard first</strong> — arrows to move, Return to open, Escape to close.</li>
+        </ul>
+      </div>
+      <img class="shot" src="img/glass-search.png" width="1000" height="1000" loading="lazy" alt="Searching “dis” shows Discord and Disk Utility, then the Displays, Storage and Startup Disk settings.">
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Liquid Glass, or Classic.</h2>
+      <p class="lead">Built with the native Liquid Glass of macOS Tahoe. Prefer something flatter? Switch styles from the sort menu.</p>
+      <div class="styles">
+        <figure>
+          <img class="shot" src="img/glass-categories.png" width="1000" height="1000" loading="lazy" alt="Liquid Glass style with glass capsules and grouped buttons.">
+          <figcaption>Liquid Glass<span>Glass capsules, grouped controls</span></figcaption>
+        </figure>
+        <figure>
+          <img class="shot" src="img/classic-list.png" width="1000" height="1000" loading="lazy" alt="Classic style in list view, each app with its category.">
+          <figcaption>Classic<span>Flat and quiet, shown here as a list</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Shortcuts</h2>
+      <p class="lead">Everything works from the keyboard.</p>
+      <table class="shortcuts">
+        <tr><td><span class="key">⌘</span> alone</td><td>Open or close the menu</td></tr>
+        <tr><td>Type</td><td>Search apps and settings</td></tr>
+        <tr><td><span class="key">←</span><span class="key">→</span><span class="key">↑</span><span class="key">↓</span></td><td>Move through the results</td></tr>
+        <tr><td><span class="key">↩</span></td><td>Open the selection</td></tr>
+        <tr><td><span class="key">esc</span></td><td>Close</td></tr>
+        <tr><td><span class="key">⌘</span><span class="key">Q</span> while open</td><td>Quit Start Menu</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="wrap">
+      <h2>Install</h2>
+      <p class="lead">Start Menu isn’t notarized by Apple, so macOS asks you to confirm the first launch.</p>
+      <div class="steps">
+        <div class="step"><div><h3>Download and unzip</h3><p><a href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip">Start-Menu.zip</a>, then move <code>Start Menu.app</code> to your Applications folder.</p></div></div>
+        <div class="step"><div><h3>Allow the first launch</h3><p>Open the app. When macOS blocks it, go to System Settings › Privacy &amp; Security and click <em>Open Anyway</em>.</p></div></div>
+        <div class="step"><div><h3>Grant Accessibility</h3><p>Turn on <em>Start Menu</em> in Privacy &amp; Security › Accessibility. It’s needed to notice the ⌘ key anywhere.</p></div></div>
+        <div class="step"><div><h3>Open at login</h3><p>Add Start Menu in System Settings › General › Login Items, so it’s always one tap away.</p></div></div>
+      </div>
+      <p style="margin-top: 32px; color: var(--muted);">Or build it from source (Xcode or the Command Line Tools):</p>
+      <pre><code>git clone https://github.com/corentin-gautier/macos-start-menu.git
+cd macos-start-menu
+scripts/setup-signing.sh   # once: local signing certificate
+scripts/install.sh         # build, install, start at login</code></pre>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>macOS Start Menu — an independent project, not affiliated with Apple.</span>
+    <a href="https://github.com/corentin-gautier/macos-start-menu">Source on GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>

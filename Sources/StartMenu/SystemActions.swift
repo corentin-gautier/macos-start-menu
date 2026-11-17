@@ -131,10 +131,14 @@ enum SystemAction: String, CaseIterable, Identifiable {
 }
 
 enum UserProfile {
-    static var fullName: String { NSFullUserName() }
+    /// `STARTMENU_DEMO=1` shows a generic account, for screenshots.
+    static let isDemo = ProcessInfo.processInfo.environment["STARTMENU_DEMO"] == "1"
+
+    static var fullName: String { isDemo ? "John Appleseed" : NSFullUserName() }
 
     /// The account picture from the local directory (as shown in Users & Groups).
     static func loadAvatar() -> NSImage? {
+        if isDemo { return nil }
         guard let node = try? ODNode(session: ODSession.default(), type: ODNodeType(kODNodeTypeLocalNodes)),
               let record = try? node.record(
                 withRecordType: kODRecordTypeUsers,

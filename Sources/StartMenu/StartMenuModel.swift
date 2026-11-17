@@ -138,6 +138,8 @@ final class StartMenuModel: ObservableObject {
         pendingUninstall = nil
         showsHidden = false
         updateResults() // usage may have changed since last time
+        // Screenshots: `STARTMENU_DEMO_QUERY` opens the menu with a search.
+        if let demoQuery = ProcessInfo.processInfo.environment["STARTMENU_DEMO_QUERY"] { query = demoQuery }
         showToken = UUID()
         // Pick up apps installed or removed since last time.
         DispatchQueue.global(qos: .userInitiated).async {
