@@ -24,8 +24,8 @@ struct FolderEntry: Identifiable, Hashable {
     }
 }
 
-/// The standard folders of the user's home plus /Applications, with English
-/// and French keywords.
+/// The standard folders of the user's home plus /Applications and its
+/// Utilities, with English and French keywords.
 enum FolderCatalog {
     static let all: [FolderEntry] = {
         let home = FileManager.default.homeDirectoryForCurrentUser
@@ -38,7 +38,9 @@ enum FolderCatalog {
             (home.appendingPathComponent("Movies"), ["movies", "videos", "vidéos", "films"]),
             (home.appendingPathComponent("Music"), ["music", "musique", "audio"]),
             (URL(fileURLWithPath: "/Applications"), ["applications", "apps", "programs", "programmes", "logiciels"]),
+            (URL(fileURLWithPath: "/Applications/Utilities"), ["utilities", "utilitaires", "outils", "tools"]),
             (home.appendingPathComponent("Applications"), ["applications", "apps"]),
+            (home.appendingPathComponent("Library"), ["library", "bibliothèque", "bibliotheque", "librairie"]),
             (home.appendingPathComponent("Public"), ["public", "partage", "shared"]),
             (home.appendingPathComponent("Library/Mobile Documents/com~apple~CloudDocs"), ["icloud", "icloud drive", "cloud"]),
             (home.appendingPathComponent(".Trash"), ["trash", "corbeille", "bin"]),
