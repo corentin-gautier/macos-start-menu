@@ -23,6 +23,6 @@
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSAppleEventsUsageDescription</key>
-    <string>Start Menu asks the system to show the Log Out, Restart and Shut Down dialogs.</string>
+    <string>Start Menu asks the system to show the Log Out, Restart and Shut Down dialogs, and the Finder to move uninstalled apps to the Trash.</string>
 </dict>
 </plist>

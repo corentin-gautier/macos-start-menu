@@ -249,6 +249,16 @@ final class StartMenuModel: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { action.perform() }
     }
 
+    func uninstall(_ app: AppEntry) {
+        dismiss()
+        // After the context menu has closed.
+        DispatchQueue.main.async {
+            guard AppUninstaller.uninstall(app, installed: self.apps) else { return }
+            self.apps = AppCatalog.scan()
+            self.updateResults()
+        }
+    }
+
     func openUserSettings() {
         dismiss()
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.Users-Groups-Settings.extension")!)

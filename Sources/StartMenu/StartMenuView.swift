@@ -95,7 +95,12 @@ struct StartMenuView: View {
             let selected = model.highlightedIndex == index
             Group {
                 switch result {
-                case .app(let app): AppTile(app: app, selected: selected)
+                case .app(let app):
+                    AppTile(
+                        app: app,
+                        selected: selected,
+                        onUninstall: AppUninstaller.canUninstall(app) ? { model.uninstall(app) } : nil
+                    )
                 case .setting(let setting): SettingRow(setting: setting, selected: selected)
                 }
             }
@@ -139,6 +144,7 @@ private struct SectionHeader: View {
 private struct AppTile: View {
     let app: AppEntry
     let selected: Bool
+    let onUninstall: (() -> Void)?
     @State private var hovered = false
 
     var body: some View {
@@ -160,6 +166,10 @@ private struct AppTile: View {
         .onHover { hovered = $0 }
         .contextMenu {
             Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([app.url]) }
+            if let onUninstall {
+                Divider()
+                Button("Uninstall…", role: .destructive, action: onUninstall)
+            }
         }
     }
 }

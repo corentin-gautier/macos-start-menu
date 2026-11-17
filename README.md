@@ -24,7 +24,12 @@ release, no other key) and a panel opens right below the Apple menu with:
 | Escape, or click outside | Close |
 | ⌘Q (menu open) | Quit Start Menu |
 
-Right-click an app to show it in the Finder.
+Right-click an app to show it in the Finder or to **uninstall** it: after a
+confirmation listing what will be removed, the app is quit if running, then the
+app and the files it left in `~/Library` (preferences, caches, Application
+Support, containers, saved state, logs, launch agents…) go to the Trash, so
+everything can still be put back. System apps can't be uninstalled; files in
+the system-wide `/Library` are left alone.
 
 ## Install
 
@@ -83,6 +88,7 @@ Sources/StartMenu/
   AppCatalog.swift            app discovery and icon cache
   AppCategory.swift           groups for the Categories sort
   UsageStore.swift            recent / most used tracking
+  AppUninstaller.swift        uninstall and leftover files detection
   SettingsCatalog.swift       System Settings panes and keywords
   Search.swift                matching and scoring
   SystemActions.swift         power, lock, force quit, avatar
