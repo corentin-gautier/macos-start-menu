@@ -75,6 +75,10 @@ final class StartMenuModel: ObservableObject {
     var dismiss: () -> Void = {}
 
     private var apps: [AppEntry] = AppCatalog.scan()
+    /// Apps the user hid (bundle ID, or path for apps without one).
+    private var hidden = Set(UserDefaults.standard.stringArray(forKey: "hiddenApps") ?? [])
+    /// Hidden apps are listed (dimmed) while this is on; reset on every opening.
+    @Published private(set) var showsHidden = false
     private var results: [StartResult] = []
     /// Result indices per visual row, for up/down navigation.
     private var rows: [[Int]] = []
@@ -101,6 +105,7 @@ final class StartMenuModel: ObservableObject {
         showsSelection = false
         hoveredID = nil
         pendingUninstall = nil
+        showsHidden = false
         updateResults() // usage may have changed since last time
         showToken = UUID()
         // Pick up apps installed or removed since last time.
@@ -124,7 +129,7 @@ final class StartMenuModel: ObservableObject {
             groups = browseGroups().map { ($0.title, true, $0.apps.map(StartResult.app)) }
             showsSelection = false
         } else {
-            let matchedApps = Self.ranked(apps, name: \.name) { Search.score(q, $0.key) }
+            let matchedApps = Self.ranked(visibleApps, name: \.name) { Search.score(q, $0.key) }
             let matchedSettings = Self.ranked(SettingsCatalog.all, name: \.name) { $0.score(q) }
                 .prefix(maxSettingResults)
             groups = [
@@ -157,6 +162,7 @@ final class StartMenuModel: ObservableObject {
 
     /// The app list shown when not searching, per sort mode.
     private func browseGroups() -> [(title: String, apps: [AppEntry])] {
+        let apps = visibleApps
         let usage = UsageStore.shared
         switch sortMode {
         case .alphabetical:
@@ -205,6 +211,33 @@ final class StartMenuModel: ObservableObject {
             return lhs.item[keyPath: name] < rhs.item[keyPath: name]
         }
         return scored.map(\.item)
+    }
+
+    // MARK: - Hidden apps
+
+    private var visibleApps: [AppEntry] {
+        showsHidden ? apps : apps.filter { !isHidden($0) }
+    }
+
+    var hiddenCount: Int { apps.filter(isHidden).count }
+
+    func isHidden(_ app: AppEntry) -> Bool {
+        hidden.contains(app.bundleID ?? app.path)
+    }
+
+    func setHidden(_ app: AppEntry, _ isHidden: Bool) {
+        let key = app.bundleID ?? app.path
+        if isHidden { hidden.insert(key) } else { hidden.remove(key) }
+        UserDefaults.standard.set(hidden.sorted(), forKey: "hiddenApps")
+        if hiddenCount == 0 { showsHidden = false }
+        let keptSelection = selection
+        updateResults()
+        selection = min(keptSelection, max(resultCount - 1, 0))
+    }
+
+    func toggleShowsHidden() {
+        showsHidden.toggle()
+        updateResults()
     }
 
     // MARK: - Hover

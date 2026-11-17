@@ -24,7 +24,11 @@ release, no other key) and a panel opens right below the Apple menu with:
 | Escape, or click outside | Close |
 | ⌘Q (menu open) | Quit Start Menu |
 
-Right-click an app to show it in the Finder or to **uninstall** it: after a
+Right-click an app to **hide** it (system apps can't be deleted: they live on
+macOS's sealed, read-only system volume). Hidden apps leave the list and the
+search; the sort menu's "Show Hidden Apps" lists them dimmed so they can be
+unhidden. Right-click also offers to show an app in the Finder or to
+**uninstall** it: after a
 confirmation listing what will be removed, the app is quit if running, then the
 app and the files it left in `~/Library` (preferences, caches, Application
 Support, containers, saved state, logs, launch agents…) go to the Trash, so

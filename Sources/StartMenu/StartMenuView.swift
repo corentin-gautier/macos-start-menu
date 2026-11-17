@@ -109,6 +109,8 @@ struct StartMenuView: View {
                         app: app,
                         selected: selected,
                         hovered: hovered,
+                        isHidden: model.isHidden(app),
+                        onToggleHidden: { model.setHidden(app, !model.isHidden(app)) },
                         onUninstall: AppUninstaller.canUninstall(app) ? { model.uninstall(app) } : nil
                     )
                 case .setting(let setting): SettingRow(setting: setting, selected: selected, hovered: hovered)
@@ -156,6 +158,8 @@ private struct AppTile: View {
     let app: AppEntry
     let selected: Bool
     let hovered: Bool
+    let isHidden: Bool
+    let onToggleHidden: () -> Void
     let onUninstall: (() -> Void)?
 
     var body: some View {
@@ -169,6 +173,7 @@ private struct AppTile: View {
                 .multilineTextAlignment(.center)
                 .frame(height: 28, alignment: .top)
         }
+        .opacity(isHidden ? 0.4 : 1)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
         .padding(.horizontal, 4)
@@ -176,6 +181,7 @@ private struct AppTile: View {
         .contentShape(Rectangle())
         .contextMenu {
             Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([app.url]) }
+            Button(isHidden ? "Unhide" : "Hide", action: onToggleHidden)
             if let onUninstall {
                 Divider()
                 Button("Uninstall…", role: .destructive, action: onUninstall)
@@ -310,6 +316,10 @@ private enum SortMenu {
         @objc func pick(_ item: NSMenuItem) {
             if let mode = item.representedObject as? SortMode { model.sortMode = mode }
         }
+
+        @objc func toggleHidden(_ item: NSMenuItem) {
+            model.toggleShowsHidden()
+        }
     }
 
     static func show(model: StartMenuModel) {
@@ -324,6 +334,19 @@ private enum SortMenu {
             item.state = mode == model.sortMode ? .on : .off
             menu.addItem(item)
         }
+        menu.addItem(.separator())
+        let count = model.hiddenCount
+        let hiddenItem = NSMenuItem(
+            title: count == 0 ? "No Hidden Apps" : "Show Hidden Apps (\(count))",
+            action: count == 0 ? nil : #selector(Target.toggleHidden(_:)),
+            keyEquivalent: ""
+        )
+        hiddenItem.target = target
+        hiddenItem.image = NSImage(systemSymbolName: "eye.slash", accessibilityDescription: nil)
+        hiddenItem.state = model.showsHidden ? .on : .off
+        menu.autoenablesItems = false
+        hiddenItem.isEnabled = count > 0
+        menu.addItem(hiddenItem)
         // popUp blocks until the menu closes, which keeps `target` alive.
         var origin = NSEvent.mouseLocation
         if let panel = NSApp.windows.first(where: { $0 is StartPanel && $0.isVisible }) {
