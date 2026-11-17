@@ -85,6 +85,15 @@ final class StartMenuModel: ObservableObject {
         return scored.map(\.item)
     }
 
+    /// The view identity of a result (its ForEach id), used to scroll to it.
+    func resultID(at index: Int) -> String? {
+        switch result(at: index) {
+        case .app(let app): app.id
+        case .setting(let setting): setting.id
+        case nil: nil
+        }
+    }
+
     func result(at index: Int) -> StartResult? {
         if index < appResults.count { return .app(appResults[index]) }
         let settingIndex = index - appResults.count

@@ -125,9 +125,25 @@ final class StartPanelController: NSObject, NSWindowDelegate {
             guard let self, self.panel.isKeyWindow else { return event }
             let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
 
-            if modifiers.contains(.command), event.charactersIgnoringModifiers == "q" {
-                NSApp.terminate(nil)
-                return nil
+            // An agent app has no Edit menu, so its standard shortcuts are
+            // routed by hand to the search field's editor.
+            if modifiers == .command || modifiers == [.command, .shift] {
+                let editActions: [String: Selector] = [
+                    "a": #selector(NSText.selectAll(_:)),
+                    "c": #selector(NSText.copy(_:)),
+                    "v": #selector(NSText.paste(_:)),
+                    "x": #selector(NSText.cut(_:)),
+                    "z": modifiers.contains(.shift) ? Selector(("redo:")) : Selector(("undo:")),
+                ]
+                let key = event.charactersIgnoringModifiers?.lowercased() ?? ""
+                if key == "q" {
+                    NSApp.terminate(nil)
+                    return nil
+                }
+                if let action = editActions[key] {
+                    NSApp.sendAction(action, to: nil, from: nil)
+                    return nil
+                }
             }
 
             switch event.keyCode {

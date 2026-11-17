@@ -3,6 +3,7 @@ import SwiftUI
 struct StartMenuView: View {
     @ObservedObject var model: StartMenuModel
     @FocusState private var searchFocused: Bool
+    private static let topID = "top"
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,11 +20,11 @@ struct StartMenuView: View {
                 }
                 .scrollIndicators(.never)
                 .onChange(of: model.selection) { _, index in
-                    guard model.showsSelection else { return }
-                    withAnimation(.easeOut(duration: 0.1)) { proxy.scrollTo(index) }
+                    guard model.showsSelection, let id = model.resultID(at: index) else { return }
+                    withAnimation(.easeOut(duration: 0.1)) { proxy.scrollTo(id) }
                 }
                 .onChange(of: model.showToken) { _, _ in
-                    proxy.scrollTo(0, anchor: .top)
+                    proxy.scrollTo(Self.topID, anchor: .top)
                 }
             }
 
@@ -62,6 +63,7 @@ struct StartMenuView: View {
                 .padding(.top, 60)
         } else {
             VStack(alignment: .leading, spacing: 6) {
+                Color.clear.frame(height: 0).id(Self.topID)
                 if !model.appResults.isEmpty {
                     SectionHeader(title: model.isSearching ? "Apps" : "All apps")
                     LazyVGrid(
@@ -70,7 +72,6 @@ struct StartMenuView: View {
                     ) {
                         ForEach(Array(model.appResults.enumerated()), id: \.element.id) { index, app in
                             AppTile(app: app, selected: model.highlightedIndex == index)
-                                .id(index)
                                 .onTapGesture { model.activate(index: index) }
                         }
                     }
@@ -80,7 +81,6 @@ struct StartMenuView: View {
                     ForEach(Array(model.settingResults.enumerated()), id: \.element.id) { offset, setting in
                         let index = model.appResults.count + offset
                         SettingRow(setting: setting, selected: model.highlightedIndex == index)
-                            .id(index)
                             .onTapGesture { model.activate(index: index) }
                     }
                 }
