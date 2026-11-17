@@ -376,16 +376,18 @@ private struct UninstallConfirmation: View {
                     .frame(maxHeight: 140)
                     .fixedSize(horizontal: false, vertical: true)
                 }
-                HStack(spacing: 10) {
-                    Button("Move to Trash") { model.confirmUninstall() }
-                        .controlSize(.large)
-                        .frame(maxWidth: .infinity)
-                    Button("Cancel") { model.cancelUninstall() }
-                        .controlSize(.large)
-                        .buttonStyle(.borderedProminent)
-                        .frame(maxWidth: .infinity)
+                // Stacked full-width buttons, like macOS alerts.
+                VStack(spacing: 8) {
+                    Button { model.confirmUninstall() } label: {
+                        Text("Move to Trash").frame(maxWidth: .infinity)
+                    }
+                    Button { model.cancelUninstall() } label: {
+                        Text("Cancel").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
-                .padding(.top, 4)
+                .controlSize(.large)
+                .padding(.top, 6)
                 Text("Esc or Return to cancel")
                     .font(.system(size: 11))
                     .foregroundStyle(.tertiary)
