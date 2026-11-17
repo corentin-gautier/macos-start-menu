@@ -444,7 +444,8 @@ private struct TooltipLayer: View {
                     .modifier(TooltipSurface(style: model.style))
                     .position(
                         x: min(max(tooltip.anchor.midX, 70), geometry.size.width - 70),
-                        y: tooltip.anchor.minY - 18
+                        // Above the control, or below when it is at the top edge.
+                        y: tooltip.anchor.minY > 40 ? tooltip.anchor.minY - 18 : tooltip.anchor.maxY + 18
                     )
                     .allowsHitTesting(false)
                     .transition(.opacity)
