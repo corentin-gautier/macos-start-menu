@@ -116,7 +116,8 @@ Sources/StartMenu/
   FolderCatalog.swift         user folders offered in search
   Search.swift                matching and scoring
   SystemActions.swift         power, lock, force quit, avatar
-scripts/                      setup-signing, build, install, uninstall
+Resources/AppIcon.svg         app icon source (scripts/make-icon.sh → AppIcon.icns, site icons)
+scripts/                      setup-signing, build, install, uninstall, package, make-icon
 ```
 
 ## Release
