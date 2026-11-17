@@ -5,8 +5,8 @@
 <p align="center"><b><a href="https://corentingautier.dev/macos-start-menu/">Website</a> · <a href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip">Download</a></b></p>
 
 <p align="center">
-  <img src="docs/img/glass-categories.webp" width="420" alt="Liquid Glass style: apps grouped by category, with account and power buttons">
-  <img src="docs/img/glass-search.webp" width="420" alt="Searching “dis” finds Discord and Disk Utility, then the Displays and Storage settings">
+  <img src="docs/img/glass-categories.webp" width="380" alt="Liquid Glass style: apps grouped by category, with account and power buttons">
+  <img src="docs/img/glass-search.webp" width="380" alt="Searching “dis” finds Discord and Disk Utility, then the Displays and Storage settings">
 </p>
 
 A Windows-style start menu for macOS. Tap **⌘ Command** on its own (press and
