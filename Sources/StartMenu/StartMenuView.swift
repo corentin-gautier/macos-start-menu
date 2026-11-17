@@ -449,7 +449,7 @@ private struct FolderRow: View {
                 .frame(width: 30, height: 30)
             VStack(alignment: .leading, spacing: 1) {
                 Text(folder.name).font(.system(size: 13, weight: .medium))
-                Text(AppUninstaller.abbreviate(folder.url))
+                Text(folder.isFinderLocation ? "Finder" : AppUninstaller.abbreviate(folder.url))
                     .font(.system(size: 11))
                     .foregroundStyle(whiteText ? .white.opacity(0.8) : .secondary)
             }
@@ -462,8 +462,10 @@ private struct FolderRow: View {
         .modifier(ResultHighlight(state: state, cornerRadius: state.style == .glass ? 14 : 10))
         .contentShape(Rectangle())
         .contextMenu {
-            Button("Show in Finder", systemImage: "folder") {
-                NSWorkspace.shared.activateFileViewerSelecting([folder.url])
+            if !folder.isFinderLocation {
+                Button("Show in Finder", systemImage: "folder") {
+                    NSWorkspace.shared.activateFileViewerSelecting([folder.url])
+                }
             }
         }
     }

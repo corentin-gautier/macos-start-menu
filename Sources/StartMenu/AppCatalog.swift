@@ -24,15 +24,8 @@ enum AppCatalog {
         (URL(fileURLWithPath: "/System/Library/CoreServices/Applications"), 1),
         (FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications"), 2),
     ]
-    /// System apps that live outside the app folders: the Finder and its
-    /// location shortcuts (iCloud Drive is already a folder result).
-    private static let extraApps: [URL] = {
-        let finder = URL(fileURLWithPath: "/System/Library/CoreServices/Finder.app")
-        let shortcuts = ["AirDrop", "Recents", "Computer", "Network"].map {
-            finder.appendingPathComponent("Contents/Applications/\($0).app")
-        }
-        return [finder] + shortcuts
-    }()
+    /// The Finder lives outside the app folders.
+    private static let extraApps = [URL(fileURLWithPath: "/System/Library/CoreServices/Finder.app")]
 
     static func scan() -> [AppEntry] {
         var seenPaths = Set<String>()

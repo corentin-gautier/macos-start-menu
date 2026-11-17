@@ -9,6 +9,10 @@ struct FolderEntry: Identifiable, Hashable {
 
     var id: String { url.path }
 
+    /// A Finder location shortcut (AirDrop, Recents…), an app bundle inside
+    /// the Finder rather than a real folder.
+    var isFinderLocation: Bool { url.pathExtension == "app" }
+
     init(url: URL, name: String, keywords: [String]) {
         self.url = url
         self.name = name
@@ -24,8 +28,8 @@ struct FolderEntry: Identifiable, Hashable {
     }
 }
 
-/// The standard folders of the user's home plus /Applications and its
-/// Utilities, with English and French keywords.
+/// The standard folders of the user's home, /Applications and its Utilities,
+/// and the Finder's locations (AirDrop, Recents…), with English and French keywords.
 enum FolderCatalog {
     static let all: [FolderEntry] = {
         let home = FileManager.default.homeDirectoryForCurrentUser
@@ -44,6 +48,10 @@ enum FolderCatalog {
             (home.appendingPathComponent("Public"), ["public", "partage", "shared"]),
             (home.appendingPathComponent("Library/Mobile Documents/com~apple~CloudDocs"), ["icloud", "icloud drive", "cloud"]),
             (home.appendingPathComponent(".Trash"), ["trash", "corbeille", "bin"]),
+            (finderLocation("AirDrop"), ["airdrop"]),
+            (finderLocation("Recents"), ["recents", "recent", "récents", "récent", "fichiers récents"]),
+            (finderLocation("Computer"), ["computer", "ordinateur", "mac", "disks", "disques"]),
+            (finderLocation("Network"), ["network", "réseau", "reseau", "shares", "partages"]),
         ]
         return candidates.compactMap { url, keywords in
             guard FileManager.default.fileExists(atPath: url.path) else { return nil }
@@ -51,12 +59,18 @@ enum FolderCatalog {
         }
     }()
 
+    private static func finderLocation(_ name: String) -> URL {
+        URL(fileURLWithPath: "/System/Library/CoreServices/Finder.app/Contents/Applications/\(name).app")
+    }
+
     private static func displayName(_ url: URL, home: URL) -> String {
         if url == home { return L("Home") }
         switch url.lastPathComponent {
         case "com~apple~CloudDocs": return "iCloud Drive"
         case ".Trash": return L("Trash")
-        default: return FileManager.default.displayName(atPath: url.path)
+        default:
+            let name = FileManager.default.displayName(atPath: url.path)
+            return url.pathExtension == "app" ? (name as NSString).deletingPathExtension : name
         }
     }
 
