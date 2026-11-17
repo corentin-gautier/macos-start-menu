@@ -430,6 +430,8 @@ private struct IconButton: View {
 /// hovered button's name floats above it, without touching the layout.
 private struct TooltipLayer: View {
     @ObservedObject var model: StartMenuModel
+    @State private var width: CGFloat = 0
+    private let margin: CGFloat = 8
 
     var body: some View {
         GeometryReader { geometry in
@@ -440,10 +442,13 @@ private struct TooltipLayer: View {
                     .fixedSize()
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
+                let half = width / 2 + margin
                 label
                     .modifier(TooltipSurface(style: model.style))
+                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
                     .position(
-                        x: min(max(tooltip.anchor.midX, 70), geometry.size.width - 70),
+                        // Centered on the control, kept whole inside the panel.
+                        x: min(max(tooltip.anchor.midX, half), geometry.size.width - half),
                         // Above the control, or below when it is at the top edge.
                         y: tooltip.anchor.minY > 40 ? tooltip.anchor.minY - 18 : tooltip.anchor.maxY + 18
                     )
