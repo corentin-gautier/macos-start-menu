@@ -2,7 +2,7 @@
 
 <h1 align="center">macOS Start Menu</h1>
 
-<p align="center"><b><a href="https://corentingautier.dev/macos-start-menu/">Website</a> · <a href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip">Download</a></b></p>
+<p align="center"><b><a href="https://corentingautier.dev/macos-start-menu/">Website</a> · <a href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip">Download</a> · <a href="https://ko-fi.com/corentingautier">Ko-fi</a></b></p>
 
 <p align="center">
   <img src="docs/img/glass-categories.webp" width="380" alt="Liquid Glass style: apps grouped by category, with account and power buttons">
@@ -164,6 +164,12 @@ generic account, `STARTMENU_DEMO_QUERY` pre-fills the search,
 `STARTMENU_DEMO_BACKDROP=<image>` centers the panel over that image so the
 glass has colors to refract), capturing the panel and its backdrop with
 `screencapture -R`.
+
+## Support
+
+If Start Menu is useful to you, you can support my work with a small donation on [Ko-fi](https://ko-fi.com/corentingautier). Thank you!
+
+[![Support me on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/corentingautier)
 
 ## License
 
