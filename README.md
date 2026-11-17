@@ -1,4 +1,6 @@
-# Mac Start Menu
+# macOS Start Menu
+
+**[Website](https://corentin-gautier.github.io/macos-start-menu/) · [Download](https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip)**
 
 A Windows-style start menu for macOS. Tap **⌘ Command** on its own (press and
 release, no other key) and a panel opens right below the Apple menu with:
@@ -40,6 +42,17 @@ everything can still be put back. System apps can't be uninstalled; files in
 the system-wide `/Library` are left alone.
 
 ## Install
+
+### Download
+
+1. Download [Start-Menu.zip](https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip),
+   unzip it and move `Start Menu.app` to Applications.
+2. Open it. The app isn't notarized: when macOS blocks it, go to System
+   Settings › Privacy & Security and click **Open Anyway**.
+3. Enable *Start Menu* in Privacy & Security › Accessibility.
+4. Add it to System Settings › General › Login Items to start it at login.
+
+### Build from source
 
 Requirements: macOS 26 or later, Xcode or the Command Line Tools (Swift 5.10+).
 
@@ -102,3 +115,18 @@ Sources/StartMenu/
   SystemActions.swift         power, lock, force quit, avatar
 scripts/                      setup-signing, build, install, uninstall
 ```
+
+## Release
+
+`scripts/package.sh` builds and zips the app to `build/Start-Menu.zip`, the
+file the website's Download button points to (latest GitHub release).
+
+## Screenshots
+
+`docs/img` screenshots are taken in demo mode (`STARTMENU_DEMO=1` shows a
+generic account, `STARTMENU_DEMO_QUERY` pre-fills the search), capturing the
+panel window only (`screencapture -l <window id>`).
+
+## License
+
+All rights reserved.
