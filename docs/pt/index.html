@@ -448,7 +448,9 @@
         <div class="step"><div><h3>Ative a Acessibilidade</h3><p>Ative o <em>Start Menu</em> em Privacidade e Segurança › Acessibilidade. Isso é necessário para detectar a tecla ⌘ em qualquer lugar.</p></div></div>
       </div>
       <p style="margin-top: 32px; color: var(--muted);">Ou instale com o Homebrew:</p>
-      <pre><code>brew install --cask corentin-gautier/tap/macos-start-menu</code></pre>
+      <pre><code>brew tap corentin-gautier/tap
+brew trust --cask corentin-gautier/tap/macos-start-menu
+brew install --cask corentin-gautier/tap/macos-start-menu</code></pre>
       <p style="margin-top: 32px; color: var(--muted);">Ou compile a partir do código-fonte (Xcode ou Command Line Tools):</p>
       <pre><code>git clone https://github.com/corentin-gautier/macos-start-menu.git
 cd macos-start-menu

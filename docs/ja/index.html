@@ -448,7 +448,9 @@
         <div class="step"><div><h3>アクセシビリティを許可</h3><p>「プライバシーとセキュリティ」›「アクセシビリティ」で<em>Start Menu</em>をオンにします。どのアプリを使っていても⌘キーを検知するために必要です。</p></div></div>
       </div>
       <p style="margin-top: 32px; color: var(--muted);">Homebrewでもインストールできます：</p>
-      <pre><code>brew install --cask corentin-gautier/tap/macos-start-menu</code></pre>
+      <pre><code>brew tap corentin-gautier/tap
+brew trust --cask corentin-gautier/tap/macos-start-menu
+brew install --cask corentin-gautier/tap/macos-start-menu</code></pre>
       <p style="margin-top: 32px; color: var(--muted);">または、ソースからビルドすることもできます（XcodeまたはCommand Line Toolsが必要）:</p>
       <pre><code>git clone https://github.com/corentin-gautier/macos-start-menu.git
 cd macos-start-menu

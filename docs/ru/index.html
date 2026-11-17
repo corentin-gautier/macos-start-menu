@@ -448,7 +448,9 @@
         <div class="step"><div><h3>Включите универсальный доступ</h3><p>Включите <em>Start Menu</em> в разделе «Конфиденциальность и безопасность» › «Универсальный доступ». Это нужно, чтобы приложение замечало нажатие ⌘ в любой программе.</p></div></div>
       </div>
       <p style="margin-top: 32px; color: var(--muted);">Или установите через Homebrew:</p>
-      <pre><code>brew install --cask corentin-gautier/tap/macos-start-menu</code></pre>
+      <pre><code>brew tap corentin-gautier/tap
+brew trust --cask corentin-gautier/tap/macos-start-menu
+brew install --cask corentin-gautier/tap/macos-start-menu</code></pre>
       <p style="margin-top: 32px; color: var(--muted);">Или соберите из исходного кода (нужен Xcode или Command Line Tools):</p>
       <pre><code>git clone https://github.com/corentin-gautier/macos-start-menu.git
 cd macos-start-menu

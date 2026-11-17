@@ -73,6 +73,8 @@ itself so they match what System Settings shows.
 ### Homebrew
 
 ```sh
+brew tap corentin-gautier/tap
+brew trust --cask corentin-gautier/tap/macos-start-menu
 brew install --cask corentin-gautier/tap/macos-start-menu
 ```
 
