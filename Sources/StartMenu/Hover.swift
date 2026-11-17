@@ -16,23 +16,34 @@ enum HoverSpace {
     static let sortID = "sort"
 }
 
-struct HoverFramesKey: PreferenceKey {
-    static let defaultValue: [String: CGRect] = [:]
+/// Frames of the hoverable views, in the root coordinate space. Views write
+/// here directly (no preference merging on every scroll frame); the model is
+/// told once per run loop pass.
+final class HoverRegistry {
+    static let shared = HoverRegistry()
+    private(set) var frames: [String: CGRect] = [:]
+    var onChange: ([String: CGRect]) -> Void = { _ in }
+    private var scheduled = false
 
-    static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
-        value.merge(nextValue()) { $1 }
+    func set(_ id: String, _ frame: CGRect?) {
+        guard frames[id] != frame else { return }
+        frames[id] = frame
+        guard !scheduled else { return }
+        scheduled = true
+        DispatchQueue.main.async {
+            self.scheduled = false
+            self.onChange(self.frames)
+        }
     }
 }
 
 extension View {
     /// Reports this view's frame for hover hit-testing under `id`.
     func hoverFrame(_ id: String) -> some View {
-        background(GeometryReader { geometry in
-            Color.clear.preference(
-                key: HoverFramesKey.self,
-                value: [id: geometry.frame(in: .named(HoverSpace.name))]
-            )
-        })
+        onGeometryChange(for: CGRect.self) { $0.frame(in: .named(HoverSpace.name)) } action: {
+            HoverRegistry.shared.set(id, $0)
+        }
+        .onDisappear { HoverRegistry.shared.set(id, nil) }
     }
 }
 

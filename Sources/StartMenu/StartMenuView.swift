@@ -45,7 +45,6 @@ struct StartMenuView: View {
         // NSGlassEffectView doesn't clip its content to its rounded shape.
         .clipShape(RoundedRectangle(cornerRadius: style.panelCornerRadius, style: .continuous))
         .coordinateSpace(name: HoverSpace.name)
-        .onPreferenceChange(HoverFramesKey.self) { model.updateHoverFrames($0) }
         .overlay { TooltipLayer(model: model) }
         .overlay {
             if let request = model.pendingUninstall {
@@ -208,10 +207,16 @@ private struct ResultHighlight: ViewModifier {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         switch state.style {
         case .glass:
-            let glass: Glass = state.selected
-                ? .regular.tint(.accentColor.opacity(0.55))
-                : state.hovered ? .regular : .identity
-            content.glassEffect(glass, in: shape)
+            // Glass only behind the active tile: an effect on every tile, even
+            // `.identity`, slows scrolling down.
+            content.background {
+                if state.selected || state.hovered {
+                    Color.clear.glassEffect(
+                        state.selected ? .regular.tint(.accentColor.opacity(0.55)) : .regular,
+                        in: shape
+                    )
+                }
+            }
         case .classic:
             content.background(shape.fill(
                 state.selected ? Color.accentColor.opacity(0.3)

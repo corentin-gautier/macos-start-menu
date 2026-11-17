@@ -101,6 +101,8 @@ final class StartMenuModel: ObservableObject {
         style = UserDefaults.standard.string(forKey: "style").flatMap(UIStyle.init(rawValue:)) ?? .glass
         updateResults()
         avatar = UserProfile.loadAvatar()
+        IconCache.shared.preload(apps.map(\.url))
+        HoverRegistry.shared.onChange = { [weak self] in self?.updateHoverFrames($0) }
     }
 
     var isSearching: Bool { !normalizedQuery.isEmpty }
@@ -127,6 +129,7 @@ final class StartMenuModel: ObservableObject {
             let scanned = AppCatalog.scan()
             DispatchQueue.main.async {
                 guard scanned.map(\.path) != self.apps.map(\.path) else { return }
+                IconCache.shared.preload(scanned.map(\.url))
                 self.apps = scanned
                 self.updateResults()
             }

@@ -86,15 +86,46 @@ enum AppCatalog {
     }
 }
 
+/// App icons rasterized once to a single bitmap at display size. The icons
+/// macOS returns hold many representations (icns) and are re-rendered every
+/// frame otherwise, which makes scrolling stutter.
 final class IconCache {
     static let shared = IconCache()
     private let cache = NSCache<NSString, NSImage>()
+    /// Points; the bitmap is 2x for Retina.
+    private let size: CGFloat = 64
 
     func icon(for url: URL) -> NSImage {
         if let cached = cache.object(forKey: url.path as NSString) { return cached }
-        let icon = NSWorkspace.shared.icon(forFile: url.path)
-        icon.size = NSSize(width: 64, height: 64)
+        let icon = rasterize(NSWorkspace.shared.icon(forFile: url.path))
         cache.setObject(icon, forKey: url.path as NSString)
         return icon
+    }
+
+    /// Warms the cache in the background so tiles never wait for an icon.
+    func preload(_ urls: [URL]) {
+        DispatchQueue.global(qos: .utility).async {
+            for url in urls { _ = self.icon(for: url) }
+        }
+    }
+
+    private func rasterize(_ source: NSImage) -> NSImage {
+        let pixels = Int(size * 2)
+        guard let bitmap = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: pixels, pixelsHigh: pixels,
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+            colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+        ), let context = NSGraphicsContext(bitmapImageRep: bitmap) else { return source }
+
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = context
+        context.imageInterpolation = .high
+        source.draw(in: NSRect(x: 0, y: 0, width: pixels, height: pixels))
+        NSGraphicsContext.restoreGraphicsState()
+
+        bitmap.size = NSSize(width: size, height: size)
+        let image = NSImage(size: bitmap.size)
+        image.addRepresentation(bitmap)
+        return image
     }
 }
