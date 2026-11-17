@@ -22,8 +22,10 @@ enum AppUninstaller {
                 + "(settings, caches, data) will be moved to the Trash."
         alert.icon = IconCache.shared.icon(for: app.url)
         if !leftovers.isEmpty { alert.accessoryView = listView(leftovers) }
-        alert.addButton(withTitle: "Move to Trash").hasDestructiveAction = true
-        alert.addButton(withTitle: "Cancel")
+        // Cancel is the default (Return) so a reflex keypress never uninstalls.
+        // No `hasDestructiveAction`: its red-on-red styling is unreadable.
+        alert.addButton(withTitle: "Move to Trash").keyEquivalent = ""
+        alert.addButton(withTitle: "Cancel").keyEquivalent = "\r"
         guard alert.runModal() == .alertFirstButtonReturn else { return false }
 
         quitIfRunning(app)
