@@ -22,8 +22,13 @@ struct ResultSection: Identifiable {
     let items: [StartResult]
     /// Index of the first item in the flat result list.
     let startIndex: Int
+    /// Pinned items also appear in the sections below: keys stay unique.
+    var keyPrefix = ""
 
     var id: String { title }
+
+    /// View identity of an item (scroll target, hover ID).
+    func key(for result: StartResult) -> String { keyPrefix + result.id }
 }
 
 enum SortMode: String, CaseIterable, Identifiable {
@@ -115,7 +120,10 @@ final class StartMenuModel: ObservableObject {
     private var hidden = Set(UserDefaults.standard.stringArray(forKey: "hiddenApps") ?? [])
     /// Hidden apps are listed (dimmed) while this is on; reset on every opening.
     @Published private(set) var showsHidden = false
+    /// Pinned apps and settings (`StartResult.id`), in pinning order.
+    private var pinned = UserDefaults.standard.stringArray(forKey: "pinned") ?? []
     private var results: [StartResult] = []
+    private var resultKeys: [String] = []
     /// Result indices per visual row, for up/down navigation.
     private var rows: [[Int]] = []
     private let maxSettingResults = 6
@@ -173,9 +181,11 @@ final class StartMenuModel: ObservableObject {
     private func updateResults() {
         let q = normalizedQuery
         var groups: [(title: String, isGrid: Bool, items: [StartResult])]
+        let pinnedItems = q.isEmpty ? pinnedResults : []
 
         if q.isEmpty {
-            groups = browseGroups().map { ($0.title, layout == .grid, $0.apps.map(StartResult.app)) }
+            groups = [(L("Pinned"), layout == .grid, pinnedItems)]
+                + browseGroups().map { ($0.title, layout == .grid, $0.apps.map(StartResult.app)) }
             showsSelection = false
         } else {
             let matchedApps = Self.ranked(visibleApps, name: \.name) { Search.score(q, $0.key) }
@@ -194,7 +204,9 @@ final class StartMenuModel: ObservableObject {
         var newRows: [[Int]] = []
         var index = 0
         for group in groups where !group.items.isEmpty {
-            newSections.append(ResultSection(title: group.title, isGrid: group.isGrid, items: group.items, startIndex: index))
+            var section = ResultSection(title: group.title, isGrid: group.isGrid, items: group.items, startIndex: index)
+            if newSections.isEmpty && !pinnedItems.isEmpty { section.keyPrefix = "pinned/" }
+            newSections.append(section)
             let indices = Array(index..<index + group.items.count)
             if group.isGrid {
                 newRows += stride(from: 0, to: indices.count, by: Layout.gridColumns).map {
@@ -207,6 +219,7 @@ final class StartMenuModel: ObservableObject {
         }
         sections = newSections
         results = newSections.flatMap(\.items)
+        resultKeys = newSections.flatMap { section in section.items.map(section.key) }
         rows = newRows
         selection = 0
     }
@@ -262,6 +275,26 @@ final class StartMenuModel: ObservableObject {
             return lhs.item[keyPath: name] < rhs.item[keyPath: name]
         }
         return scored.map(\.item)
+    }
+
+    // MARK: - Pinned
+
+    /// Pinned items still installed (and not hidden), in pinning order.
+    private var pinnedResults: [StartResult] {
+        var byID: [String: StartResult] = [:]
+        for app in visibleApps { byID[StartResult.app(app).id] = .app(app) }
+        for setting in SettingsCatalog.all { byID[StartResult.setting(setting).id] = .setting(setting) }
+        return pinned.compactMap { byID[$0] }
+    }
+
+    func isPinned(_ result: StartResult) -> Bool { pinned.contains(result.id) }
+
+    func togglePinned(_ result: StartResult) {
+        if let index = pinned.firstIndex(of: result.id) { pinned.remove(at: index) } else { pinned.append(result.id) }
+        UserDefaults.standard.set(pinned, forKey: "pinned")
+        let keptSelection = selection
+        updateResults()
+        selection = min(keptSelection, max(resultCount - 1, 0))
     }
 
     // MARK: - Hidden apps
@@ -354,7 +387,7 @@ final class StartMenuModel: ObservableObject {
     }
 
     func resultID(at index: Int) -> String? {
-        results.indices.contains(index) ? results[index].id : nil
+        resultKeys.indices.contains(index) ? resultKeys[index] : nil
     }
 
     // MARK: - Keyboard navigation

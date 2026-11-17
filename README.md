@@ -67,6 +67,14 @@ itself so they match what System Settings shows.
    Privacy & Security › Accessibility: turn *Start Menu* on) and adds itself to
    the Login Items. "Open at Login" in the sort menu turns that off.
 
+### Homebrew
+
+```sh
+brew install --cask corentin-gautier/tap/macos-start-menu
+```
+
+The cask lives in [corentin-gautier/homebrew-tap](https://github.com/corentin-gautier/homebrew-tap).
+
 ### Build from source
 
 Requirements: macOS 26 or later, Xcode or the Command Line Tools (Swift 5.10+).
@@ -135,8 +143,10 @@ scripts/                      setup-signing, build, install, uninstall, package,
 
 ## Release
 
-`scripts/package.sh` builds and zips the app to `build/Start-Menu.zip`, the
-file the website's Download button points to (latest GitHub release).
+`scripts/release.sh <version> "<notes>"` builds and zips the app
+(`scripts/package.sh`), publishes the GitHub release the website's Download
+button points to, and bumps the Homebrew cask (version and sha256) in
+`corentin-gautier/homebrew-tap`.
 
 ## Screenshots
 

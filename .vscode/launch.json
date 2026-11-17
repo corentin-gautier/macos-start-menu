@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:mac-start-menu}",
+            "name": "Debug StartMenu",
+            "target": "StartMenu",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug StartMenu"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:mac-start-menu}",
+            "name": "Release StartMenu",
+            "target": "StartMenu",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release StartMenu"
+        }
+    ]
+}
