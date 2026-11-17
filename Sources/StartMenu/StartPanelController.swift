@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 
 /// Borderless panel that takes keyboard focus without activating the app,
@@ -29,7 +30,6 @@ final class StartPanel: NSPanel {
 enum Layout {
     static let panelWidth: CGFloat = 640
     static let panelHeight: CGFloat = 640
-    static let cornerRadius: CGFloat = 28
     static let gridColumns = 6
     /// Gap between the menu bar and the panel, and from the screen's left edge.
     static let margin: CGFloat = 6
@@ -39,6 +39,7 @@ final class StartPanelController: NSObject, NSWindowDelegate {
     private let panel = StartPanel()
     private let model = StartMenuModel()
     private var keyMonitor: Any?
+    private var styleObserver: AnyCancellable?
     private weak var hosting: TrackingHostingView<StartMenuView>?
 
     override init() {
@@ -106,8 +107,9 @@ final class StartPanelController: NSObject, NSWindowDelegate {
         self.hosting = hosting
 
         let glass = NSGlassEffectView()
-        glass.cornerRadius = Layout.cornerRadius
+        glass.cornerRadius = model.style.panelCornerRadius
         glass.contentView = hosting
+        styleObserver = model.$style.sink { [weak glass] in glass?.cornerRadius = $0.panelCornerRadius }
         return glass
     }
 

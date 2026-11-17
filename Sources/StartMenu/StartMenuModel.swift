@@ -48,6 +48,14 @@ enum SortMode: String, CaseIterable, Identifiable {
     }
 }
 
+enum UIStyle: String, CaseIterable, Identifiable {
+    case glass, classic
+
+    var id: String { rawValue }
+    var title: String { self == .glass ? "Liquid Glass" : "Classic" }
+    var symbol: String { self == .glass ? "drop" : "square" }
+}
+
 enum MoveDirection { case left, right, up, down }
 
 final class StartMenuModel: ObservableObject {
@@ -57,6 +65,9 @@ final class StartMenuModel: ObservableObject {
             UserDefaults.standard.set(sortMode.rawValue, forKey: "sortMode")
             updateResults()
         }
+    }
+    @Published var style: UIStyle {
+        didSet { UserDefaults.standard.set(style.rawValue, forKey: "style") }
     }
     @Published private(set) var sections: [ResultSection] = []
     @Published private(set) var selection = 0
@@ -87,6 +98,7 @@ final class StartMenuModel: ObservableObject {
     init() {
         let saved = UserDefaults.standard.string(forKey: "sortMode").flatMap(SortMode.init(rawValue:))
         sortMode = saved ?? .alphabetical
+        style = UserDefaults.standard.string(forKey: "style").flatMap(UIStyle.init(rawValue:)) ?? .glass
         updateResults()
         avatar = UserProfile.loadAvatar()
     }

@@ -8,6 +8,8 @@ release, no other key) and a panel opens right below the Apple menu with:
 - A **search field, already focused**: typing filters and ranks the apps and
   also suggests the matching **System Settings** panes (English and French
   keywords: "wifi", "dark mode", "mode sombre", "luminosité"…).
+- Two **styles**, picked in the sort menu: **Liquid Glass** (glass capsules,
+  grouped buttons, glass highlights, the default) or **Classic** (flat fills).
 - A **sort button** next to the search field: A–Z, Recent (grouped by Today,
   This week…), Most used, or Categories (Productivity, Music, Games…).
 - **Your account** with its avatar (opens Users & Groups), followed by the
@@ -37,7 +39,7 @@ the system-wide `/Library` are left alone.
 
 ## Install
 
-Requirements: macOS 14 or later, Xcode or the Command Line Tools (Swift 5.10+).
+Requirements: macOS 26 or later, Xcode or the Command Line Tools (Swift 5.10+).
 
 ```sh
 scripts/setup-signing.sh   # once: creates a local code signing certificate
