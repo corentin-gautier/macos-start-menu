@@ -15,8 +15,20 @@ final class CommandKeyMonitor {
     private var pressStart: TimeInterval?
     private var cancelled = false
 
+    /// Called once when the Accessibility permission is granted after launch.
+    var onPermissionGranted: () -> Void = {}
+
     init(onTap: @escaping () -> Void) {
         self.onTap = onTap
+    }
+
+    static var isTrusted: Bool { AXIsProcessTrusted() }
+
+    /// Shows the system Accessibility prompt, which adds Start Menu to the list
+    /// in Privacy & Security › Accessibility (the user then turns it on).
+    static func requestPermission() {
+        let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
+        AXIsProcessTrustedWithOptions(options)
     }
 
     func start() {
@@ -24,13 +36,13 @@ final class CommandKeyMonitor {
             installTap()
             return
         }
-        // Shows the system prompt pointing to Privacy & Security > Accessibility.
-        let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
-        AXIsProcessTrustedWithOptions(options)
+        // The onboarding card explains and asks (see StartMenuModel.Onboarding);
+        // poll until the permission is granted.
         permissionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
             guard AXIsProcessTrusted() else { return }
             timer.invalidate()
             self?.installTap()
+            self?.onPermissionGranted()
         }
     }
 

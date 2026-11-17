@@ -1,39 +1,24 @@
 #!/bin/bash
-# Builds, installs to ~/Applications, starts at login (LaunchAgent) and launches.
+# Builds, installs to ~/Applications and launches. The app adds itself to the
+# Login Items on its first launch (System Settings › General › Login Items).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-LABEL="local.mac-start-menu"
 DEST="$HOME/Applications/Start Menu.app"
-AGENT="$HOME/Library/LaunchAgents/$LABEL.plist"
+OLD_AGENT="$HOME/Library/LaunchAgents/local.mac-start-menu.plist"
 
 scripts/build.sh
 
 pkill -x StartMenu 2>/dev/null || true
-mkdir -p "$HOME/Applications" "$HOME/Library/LaunchAgents"
+mkdir -p "$HOME/Applications"
 rm -rf "$DEST"
 cp -R "build/Start Menu.app" "$DEST"
 
-cat > "$AGENT" <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>$LABEL</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/usr/bin/open</string>
-        <string>-g</string>
-        <string>$DEST</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-</dict>
-</plist>
-EOF
+# Earlier versions started at login through a LaunchAgent.
+if [ -f "$OLD_AGENT" ]; then
+    launchctl bootout "gui/$(id -u)/local.mac-start-menu" 2>/dev/null || true
+    rm -f "$OLD_AGENT"
+fi
 
-launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
-launchctl bootstrap "gui/$(id -u)" "$AGENT"
-
-echo "Installed $DEST (starts at login)."
+open "$DEST"
+echo "Installed $DEST"

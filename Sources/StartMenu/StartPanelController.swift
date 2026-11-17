@@ -66,6 +66,14 @@ final class StartPanelController: NSObject, NSWindowDelegate {
 
     func show() {
         model.prepareForShow()
+        // Until the permission is granted, the menu keeps asking for it.
+        if !CommandKeyMonitor.isTrusted { model.onboarding = .permission }
+        // Screenshots: STARTMENU_DEMO_ONBOARDING=permission|ready shows that card.
+        switch ProcessInfo.processInfo.environment["STARTMENU_DEMO_ONBOARDING"] {
+        case "permission": model.onboarding = .permission
+        case "ready": model.onboarding = .ready
+        default: break
+        }
 
         // Top-left of the screen under the mouse, right below the Apple menu.
         let mouse = NSEvent.mouseLocation
@@ -100,6 +108,12 @@ final class StartPanelController: NSObject, NSWindowDelegate {
             // as a gray band under the rounded bottom edge.
             panel.invalidateShadow()
         }
+    }
+
+    /// First launch: the menu opens on the onboarding card.
+    func showOnboarding(_ step: StartMenuModel.Onboarding) {
+        show()
+        model.onboarding = step
     }
 
     func hide() {
@@ -151,6 +165,21 @@ final class StartPanelController: NSObject, NSWindowDelegate {
             let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
 
             // Uninstall confirmation: Escape and Return (the default) cancel.
+            // Onboarding card: Escape closes, Return confirms the last step.
+            if let step = self.model.onboarding {
+                switch event.keyCode {
+                case 53:
+                    self.model.onboarding = nil
+                    if step == .ready { self.hide() }
+                case 36, 76:
+                    if step == .ready { self.model.onboarding = nil; self.hide() }
+                    else { self.model.requestPermission() }
+                default:
+                    return event
+                }
+                return nil
+            }
+
             // Force Quit window: arrows choose, Return force quits, Escape closes.
             if self.model.forceQuitApps != nil {
                 switch event.keyCode {

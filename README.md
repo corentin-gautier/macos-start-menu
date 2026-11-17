@@ -63,8 +63,9 @@ itself so they match what System Settings shows.
    unzip it and move `Start Menu.app` to Applications.
 2. Open it. The app isn't notarized: when macOS blocks it, go to System
    Settings › Privacy & Security and click **Open Anyway**.
-3. Enable *Start Menu* in Privacy & Security › Accessibility.
-4. Add it to System Settings › General › Login Items to start it at login.
+3. On first launch, Start Menu asks for the Accessibility permission (it opens
+   Privacy & Security › Accessibility: turn *Start Menu* on) and adds itself to
+   the Login Items. "Open at Login" in the sort menu turns that off.
 
 ### Build from source
 
@@ -72,7 +73,7 @@ Requirements: macOS 26 or later, Xcode or the Command Line Tools (Swift 5.10+).
 
 ```sh
 scripts/setup-signing.sh   # once: creates a local code signing certificate
-scripts/install.sh         # builds, installs, starts now and at every login
+scripts/install.sh         # builds, installs and launches (the app adds itself to Login Items)
 ```
 
 On first launch macOS asks for the **Accessibility** permission

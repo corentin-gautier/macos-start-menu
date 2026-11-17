@@ -104,3 +104,11 @@
 "Force Quit Applications" = "Force Quit Applications";
 "If an app doesn’t respond for a while, select its name and click Force Quit." = "If an app doesn’t respond for a while, select its name and click Force Quit.";
 "Force Quit" = "Force Quit";
+"Welcome to Start Menu" = "Welcome to Start Menu";
+"To open when you tap ⌘, Start Menu needs the Accessibility permission. It only watches the ⌘ key; nothing you type is recorded." = "To open when you tap ⌘, Start Menu needs the Accessibility permission. It only watches the ⌘ key; nothing you type is recorded.";
+"Turn on Start Menu in the list, then come back." = "Turn on Start Menu in the list, then come back.";
+"Open Accessibility Settings" = "Open Accessibility Settings";
+"You’re all set" = "You’re all set";
+"Tap ⌘ on its own to open the menu anytime." = "Tap ⌘ on its own to open the menu anytime.";
+"Got It" = "Got It";
+"Open at Login" = "Open at Login";

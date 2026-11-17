@@ -64,6 +64,8 @@ struct StartMenuView: View {
                 UninstallConfirmation(request: request, model: model)
             } else if let apps = model.forceQuitApps {
                 ForceQuitWindow(apps: apps, model: model)
+            } else if let step = model.onboarding {
+                OnboardingCard(step: step, model: model)
             }
         }
         .onAppear { searchFocused = true }
@@ -598,6 +600,10 @@ private enum SortMenu {
             if let style = item.representedObject as? UIStyle { model.style = style }
         }
 
+        @objc func toggleLogin(_ item: NSMenuItem) {
+            model.toggleOpensAtLogin()
+        }
+
         @objc func toggleHidden(_ item: NSMenuItem) {
             model.toggleShowsHidden()
         }
@@ -642,6 +648,10 @@ private enum SortMenu {
             _ = addItem(style.title, symbol: style.symbol, action: #selector(Target.pickStyle(_:)),
                         object: style, checked: style == model.style)
         }
+
+        menu.addItem(.separator())
+        _ = addItem(L("Open at Login"), symbol: "power.circle", action: #selector(Target.toggleLogin(_:)),
+                    object: nil, checked: model.opensAtLogin)
 
         var origin = NSEvent.mouseLocation
         if let panel = NSApp.windows.first(where: { $0 is StartPanel && $0.isVisible }) {
@@ -823,5 +833,68 @@ private struct ForceQuitWindow: View {
                 quit.buttonStyle(.borderedProminent)
             }
         }
+    }
+}
+
+// MARK: - Onboarding
+
+/// First launch: explains why Start Menu needs Accessibility and opens the
+/// right settings pane; once granted, confirms that tapping ⌘ works.
+private struct OnboardingCard: View {
+    let step: StartMenuModel.Onboarding
+    @ObservedObject var model: StartMenuModel
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.2)
+            card
+        }
+    }
+
+    @ViewBuilder
+    private var card: some View {
+        let content = VStack(spacing: 14) {
+            if let icon = NSApp.applicationIconImage {
+                Image(nsImage: icon).resizable().frame(width: 72, height: 72)
+            }
+            Text(step == .permission ? L("Welcome to Start Menu") : L("You’re all set"))
+                .font(.system(size: 17, weight: .bold))
+            Text(step == .permission
+                 ? L("To open when you tap ⌘, Start Menu needs the Accessibility permission. It only watches the ⌘ key; nothing you type is recorded.")
+                 : L("Tap ⌘ on its own to open the menu anytime."))
+                .font(.system(size: 13))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            if step == .permission {
+                Text(L("Turn on Start Menu in the list, then come back."))
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            button.controlSize(.large).padding(.top, 4)
+        }
+        .padding(24)
+        .frame(width: 360)
+
+        switch model.style {
+        case .glass:
+            content.glassEffect(.regular, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        case .classic:
+            content.background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(nsColor: .windowBackgroundColor))
+                    .shadow(radius: 20)
+            )
+        }
+    }
+
+    @ViewBuilder
+    private var button: some View {
+        let action = step == .permission ? model.requestPermission : { model.onboarding = nil; model.dismiss() }
+        let label = Button(action: action) {
+            Text(step == .permission ? L("Open Accessibility Settings") : L("Got It"))
+                .frame(maxWidth: .infinity)
+        }
+        if model.style == .glass { label.buttonStyle(.glassProminent) } else { label.buttonStyle(.borderedProminent) }
     }
 }

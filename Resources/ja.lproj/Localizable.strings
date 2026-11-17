@@ -104,3 +104,11 @@
 "Force Quit Applications" = "アプリケーションの強制終了";
 "If an app doesn’t respond for a while, select its name and click Force Quit." = "しばらく待ってもアプリが応答しない場合は、そのアプリの名前を選択して、“強制終了”をクリックしてください。";
 "Force Quit" = "強制終了";
+"Welcome to Start Menu" = "Start Menuへようこそ";
+"To open when you tap ⌘, Start Menu needs the Accessibility permission. It only watches the ⌘ key; nothing you type is recorded." = "⌘キーを押したときに開くには、Start Menuにアクセシビリティの許可が必要です。監視するのは⌘キーだけで、入力内容は一切記録されません。";
+"Turn on Start Menu in the list, then come back." = "リストでStart Menuをオンにしてから、ここに戻ってください。";
+"Open Accessibility Settings" = "アクセシビリティ設定を開く";
+"You’re all set" = "準備ができました";
+"Tap ⌘ on its own to open the menu anytime." = "いつでも⌘キーだけを押すとメニューが開きます。";
+"Got It" = "OK";
+"Open at Login" = "ログイン時に開く";

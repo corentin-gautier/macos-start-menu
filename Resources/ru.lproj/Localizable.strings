@@ -104,3 +104,11 @@
 "Force Quit Applications" = "Принудительное завершение программ";
 "If an app doesn’t respond for a while, select its name and click Force Quit." = "Если приложение долгое время не отвечает, выберите его название и нажмите «Завершить».";
 "Force Quit" = "Завершить";
+"Welcome to Start Menu" = "Добро пожаловать в Start Menu";
+"To open when you tap ⌘, Start Menu needs the Accessibility permission. It only watches the ⌘ key; nothing you type is recorded." = "Чтобы открываться по нажатию ⌘, Start Menu нужно разрешение «Универсальный доступ». Приложение следит только за клавишей ⌘ и ничего из набранного не записывает.";
+"Turn on Start Menu in the list, then come back." = "Включите Start Menu в списке и вернитесь сюда.";
+"Open Accessibility Settings" = "Открыть настройки универсального доступа";
+"You’re all set" = "Всё готово";
+"Tap ⌘ on its own to open the menu anytime." = "Нажмите только ⌘, чтобы открыть меню в любой момент.";
+"Got It" = "Понятно";
+"Open at Login" = "Открывать при входе";

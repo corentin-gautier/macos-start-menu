@@ -104,3 +104,11 @@
 "Force Quit Applications" = "Forzar salida de las aplicaciones";
 "If an app doesn’t respond for a while, select its name and click Force Quit." = "Si una app no responde, selecciónala y haz clic en “Forzar salida”.";
 "Force Quit" = "Forzar salida";
+"Welcome to Start Menu" = "Te damos la bienvenida a Start Menu";
+"To open when you tap ⌘, Start Menu needs the Accessibility permission. It only watches the ⌘ key; nothing you type is recorded." = "Para abrirse al pulsar ⌘, Start Menu necesita el permiso de Accesibilidad. Solo vigila la tecla ⌘; no se registra nada de lo que escribes.";
+"Turn on Start Menu in the list, then come back." = "Activa Start Menu en la lista y vuelve aquí.";
+"Open Accessibility Settings" = "Abrir ajustes de Accesibilidad";
+"You’re all set" = "Todo listo";
+"Tap ⌘ on its own to open the menu anytime." = "Pulsa solo ⌘ para abrir el menú cuando quieras.";
+"Got It" = "Entendido";
+"Open at Login" = "Abrir al iniciar sesión";

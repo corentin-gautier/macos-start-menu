@@ -104,3 +104,11 @@
 "Force Quit Applications" = "强制退出应用程序";
 "If an app doesn’t respond for a while, select its name and click Force Quit." = "如果某个App长时间未响应，请选择其名称并点按“强制退出”。";
 "Force Quit" = "强制退出";
+"Welcome to Start Menu" = "欢迎使用 Start Menu";
+"To open when you tap ⌘, Start Menu needs the Accessibility permission. It only watches the ⌘ key; nothing you type is recorded." = "要在轻按 ⌘ 时打开，Start Menu 需要“辅助功能”权限。它只监测 ⌘ 键，不会记录你输入的任何内容。";
+"Turn on Start Menu in the list, then come back." = "在列表中打开 Start Menu，然后回到这里。";
+"Open Accessibility Settings" = "打开“辅助功能”设置";
+"You’re all set" = "一切就绪";
+"Tap ⌘ on its own to open the menu anytime." = "随时单独轻按 ⌘ 即可打开菜单。";
+"Got It" = "好";
+"Open at Login" = "登录时打开";

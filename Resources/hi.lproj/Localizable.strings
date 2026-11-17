@@ -104,3 +104,11 @@
 "Force Quit Applications" = "ऐप्लिकेशन जबरन बंद करें";
 "If an app doesn’t respond for a while, select its name and click Force Quit." = "यदि कोई ऐप थोड़े समय तक प्रतिक्रिया न दे, तो उसका नाम चुनें और “जबरन बंद करें” पर क्लिक करें।";
 "Force Quit" = "जबरन बंद करें";
+"Welcome to Start Menu" = "Start Menu में आपका स्वागत है";
+"To open when you tap ⌘, Start Menu needs the Accessibility permission. It only watches the ⌘ key; nothing you type is recorded." = "⌘ दबाने पर खुलने के लिए Start Menu को ऐक्सेसिबिलिटी अनुमति चाहिए। यह सिर्फ़ ⌘ कुंजी पर नज़र रखता है; आप जो टाइप करते हैं उसमें से कुछ भी रिकॉर्ड नहीं होता।";
+"Turn on Start Menu in the list, then come back." = "सूची में Start Menu चालू करें, फिर यहाँ वापस आएँ।";
+"Open Accessibility Settings" = "ऐक्सेसिबिलिटी सेटिंग्ज़ खोलें";
+"You’re all set" = "सब तैयार है";
+"Tap ⌘ on its own to open the menu anytime." = "मेन्यू खोलने के लिए कभी भी सिर्फ़ ⌘ दबाएँ।";
+"Got It" = "ठीक है";
+"Open at Login" = "लॉगिन पर खोलें";

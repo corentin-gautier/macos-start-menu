@@ -100,6 +100,11 @@ final class StartMenuModel: ObservableObject {
     /// Apps listed by the in-panel Force Quit window, nil when it is closed.
     /// (A synthesized ⌥⌘⎋ doesn't open the system one: it is a protected hotkey.)
     @Published private(set) var forceQuitApps: [NSRunningApplication]?
+
+    enum Onboarding { case permission, ready }
+    /// First-launch card: asks for Accessibility, then confirms it works.
+    @Published var onboarding: Onboarding? { didSet { refreshHover() } }
+    @Published private(set) var opensAtLogin = LoginItem.isEnabled
     @Published private(set) var forceQuitSelection = 0
 
     let userName = UserProfile.fullName
@@ -143,6 +148,8 @@ final class StartMenuModel: ObservableObject {
         tooltip = nil
         pendingUninstall = nil
         forceQuitApps = nil
+        onboarding = nil
+        opensAtLogin = LoginItem.isEnabled
         showsHidden = false
         updateResults() // usage may have changed since last time
         // Screenshots: `STARTMENU_DEMO_QUERY` opens the menu with a search.
@@ -335,7 +342,7 @@ final class StartMenuModel: ObservableObject {
 
     private func refreshHover() {
         var hit: String?
-        if let point = mouseLocation, pendingUninstall == nil, forceQuitApps == nil {
+        if let point = mouseLocation, pendingUninstall == nil, forceQuitApps == nil, onboarding == nil {
             let under = hoverFrames.filter { $0.value.contains(point) }.map(\.key)
             let overBar = under.contains { $0.hasPrefix("block:") }
             hit = under.first { !$0.hasPrefix("block:") && !(overBar && $0.hasPrefix("result:")) }
@@ -415,6 +422,19 @@ final class StartMenuModel: ObservableObject {
         guard AppUninstaller.perform(request) else { return }
         apps = AppCatalog.scan()
         updateResults()
+    }
+
+    // MARK: - Onboarding and login item
+
+    func requestPermission() {
+        CommandKeyMonitor.requestPermission()
+        NSWorkspace.shared.open(URL(string:
+            "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Accessibility")!)
+    }
+
+    func toggleOpensAtLogin() {
+        LoginItem.setEnabled(!opensAtLogin)
+        opensAtLogin = LoginItem.isEnabled
     }
 
     // MARK: - Force Quit

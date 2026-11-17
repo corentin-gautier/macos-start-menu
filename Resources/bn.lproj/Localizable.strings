@@ -104,3 +104,11 @@
 "Force Quit Applications" = "অ্যাপ জোর করে বন্ধ করুন";
 "If an app doesn’t respond for a while, select its name and click Force Quit." = "কোনো অ্যাপ কিছুক্ষণ সাড়া না দিলে, তার নাম বেছে নিয়ে জোর করে বন্ধ করুন-এ ক্লিক করুন।";
 "Force Quit" = "জোর করে বন্ধ করুন";
+"Welcome to Start Menu" = "Start Menu-এ স্বাগতম";
+"To open when you tap ⌘, Start Menu needs the Accessibility permission. It only watches the ⌘ key; nothing you type is recorded." = "⌘ চাপলে খোলার জন্য Start Menu-এর অ্যাক্সেসিবিলিটি অনুমতি দরকার। এটি শুধু ⌘ কী লক্ষ রাখে; আপনি যা টাইপ করেন তার কিছুই রেকর্ড হয় না।";
+"Turn on Start Menu in the list, then come back." = "তালিকায় Start Menu চালু করুন, তারপর এখানে ফিরে আসুন।";
+"Open Accessibility Settings" = "অ্যাক্সেসিবিলিটি সেটিংস খুলুন";
+"You’re all set" = "সব প্রস্তুত";
+"Tap ⌘ on its own to open the menu anytime." = "যেকোনো সময় মেনু খুলতে শুধু ⌘ চাপুন।";
+"Got It" = "ঠিক আছে";
+"Open at Login" = "লগইনে খুলুন";
