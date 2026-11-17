@@ -39,6 +39,7 @@ final class StartPanelController: NSObject, NSWindowDelegate {
     private let panel = StartPanel()
     private let model = StartMenuModel()
     private var keyMonitor: Any?
+    private weak var hosting: TrackingHostingView<StartMenuView>?
 
     override init() {
         super.init()
@@ -46,6 +47,13 @@ final class StartPanelController: NSObject, NSWindowDelegate {
         panel.delegate = self
         panel.contentView = makeContentView()
         installKeyMonitor()
+        // A context or sort menu can leave the panel without keyboard focus.
+        NotificationCenter.default.addObserver(
+            forName: NSMenu.didEndTrackingNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            guard let self, self.panel.isVisible, !self.panel.isKeyWindow else { return }
+            self.panel.makeKey()
+        }
     }
 
     var isVisible: Bool { panel.isVisible }
@@ -73,6 +81,7 @@ final class StartPanelController: NSObject, NSWindowDelegate {
         panel.setFrame(frame.offsetBy(dx: 0, dy: 8), display: false)
         panel.alphaValue = 0
         panel.makeKeyAndOrderFront(nil)
+        model.mouseMoved(to: hosting?.currentMouseLocation())
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.14
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)
@@ -91,8 +100,10 @@ final class StartPanelController: NSObject, NSWindowDelegate {
     }
 
     private func makeContentView() -> NSView {
-        let hosting = NSHostingView(rootView: StartMenuView(model: model))
+        let hosting = TrackingHostingView(rootView: StartMenuView(model: model))
         hosting.sizingOptions = []
+        hosting.onMouseMove = { [weak model] in model?.mouseMoved(to: $0) }
+        self.hosting = hosting
 
         if #available(macOS 26.0, *) {
             let glass = NSGlassEffectView()

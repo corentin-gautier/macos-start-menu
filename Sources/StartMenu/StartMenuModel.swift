@@ -65,7 +65,10 @@ final class StartMenuModel: ObservableObject {
     /// Changes every time the panel opens, so the view refocuses and scrolls up.
     @Published private(set) var showToken = UUID()
     @Published private(set) var avatar: NSImage?
-    @Published var hoveredAction: SystemAction?
+    /// Hover is hit-tested here (see Hover.swift).
+    @Published private(set) var hoveredID: String?
+    private var hoverFrames: [String: CGRect] = [:]
+    private var mouseLocation: CGPoint?
     @Published private(set) var pendingUninstall: UninstallRequest?
 
     let userName = UserProfile.fullName
@@ -96,7 +99,7 @@ final class StartMenuModel: ObservableObject {
         query = ""
         selection = 0
         showsSelection = false
-        hoveredAction = nil
+        hoveredID = nil
         pendingUninstall = nil
         updateResults() // usage may have changed since last time
         showToken = UUID()
@@ -204,6 +207,35 @@ final class StartMenuModel: ObservableObject {
         return scored.map(\.item)
     }
 
+    // MARK: - Hover
+
+    var hoveredAction: SystemAction? {
+        SystemAction.allCases.first { HoverSpace.actionID($0) == hoveredID }
+    }
+
+    func mouseMoved(to point: CGPoint?) {
+        mouseLocation = point
+        refreshHover()
+    }
+
+    /// Frames change on scroll and on new results, under a still mouse too.
+    func updateHoverFrames(_ frames: [String: CGRect]) {
+        hoverFrames = frames
+        refreshHover()
+    }
+
+    private func refreshHover() {
+        var hit: String?
+        if let point = mouseLocation, pendingUninstall == nil {
+            let viewport = hoverFrames[HoverSpace.viewportID]
+            hit = hoverFrames.first { id, frame in
+                id != HoverSpace.viewportID && frame.contains(point)
+                    && (!id.hasPrefix("result:") || viewport?.contains(point) == true)
+            }?.key
+        }
+        if hit != hoveredID { hoveredID = hit }
+    }
+
     func resultID(at index: Int) -> String? {
         results.indices.contains(index) ? results[index].id : nil
     }
@@ -254,10 +286,12 @@ final class StartMenuModel: ObservableObject {
     /// Asks for confirmation inside the panel.
     func uninstall(_ app: AppEntry) {
         pendingUninstall = AppUninstaller.request(app, installed: apps)
+        refreshHover()
     }
 
     func cancelUninstall() {
         pendingUninstall = nil
+        refreshHover()
     }
 
     func confirmUninstall() {

@@ -22,6 +22,7 @@ struct StartMenuView: View {
                         .padding(.bottom, 12)
                 }
                 .scrollIndicators(.never)
+                .hoverFrame(HoverSpace.viewportID)
                 .onChange(of: model.selection) { _, index in
                     guard model.showsSelection, let id = model.resultID(at: index) else { return }
                     withAnimation(.easeOut(duration: 0.1)) { proxy.scrollTo(id) }
@@ -38,6 +39,8 @@ struct StartMenuView: View {
                 .padding(.vertical, 10)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .coordinateSpace(name: HoverSpace.name)
+        .onPreferenceChange(HoverFramesKey.self) { model.updateHoverFrames($0) }
         .overlay {
             if let request = model.pendingUninstall {
                 UninstallConfirmation(request: request, model: model)
@@ -98,17 +101,20 @@ struct StartMenuView: View {
         ForEach(Array(section.items.enumerated()), id: \.element.id) { offset, result in
             let index = section.startIndex + offset
             let selected = model.highlightedIndex == index
+            let hovered = model.hoveredID == HoverSpace.resultID(result.id)
             Group {
                 switch result {
                 case .app(let app):
                     AppTile(
                         app: app,
                         selected: selected,
+                        hovered: hovered,
                         onUninstall: AppUninstaller.canUninstall(app) ? { model.uninstall(app) } : nil
                     )
-                case .setting(let setting): SettingRow(setting: setting, selected: selected)
+                case .setting(let setting): SettingRow(setting: setting, selected: selected, hovered: hovered)
                 }
             }
+            .hoverFrame(HoverSpace.resultID(result.id))
             .onTapGesture { model.activate(index: index) }
         }
     }
@@ -149,8 +155,8 @@ private struct SectionHeader: View {
 private struct AppTile: View {
     let app: AppEntry
     let selected: Bool
+    let hovered: Bool
     let onUninstall: (() -> Void)?
-    @State private var hovered = false
 
     var body: some View {
         VStack(spacing: 5) {
@@ -168,7 +174,6 @@ private struct AppTile: View {
         .padding(.horizontal, 4)
         .background(Highlight(selected: selected, hovered: hovered))
         .contentShape(Rectangle())
-        .onHover { hovered = $0 }
         .contextMenu {
             Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([app.url]) }
             if let onUninstall {
@@ -182,7 +187,7 @@ private struct AppTile: View {
 private struct SettingRow: View {
     let setting: SettingEntry
     let selected: Bool
-    @State private var hovered = false
+    let hovered: Bool
 
     var body: some View {
         HStack(spacing: 10) {
@@ -204,7 +209,6 @@ private struct SettingRow: View {
         .padding(.vertical, 6)
         .background(Highlight(selected: selected, hovered: hovered))
         .contentShape(Rectangle())
-        .onHover { hovered = $0 }
     }
 }
 
@@ -243,9 +247,9 @@ private struct BottomBar: View {
 
 private struct UserButton: View {
     @ObservedObject var model: StartMenuModel
-    @State private var hovered = false
 
     var body: some View {
+        let hovered = model.hoveredID == HoverSpace.userID
         Button(action: model.openUserSettings) {
             HStack(spacing: 8) {
                 Group {
@@ -268,7 +272,7 @@ private struct UserButton: View {
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)
-        .onHover { hovered = $0 }
+        .hoverFrame(HoverSpace.userID)
         .help("Users & Groups")
     }
 }
@@ -276,9 +280,9 @@ private struct UserButton: View {
 private struct IconButton: View {
     let action: SystemAction
     @ObservedObject var model: StartMenuModel
-    @State private var hovered = false
 
     var body: some View {
+        let hovered = model.hoveredID == HoverSpace.actionID(action)
         Button { model.perform(action) } label: {
             Group {
                 if let url = action.appIconURL {
@@ -293,11 +297,7 @@ private struct IconButton: View {
         }
         .buttonStyle(.plain)
         .help(action.title)
-        .onHover { isHovered in
-            hovered = isHovered
-            if isHovered { model.hoveredAction = action }
-            else if model.hoveredAction == action { model.hoveredAction = nil }
-        }
+        .hoverFrame(HoverSpace.actionID(action))
     }
 }
 
