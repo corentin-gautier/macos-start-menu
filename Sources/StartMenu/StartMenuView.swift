@@ -11,8 +11,8 @@ struct StartMenuView: View {
                 searchBar
                 sortMenu
             }
-                .padding(.horizontal, 18)
-                .padding(.top, 18)
+                .padding(.horizontal, Self.topBarInset)
+                .padding(.top, Self.topBarInset)
                 .padding(.bottom, 12)
 
             ScrollViewReader { proxy in
@@ -53,9 +53,13 @@ struct StartMenuView: View {
                 .focused($searchFocused)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 11)
+        .frame(height: Self.topBarHeight)
         .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(0.07)))
     }
+
+    /// Shared by the search field and the sort button.
+    static let topBarHeight: CGFloat = 46
+    static let topBarInset: CGFloat = 18
 
     @ViewBuilder
     private var results: some View {
@@ -100,27 +104,21 @@ struct StartMenuView: View {
     }
 
     private var sortMenu: some View {
-        Menu {
-            Picker("Sort apps", selection: $model.sortMode) {
-                ForEach(SortMode.allCases) { mode in
-                    Label(mode.title, systemImage: mode.symbol).tag(mode)
-                }
-            }
-            .pickerStyle(.inline)
-        } label: {
+        // A plain button over the whole surface (a SwiftUI Menu only reacts
+        // on its label), opening a native menu below itself.
+        Button { SortMenu.show(model: model) } label: {
             HStack(spacing: 5) {
                 Image(systemName: "arrow.up.arrow.down")
                 Text(model.sortMode.title)
             }
-            .font(.system(size: 12, weight: .medium))
+            .font(.system(size: 15, weight: .medium))
+            .padding(.horizontal, 14)
+            .frame(height: Self.topBarHeight)
+            .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(0.07)))
+            .contentShape(RoundedRectangle(cornerRadius: 12))
         }
-        .menuStyle(.button)
         .buttonStyle(.plain)
-        .menuIndicator(.visible)
         .fixedSize()
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.07)))
         .opacity(model.isSearching ? 0.4 : 1)
         .help("Sort apps")
     }
@@ -285,5 +283,41 @@ private struct IconButton: View {
             if isHovered { model.hoveredAction = action }
             else if model.hoveredAction == action { model.hoveredAction = nil }
         }
+    }
+}
+
+/// The sort choices as a native menu, right-aligned under the sort button.
+private enum SortMenu {
+    private final class Target: NSObject {
+        let model: StartMenuModel
+        init(model: StartMenuModel) { self.model = model }
+
+        @objc func pick(_ item: NSMenuItem) {
+            if let mode = item.representedObject as? SortMode { model.sortMode = mode }
+        }
+    }
+
+    static func show(model: StartMenuModel) {
+        let target = Target(model: model)
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem.sectionHeader(title: "Sort apps"))
+        for mode in SortMode.allCases {
+            let item = NSMenuItem(title: mode.title, action: #selector(Target.pick(_:)), keyEquivalent: "")
+            item.target = target
+            item.representedObject = mode
+            item.image = NSImage(systemSymbolName: mode.symbol, accessibilityDescription: nil)
+            item.state = mode == model.sortMode ? .on : .off
+            menu.addItem(item)
+        }
+        // popUp blocks until the menu closes, which keeps `target` alive.
+        var origin = NSEvent.mouseLocation
+        if let panel = NSApp.windows.first(where: { $0 is StartPanel && $0.isVisible }) {
+            origin = NSPoint(
+                x: panel.frame.maxX - StartMenuView.topBarInset - menu.size.width,
+                y: panel.frame.maxY - StartMenuView.topBarInset - StartMenuView.topBarHeight - 6
+            )
+        }
+        menu.popUp(positioning: nil, at: origin, in: nil)
+        withExtendedLifetime(target) {}
     }
 }
