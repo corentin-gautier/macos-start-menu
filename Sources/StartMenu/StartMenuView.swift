@@ -4,8 +4,8 @@ import SwiftUI
 /// - Liquid Glass: glass capsules for the controls and grouped bottom
 ///   buttons, glass highlights, radii concentric with the panel's.
 /// - Classic: flat translucent fills, a divider above a single bottom bar.
-/// The layout is shared: results scroll under the top controls (soft scroll
-/// edge effect), the bottom bar sits below the list.
+/// The bottom bar sits below the list; the results scroll under the glass
+/// top controls (soft scroll edge effect), and below the classic ones.
 struct StartMenuView: View {
     @ObservedObject var model: StartMenuModel
     @FocusState private var searchFocused: Bool
@@ -20,6 +20,9 @@ struct StartMenuView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // Classic's flat fills would show the list through: its bar sits
+            // above the list instead of floating over it.
+            if style == .classic { topBar.padding(.bottom, 6) }
             ScrollViewReader { proxy in
                 ScrollView {
                     results
@@ -28,7 +31,9 @@ struct StartMenuView: View {
                 }
                 .scrollIndicators(.never)
                 .scrollEdgeEffectStyle(.soft, for: .vertical)
-                .safeAreaInset(edge: .top, spacing: 6) { topBar }
+                .safeAreaInset(edge: .top, spacing: 6) {
+                    if style == .glass { topBar }
+                }
                 .onChange(of: model.selection) { _, index in
                     guard model.showsSelection, let id = model.resultID(at: index) else { return }
                     withAnimation(.easeOut(duration: 0.1)) { proxy.scrollTo(id) }
