@@ -3,13 +3,120 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>macOS Start Menu</title>
-<meta name="description" content="A start menu for macOS. Tap ⌘ alone to open all your apps, search them and System Settings, and reach power and session controls.">
-<meta property="og:title" content="macOS Start Menu">
-<meta property="og:description" content="Tap ⌘. Every app, every setting, nothing else.">
-<meta property="og:image" content="img/glass-categories.png">
+<title>macOS Start Menu — Free Start Menu &amp; Launchpad Alternative for Mac</title>
+<meta name="description" content="A free Windows-style start menu for macOS Tahoe. Tap ⌘ to open every app, search apps, folders and System Settings, and lock or shut down your Mac. A fast Launchpad alternative.">
+<link rel="canonical" href="https://corentingautier.dev/macos-start-menu/">
+<meta name="theme-color" content="#6a5cff">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="macOS Start Menu">
+<meta property="og:url" content="https://corentingautier.dev/macos-start-menu/">
+<meta property="og:title" content="macOS Start Menu — a Start menu for your Mac">
+<meta property="og:description" content="Tap ⌘ alone: every app and setting, no file clutter. Free for macOS Tahoe.">
+<meta property="og:image" content="https://corentingautier.dev/macos-start-menu/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="macOS Start Menu: the panel with apps grouped by category.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="macOS Start Menu — a Start menu for your Mac">
+<meta name="twitter:description" content="Tap ⌘ alone: every app and setting, no file clutter. Free for macOS Tahoe.">
+<meta name="twitter:image" content="https://corentingautier.dev/macos-start-menu/img/og.jpg">
 <link rel="icon" type="image/png" href="img/icon.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="preload" as="image" href="img/glass-categories.webp" fetchpriority="high">
+<script type="application/ld+json">
+[
+ {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "macOS Start Menu",
+  "alternateName": [
+   "Start Menu for Mac",
+   "Mac Start Menu"
+  ],
+  "description": "A free Windows-style start menu and app launcher for macOS: tap ⌘ alone to open all your apps, search apps, folders and System Settings, and reach power and session controls.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "macOS 26 or later",
+  "softwareVersion": "1.2",
+  "url": "https://corentingautier.dev/macos-start-menu/",
+  "downloadUrl": "https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip",
+  "image": "https://corentingautier.dev/macos-start-menu/img/icon.png",
+  "screenshot": [
+   "https://corentingautier.dev/macos-start-menu/img/glass-categories.webp",
+   "https://corentingautier.dev/macos-start-menu/img/glass-search.webp",
+   "https://corentingautier.dev/macos-start-menu/img/classic-list.webp"
+  ],
+  "offers": {
+   "@type": "Offer",
+   "price": "0",
+   "priceCurrency": "USD"
+  },
+  "featureList": [
+   "Opens by tapping the Command key",
+   "Search apps, folders and System Settings",
+   "Sort A–Z, recent, most used or by category",
+   "Grid or list view",
+   "Lock, log out, sleep, restart, shut down",
+   "Uninstall apps with their leftover files",
+   "Liquid Glass and Classic styles"
+  ]
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+   {
+    "@type": "Question",
+    "name": "How do I get a Start menu on a Mac?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Install macOS Start Menu, allow it in Privacy & Security › Accessibility, then tap the ⌘ Command key on its own. A Windows-style start menu opens below the menu bar with all your apps, a search field, and power buttons."
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "Is it a Launchpad alternative for macOS Tahoe?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Yes. macOS 26 Tahoe replaced Launchpad with the Apps view. macOS Start Menu gives you a fast, keyboard-first grid or list of every app, sorted A–Z, by recent use, most used or category."
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "Why does Spotlight show files when I only want apps?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Spotlight hides categories you turn off, but files it can't classify (game assets, archives, caches) still show up. Start Menu reads your app folders directly, so it only lists apps, System Settings panes and your main folders."
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "Does tapping ⌘ break keyboard shortcuts?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "No. The menu opens only when ⌘ is pressed and released alone within half a second. ⌘C, ⌘V and every other shortcut work as usual."
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "Is macOS Start Menu free?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Yes, it's free to download. The source code is on GitHub."
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "Which Macs are supported?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Macs with Apple silicon running macOS 26 Tahoe or later."
+    }
+   }
+  ]
+ }
+]
+</script>
 <style>
   :root {
     --bg: #f5f5f7;
@@ -195,6 +302,13 @@
   }
   pre code { background: none; padding: 0; }
 
+  .faq { max-width: 760px; }
+  .faq details { border-bottom: 1px solid var(--line); padding: 18px 0; }
+  .faq summary { cursor: pointer; font-weight: 600; font-size: 19px; list-style: none; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; float: right; color: var(--muted); font-weight: 400; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq p { color: var(--muted); margin: 10px 0 0; }
   .shortcuts { width: 100%; max-width: 560px; border-collapse: collapse; }
   .shortcuts td { padding: 12px 0; border-bottom: 1px solid var(--line); }
   .shortcuts td:first-child { width: 45%; white-space: nowrap; }
@@ -220,7 +334,7 @@
 
 <header class="hero">
   <div class="wrap">
-    <img class="app-icon" src="img/icon.png" width="128" height="128" alt="">
+    <img class="app-icon" src="img/icon.png" width="128" height="128" alt="macOS Start Menu app icon">
     <h1>macOS Start Menu</h1>
     <p class="tagline">Tap <span class="key pulse">⌘</span> on its own. <strong>Every app, every setting</strong> — and none of the files Spotlight keeps showing you.</p>
     <div class="actions">
@@ -230,15 +344,15 @@
     <p class="note">Free · source on GitHub · macOS 26 Tahoe or later · Apple silicon</p>
   </div>
   <div class="shot-hero">
-    <img src="img/glass-categories.png" width="1200" height="1200" alt="The Start Menu panel in the Liquid Glass style, showing apps grouped by category with the account and power buttons at the bottom.">
+    <img src="img/glass-categories.webp" width="1200" height="1200" fetchpriority="high" alt="The Start Menu panel in the Liquid Glass style, showing apps grouped by category with the account and power buttons at the bottom.">
   </div>
 </header>
 
 <main>
   <section>
     <div class="wrap">
-      <h2>One key away from everything.</h2>
-      <p class="lead">A panel opens right below the menu bar, with the search field already focused. It shows apps and settings — never documents, archives or caches.</p>
+      <h2>A Start menu for your Mac, one key away.</h2>
+      <p class="lead">macOS Start Menu is a free app launcher that brings the Windows Start menu to macOS. A panel opens right below the menu bar, search field already focused: apps, folders and System Settings — never the documents, archives or caches Spotlight digs up. With Launchpad gone in macOS Tahoe, it’s the quickest way to reach every app.</p>
       <div class="features">
         <div class="feature"><div class="icon">⌘</div><h3>Tap Command</h3><p>Press and release ⌘ alone, like the Windows key. Shortcuts such as ⌘C are never affected.</p></div>
         <div class="feature"><div class="icon">⌕</div><h3>Instant search</h3><p>Typing ranks your apps and suggests the matching System Settings panes, in English and French.</p></div>
@@ -261,7 +375,7 @@
           <li><strong>Keyboard first</strong> — arrows to move, Return to open, Escape to close.</li>
         </ul>
       </div>
-      <img class="shot" src="img/glass-search.png" width="1200" height="1200" loading="lazy" alt="Searching “dis” shows Discord and Disk Utility, then the Displays, Storage and Startup Disk settings.">
+      <img class="shot" src="img/glass-search.webp" width="1200" height="1200" loading="lazy" alt="Searching “dis” shows Discord and Disk Utility, then the Displays, Storage and Startup Disk settings.">
     </div>
   </section>
 
@@ -271,11 +385,11 @@
       <p class="lead">Built with the native Liquid Glass of macOS Tahoe. Prefer something flatter? Switch styles from the sort menu.</p>
       <div class="styles">
         <figure>
-          <img class="shot" src="img/glass-categories.png" width="1200" height="1200" loading="lazy" alt="Liquid Glass style with glass capsules and grouped buttons.">
+          <img class="shot" src="img/glass-categories.webp" width="1200" height="1200" loading="lazy" alt="Liquid Glass style with glass capsules and grouped buttons.">
           <figcaption>Liquid Glass<span>Glass capsules, grouped controls</span></figcaption>
         </figure>
         <figure>
-          <img class="shot" src="img/classic-list.png" width="1200" height="1200" loading="lazy" alt="Classic style in list view, each app with its category.">
+          <img class="shot" src="img/classic-list.webp" width="1200" height="1200" loading="lazy" alt="Classic style in list view, each app with its category.">
           <figcaption>Classic<span>Flat and quiet, shown here as a list</span></figcaption>
         </figure>
       </div>
@@ -297,9 +411,23 @@
     </div>
   </section>
 
+  <section id="faq">
+    <div class="wrap">
+      <h2>Questions</h2>
+      <div class="faq">
+        <details><summary>How do I get a Start menu on a Mac?</summary><p>Install macOS Start Menu, allow it in Privacy & Security › Accessibility, then tap the ⌘ Command key on its own. A Windows-style start menu opens below the menu bar with all your apps, a search field, and power buttons.</p></details>
+        <details><summary>Is it a Launchpad alternative for macOS Tahoe?</summary><p>Yes. macOS 26 Tahoe replaced Launchpad with the Apps view. macOS Start Menu gives you a fast, keyboard-first grid or list of every app, sorted A–Z, by recent use, most used or category.</p></details>
+        <details><summary>Why does Spotlight show files when I only want apps?</summary><p>Spotlight hides categories you turn off, but files it can't classify (game assets, archives, caches) still show up. Start Menu reads your app folders directly, so it only lists apps, System Settings panes and your main folders.</p></details>
+        <details><summary>Does tapping ⌘ break keyboard shortcuts?</summary><p>No. The menu opens only when ⌘ is pressed and released alone within half a second. ⌘C, ⌘V and every other shortcut work as usual.</p></details>
+        <details><summary>Is macOS Start Menu free?</summary><p>Yes, it's free to download. The source code is on GitHub.</p></details>
+        <details><summary>Which Macs are supported?</summary><p>Macs with Apple silicon running macOS 26 Tahoe or later.</p></details>
+      </div>
+    </div>
+  </section>
+
   <section id="install">
     <div class="wrap">
-      <h2>Install</h2>
+      <h2>Install macOS Start Menu</h2>
       <p class="lead">Start Menu isn’t notarized by Apple, so macOS asks you to confirm the first launch.</p>
       <div class="steps">
         <div class="step"><div><h3>Download and unzip</h3><p><a href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip">Start-Menu.zip</a>, then move <code>Start Menu.app</code> to your Applications folder.</p></div></div>
