@@ -40,16 +40,16 @@ enum SystemAction: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .appStore: "App Store"
-        case .activityMonitor: "Activity Monitor"
-        case .forceQuit: "Force Quit…"
-        case .settings: "System Settings"
-        case .aboutThisMac: "About This Mac"
-        case .lock: "Lock Screen"
-        case .logOut: "Log Out…"
-        case .sleep: "Sleep"
-        case .restart: "Restart…"
-        case .shutDown: "Shut Down…"
+        case .appStore: L("App Store")
+        case .activityMonitor: L("Activity Monitor")
+        case .forceQuit: L("Force Quit…")
+        case .settings: L("System Settings")
+        case .aboutThisMac: L("About This Mac")
+        case .lock: L("Lock Screen")
+        case .logOut: L("Log Out…")
+        case .sleep: L("Sleep")
+        case .restart: L("Restart…")
+        case .shutDown: L("Shut Down…")
         }
     }
 
@@ -77,8 +77,7 @@ enum SystemAction: String, CaseIterable, Identifiable {
         case .aboutThisMac:
             Self.openApp(url: URL(fileURLWithPath: "/System/Library/CoreServices/Applications/About This Mac.app"))
         case .forceQuit:
-            // Same as pressing ⌥⌘⎋, which opens the system Force Quit window.
-            Self.postKey(53, flags: [.maskCommand, .maskAlternate])
+            break // Shown inside the panel (see StartMenuModel.showForceQuit).
         case .lock: Self.lockScreen()
         case .sleep: Self.run("/usr/bin/pmset", ["sleepnow"])
         // The loginwindow events below show the system confirmation dialog.

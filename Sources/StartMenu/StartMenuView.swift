@@ -62,6 +62,8 @@ struct StartMenuView: View {
         .overlay {
             if let request = model.pendingUninstall {
                 UninstallConfirmation(request: request, model: model)
+            } else if let apps = model.forceQuitApps {
+                ForceQuitWindow(apps: apps, model: model)
             }
         }
         .onAppear { searchFocused = true }
@@ -302,7 +304,7 @@ private struct AppTile: View {
             Button("Show in Finder", systemImage: "folder") {
                 NSWorkspace.shared.activateFileViewerSelecting([app.url])
             }
-            Button(isHidden ? "Unhide" : "Hide", systemImage: isHidden ? "eye" : "eye.slash", action: onToggleHidden)
+            Button(isHidden ? L("Unhide") : L("Hide"), systemImage: isHidden ? "eye" : "eye.slash", action: onToggleHidden)
             if let onUninstall {
                 Divider()
                 Button("Uninstall…", systemImage: "trash", role: .destructive, action: onUninstall)
@@ -616,26 +618,26 @@ private enum SortMenu {
             return item
         }
 
-        menu.addItem(NSMenuItem.sectionHeader(title: "Sort apps"))
+        menu.addItem(NSMenuItem.sectionHeader(title: L("Sort apps")))
         for mode in SortMode.allCases {
             _ = addItem(mode.title, symbol: mode.symbol, action: #selector(Target.pickSort(_:)),
                         object: mode, checked: mode == model.sortMode)
         }
         menu.addItem(.separator())
         let count = model.hiddenCount
-        let hidden = addItem(count == 0 ? "No Hidden Apps" : "Show Hidden Apps (\(count))", symbol: "eye.slash",
+        let hidden = addItem(count == 0 ? L("No Hidden Apps") : L("Show Hidden Apps (%d)", count), symbol: "eye.slash",
                              action: #selector(Target.toggleHidden(_:)), object: nil, checked: model.showsHidden)
         hidden.isEnabled = count > 0
 
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem.sectionHeader(title: "View"))
+        menu.addItem(NSMenuItem.sectionHeader(title: L("View")))
         for layout in AppLayout.allCases {
             _ = addItem(layout.title, symbol: layout.symbol, action: #selector(Target.pickLayout(_:)),
                         object: layout, checked: layout == model.layout)
         }
 
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem.sectionHeader(title: "Style"))
+        menu.addItem(NSMenuItem.sectionHeader(title: L("Style")))
         for style in UIStyle.allCases {
             _ = addItem(style.title, symbol: style.symbol, action: #selector(Target.pickStyle(_:)),
                         object: style, checked: style == model.style)
@@ -664,9 +666,8 @@ private struct UninstallConfirmation: View {
     private var message: String {
         let count = request.leftovers.count
         return count == 0
-            ? "The app will be moved to the Trash."
-            : "The app and the \(count) item\(count == 1 ? "" : "s") it left in your Library "
-                + "(settings, caches, data) will be moved to the Trash."
+            ? L("The app will be moved to the Trash.")
+            : L("The app and the files it left in your Library (%d: settings, caches, data) will be moved to the Trash.", count)
     }
 
     var body: some View {
@@ -684,7 +685,7 @@ private struct UninstallConfirmation: View {
             Image(nsImage: IconCache.shared.icon(for: request.app.url))
                 .resizable()
                 .frame(width: 64, height: 64)
-            Text("Uninstall “\(request.app.name)”?")
+            Text(L("Uninstall “%@”?", request.app.name))
                 .font(.system(size: 15, weight: .bold))
             Text(message)
                 .font(.system(size: 13))
@@ -733,6 +734,93 @@ private struct UninstallConfirmation: View {
             } else {
                 trash.buttonStyle(.bordered)
                 cancel.buttonStyle(.borderedProminent)
+            }
+        }
+    }
+}
+
+// MARK: - Force Quit
+
+/// The apps that can be force quit, like the system ⌥⌘⎋ window, drawn in the
+/// panel (Start Menu can't open the system one: it is a protected hotkey).
+private struct ForceQuitWindow: View {
+    let apps: [NSRunningApplication]
+    @ObservedObject var model: StartMenuModel
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.2)
+                .contentShape(Rectangle())
+                .onTapGesture { model.closeForceQuit() }
+            card
+        }
+    }
+
+    @ViewBuilder
+    private var card: some View {
+        let content = VStack(alignment: .leading, spacing: 12) {
+            Text("Force Quit Applications")
+                .font(.system(size: 15, weight: .bold))
+            Text("If an app doesn’t respond for a while, select its name and click Force Quit.")
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            ScrollView {
+                VStack(spacing: 2) {
+                    ForEach(Array(apps.enumerated()), id: \.element.processIdentifier) { index, app in
+                        row(app, selected: index == model.forceQuitSelection)
+                            .contentShape(Rectangle())
+                            .onTapGesture { model.selectForceQuit(index) }
+                    }
+                }
+            }
+            .frame(height: 240)
+            buttons.controlSize(.large).padding(.top, 4)
+        }
+        .padding(22)
+        .frame(width: 380)
+
+        switch model.style {
+        case .glass:
+            content.glassEffect(.regular, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        case .classic:
+            content.background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(nsColor: .windowBackgroundColor))
+                    .shadow(radius: 20)
+            )
+        }
+    }
+
+    private func row(_ app: NSRunningApplication, selected: Bool) -> some View {
+        HStack(spacing: 10) {
+            if let url = app.bundleURL {
+                Image(nsImage: IconCache.shared.icon(for: url)).resizable().frame(width: 24, height: 24)
+            }
+            Text(app.localizedName ?? "").font(.system(size: 13))
+            Spacer()
+        }
+        .foregroundStyle(selected ? .white : .primary)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(RoundedRectangle(cornerRadius: 8).fill(selected ? Color.accentColor : .clear))
+    }
+
+    @ViewBuilder
+    private var buttons: some View {
+        let cancel = Button { model.closeForceQuit() } label: {
+            Text("Cancel").frame(maxWidth: .infinity)
+        }
+        let quit = Button { model.forceQuitSelected() } label: {
+            Text("Force Quit").frame(maxWidth: .infinity)
+        }
+        HStack(spacing: 8) {
+            if model.style == .glass {
+                cancel.buttonStyle(.glass)
+                quit.buttonStyle(.glassProminent)
+            } else {
+                cancel.buttonStyle(.bordered)
+                quit.buttonStyle(.borderedProminent)
             }
         }
     }

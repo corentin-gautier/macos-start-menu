@@ -48,10 +48,10 @@ enum FolderCatalog {
     }()
 
     private static func displayName(_ url: URL, home: URL) -> String {
-        if url == home { return "Home" }
+        if url == home { return L("Home") }
         switch url.lastPathComponent {
         case "com~apple~CloudDocs": return "iCloud Drive"
-        case ".Trash": return "Trash"
+        case ".Trash": return L("Trash")
         default: return FileManager.default.displayName(atPath: url.path)
         }
     }

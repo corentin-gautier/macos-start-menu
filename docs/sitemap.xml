@@ -1,8 +1,181 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://corentingautier.dev/macos-start-menu/</loc>
     <lastmod>2026-11-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/"/>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-categories.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-search.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/classic-list.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://corentingautier.dev/macos-start-menu/zh/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/"/>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-categories.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-search.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/classic-list.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://corentingautier.dev/macos-start-menu/hi/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/"/>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-categories.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-search.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/classic-list.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://corentingautier.dev/macos-start-menu/es/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/"/>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-categories.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-search.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/classic-list.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://corentingautier.dev/macos-start-menu/ar/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/"/>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-categories.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-search.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/classic-list.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://corentingautier.dev/macos-start-menu/fr/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/"/>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-categories.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-search.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/classic-list.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://corentingautier.dev/macos-start-menu/bn/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/"/>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-categories.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-search.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/classic-list.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://corentingautier.dev/macos-start-menu/pt/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/"/>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-categories.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-search.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/classic-list.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://corentingautier.dev/macos-start-menu/ru/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/"/>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-categories.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-search.webp</image:loc></image:image>
+    <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/classic-list.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://corentingautier.dev/macos-start-menu/ja/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/"/>
     <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-categories.webp</image:loc></image:image>
     <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/glass-search.webp</image:loc></image:image>
     <image:image><image:loc>https://corentingautier.dev/macos-start-menu/img/classic-list.webp</image:loc></image:image>

@@ -8,16 +8,16 @@ enum AppCategory: Int, CaseIterable, Comparable {
 
     var title: String {
         switch self {
-        case .productivity: "Productivity"
-        case .internet: "Internet & Social"
-        case .creativity: "Creativity"
-        case .music: "Music"
-        case .games: "Games"
-        case .entertainment: "Entertainment"
-        case .information: "Information"
-        case .developer: "Developer Tools"
-        case .utilities: "Utilities"
-        case .other: "Other"
+        case .productivity: L("Productivity")
+        case .internet: L("Internet & Social")
+        case .creativity: L("Creativity")
+        case .music: L("Music")
+        case .games: L("Games")
+        case .entertainment: L("Entertainment")
+        case .information: L("Information")
+        case .developer: L("Developer Tools")
+        case .utilities: L("Utilities")
+        case .other: L("Other")
         }
     }
 

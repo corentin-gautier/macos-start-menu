@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>macOS Start Menu — 免费的 Mac 开始菜单，启动台替代工具</title>
+<meta name="description" content="免费的 Mac 开始菜单，像 Windows 一样好用，支持 macOS Tahoe。单按 ⌘ 键即可打开所有 App，搜索 App、文件夹和系统设置，还能锁定、关机。macOS Tahoe 启动台（Launchpad）的快速替代方案。">
+<link rel="canonical" href="https://corentingautier.dev/macos-start-menu/zh/">
+<link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/">
+<link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/">
+<link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/">
+<link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/">
+<link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/">
+<link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/">
+<link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/">
+<link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/">
+<link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/">
+<link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/">
+<link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/">
+<meta name="theme-color" content="#6a5cff">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="macOS Start Menu">
+<meta property="og:url" content="https://corentingautier.dev/macos-start-menu/zh/">
+<meta property="og:title" content="macOS Start Menu — 给你的 Mac 装上开始菜单">
+<meta property="og:description" content="单按 ⌘ 键：所有 App 和设置一目了然，没有杂乱文件。免费，支持 macOS Tahoe。">
+<meta property="og:image" content="https://corentingautier.dev/macos-start-menu/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="macOS Start Menu：按分类排列 App 的面板。">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="macOS Start Menu — 给你的 Mac 装上开始菜单">
+<meta name="twitter:description" content="单按 ⌘ 键：所有 App 和设置一目了然，没有杂乱文件。免费，支持 macOS Tahoe。">
+<meta name="twitter:image" content="https://corentingautier.dev/macos-start-menu/img/og.jpg">
+<link rel="icon" type="image/png" href="../img/icon.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<link rel="preload" as="image" href="../img/glass-categories.webp" fetchpriority="high">
+<script type="application/ld+json">
+[
+ {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "macOS Start Menu",
+  "alternateName": [
+   "Start Menu for Mac",
+   "Mac Start Menu"
+  ],
+  "description": "免费的 Windows 风格 Mac 开始菜单和 App 启动器：单按 ⌘ 键即可打开所有 App，搜索 App、文件夹和系统设置，并快速使用电源和会话控制。",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "macOS 26 or later",
+  "softwareVersion": "1.2",
+  "url": "https://corentingautier.dev/macos-start-menu/",
+  "downloadUrl": "https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip",
+  "image": "https://corentingautier.dev/macos-start-menu/img/icon.png",
+  "screenshot": [
+   "https://corentingautier.dev/macos-start-menu/img/glass-categories.webp",
+   "https://corentingautier.dev/macos-start-menu/img/glass-search.webp",
+   "https://corentingautier.dev/macos-start-menu/img/classic-list.webp"
+  ],
+  "offers": {
+   "@type": "Offer",
+   "price": "0",
+   "priceCurrency": "USD"
+  },
+  "featureList": [
+   "单按 Command 键即可打开",
+   "搜索 App、文件夹和系统设置",
+   "按字母（A–Z）、最近使用、最常用或分类排序",
+   "网格或列表视图",
+   "锁定屏幕、退出登录、睡眠、重新启动、关机",
+   "卸载 App 及其残留文件",
+   "液态玻璃和经典两种样式"
+  ]
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+   {
+    "@type": "Question",
+    "name": "Mac 怎么像 Windows 一样使用开始菜单？",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "安装 macOS Start Menu，在“隐私与安全性 › 辅助功能”中允许它，然后单独按一下 ⌘ Command 键。菜单栏下方会弹出 Windows 风格的开始菜单，包含所有 App、搜索栏和电源按钮。"
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "macOS Tahoe 没有启动台了，有什么替代工具？",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "macOS 26 Tahoe 用 App 视图取代了启动台（Launchpad）。macOS Start Menu 以网格或列表快速展示所有 App，以键盘操作为主，可按字母（A–Z）、最近使用、最常用或分类排序。"
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "为什么聚焦搜索（Spotlight）只想找 App 却总显示文件？",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "聚焦会隐藏你关闭的类别，但无法归类的文件（游戏资源、压缩包、缓存）仍会出现。Start Menu 直接读取 App 文件夹，因此只列出 App、系统设置面板和你的主要文件夹。"
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "单按 ⌘ 键会影响快捷键吗？",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "不会。只有在半秒内单独按下并松开 ⌘ 键时才会打开菜单。⌘C、⌘V 等所有快捷键照常使用。"
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "macOS Start Menu 免费吗？",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "是的，可免费下载，源代码公开在 GitHub 上。"
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "支持哪些 Mac？",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "搭载 Apple 芯片并运行 macOS 26 Tahoe 或更高版本的 Mac。"
+    }
+   }
+  ]
+ }
+]
+</script>
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: rgba(0, 0, 0, 0.08);
+    --accent: #0071e3;
+    --accent-text: #ffffff;
+    --key-bg: linear-gradient(#ffffff, #e9e9ee);
+    --key-border: rgba(0, 0, 0, 0.14);
+    --hero-a: #c9d8ff;
+    --hero-b: #f3d5ff;
+    --hero-c: #d6f2ff;
+    --shadow: 0 30px 80px rgba(20, 30, 60, 0.25), 0 6px 20px rgba(20, 30, 60, 0.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0b0d;
+      --surface: #161618;
+      --text: #f5f5f7;
+      --muted: #a1a1a6;
+      --line: rgba(255, 255, 255, 0.1);
+      --accent: #2997ff;
+      --key-bg: linear-gradient(#3a3a3e, #26262a);
+      --key-border: rgba(255, 255, 255, 0.16);
+      --hero-a: #1b2a55;
+      --hero-b: #3a1d4f;
+      --hero-c: #0f3a4a;
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0b0d; --surface: #161618; --text: #f5f5f7; --muted: #a1a1a6;
+    --line: rgba(255, 255, 255, 0.1); --accent: #2997ff;
+    --key-bg: linear-gradient(#3a3a3e, #26262a); --key-border: rgba(255, 255, 255, 0.16);
+    --hero-a: #1b2a55; --hero-b: #3a1d4f; --hero-c: #0f3a4a;
+    --shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 6px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  /* height: auto keeps the ratio when the width shrinks (width/height
+     attributes alone stretched the screenshots). */
+  img { max-width: 100%; height: auto; display: block; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 96px 0 0;
+    background:
+      radial-gradient(60% 50% at 15% 10%, var(--hero-a), transparent 70%),
+      radial-gradient(50% 45% at 85% 20%, var(--hero-b), transparent 70%),
+      radial-gradient(60% 50% at 50% 100%, var(--hero-c), transparent 70%),
+      var(--bg);
+    text-align: center;
+  }
+  .app-icon { width: 128px; margin: 0 auto 18px; }
+  h1 {
+    font: 700 clamp(44px, 8vw, 80px)/1.04 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -0.03em;
+    margin: 0 0 18px;
+  }
+  .tagline {
+    font-size: clamp(20px, 3vw, 26px);
+    line-height: 1.35;
+    color: var(--muted);
+    margin: 0 auto 32px;
+    max-width: 640px;
+  }
+  .tagline strong { color: var(--text); font-weight: 600; }
+  .key {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.7em;
+    height: 1.7em;
+    padding: 0 0.35em;
+    margin: 0 0.1em;
+    border-radius: 0.38em;
+    border: 1px solid var(--key-border);
+    background: var(--key-bg);
+    box-shadow: 0 2px 0 var(--key-border);
+    font-weight: 600;
+    color: var(--text);
+    vertical-align: 0.05em;
+    font-size: 0.85em;
+  }
+  .key.pulse { animation: tap 2.4s ease-in-out infinite; }
+  @keyframes tap {
+    0%, 70%, 100% { transform: translateY(0); box-shadow: 0 2px 0 var(--key-border); }
+    78% { transform: translateY(2px); box-shadow: 0 0 0 var(--key-border); }
+  }
+  @media (prefers-reduced-motion: reduce) { .key.pulse { animation: none; } }
+
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .button {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 24px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 17px;
+  }
+  .button.primary { background: var(--accent); color: var(--accent-text); }
+  .button.secondary { background: var(--surface); color: var(--text); border: 1px solid var(--line); }
+  .button:hover { text-decoration: none; filter: brightness(1.06); }
+  .note { color: var(--muted); font-size: 14px; margin: 0 0 56px; }
+
+  /* The hero shows the top of the panel, cut by the section edge. */
+  .shot-hero {
+    width: min(620px, 92%);
+    aspect-ratio: 1 / 0.8;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 22px 22px 0 0;
+    box-shadow: var(--shadow);
+  }
+  .shot-hero img { width: 100%; height: auto; }
+
+  /* Sections */
+  section { padding: 100px 0; border-top: 1px solid var(--line); }
+  h2 {
+    font: 700 clamp(32px, 5vw, 48px)/1.1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+  }
+  .lead { color: var(--muted); font-size: 21px; max-width: 680px; margin: 0 0 48px; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .feature {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 26px;
+  }
+  .feature .icon { font-size: 28px; line-height: 1; margin-bottom: 14px; }
+  .feature h3 { font-size: 19px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .feature p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .split.reverse > :first-child { order: 2; }
+  .shot { border-radius: 22px; box-shadow: var(--shadow); }
+  .bullets { list-style: none; padding: 0; margin: 0; }
+  .bullets li { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+  .bullets li strong { color: var(--text); font-weight: 600; }
+
+  .styles { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .styles figure { margin: 0; }
+  .styles figcaption { text-align: center; margin-top: 16px; font-weight: 600; }
+  .styles figcaption span { display: block; font-weight: 400; color: var(--muted); font-size: 15px; }
+
+  .steps { counter-reset: step; display: grid; gap: 16px; max-width: 760px; }
+  .step {
+    counter-increment: step;
+    display: grid; grid-template-columns: 44px 1fr; gap: 16px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px;
+  }
+  .step::before {
+    content: counter(step);
+    display: grid; place-items: center;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-text); font-weight: 700;
+  }
+  .step h3 { margin: 4px 0 4px; font-size: 18px; }
+  .step p { margin: 0; color: var(--muted); font-size: 15px; }
+  code, pre {
+    font: 14px/1.5 ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  code { background: var(--line); padding: 2px 6px; border-radius: 6px; color: var(--text); }
+  pre {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px; overflow-x: auto; margin: 16px 0 0;
+  }
+  pre code { background: none; padding: 0; }
+
+  .faq { max-width: 760px; }
+  .faq details { border-bottom: 1px solid var(--line); padding: 18px 0; }
+  .faq summary { cursor: pointer; font-weight: 600; font-size: 19px; list-style: none; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; float: right; color: var(--muted); font-weight: 400; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq p { color: var(--muted); margin: 10px 0 0; }
+  .shortcuts { width: 100%; max-width: 560px; border-collapse: collapse; }
+  .shortcuts td { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .shortcuts td:first-child { width: 45%; white-space: nowrap; }
+  .shortcuts td:last-child { color: var(--muted); }
+
+  footer { padding: 48px 0 64px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  .languages { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  @media (max-width: 860px) {
+    .features { grid-template-columns: 1fr 1fr; }
+    .split, .styles { grid-template-columns: 1fr; gap: 32px; }
+    .split.reverse > :first-child { order: 0; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 0 16px; }
+    .hero { padding-top: 64px; }
+    .features { grid-template-columns: 1fr; }
+    section { padding: 72px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <img class="app-icon" src="../img/icon.png" width="128" height="128" alt="macOS Start Menu App 图标">
+    <h1>macOS Start Menu</h1>
+    <p class="tagline">单独按一下 <span class="key pulse">⌘</span> 键。<strong>所有 App、所有设置</strong>——不再有聚焦搜索里那些乱七八糟的文件。</p>
+    <div class="actions">
+      <a class="button primary" href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip">下载 Mac 版</a>
+      <a class="button secondary" href="https://github.com/corentin-gautier/macos-start-menu">在 GitHub 上查看</a>
+    </div>
+    <p class="note">免费 · GitHub 开源 · macOS 26 Tahoe 或更高版本 · Apple 芯片</p>
+  </div>
+  <div class="shot-hero">
+    <img src="../img/glass-categories.webp" width="1200" height="1200" fetchpriority="high" alt="液态玻璃样式的 Start Menu 面板，App 按分类排列，底部是账户和电源按钮。">
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <h2>Mac 上的开始菜单，一键即达。</h2>
+      <p class="lead">macOS Start Menu（Mac 开始菜单）是一款免费的 App 启动器，把 Windows 的开始菜单带到 macOS。面板直接在菜单栏下方弹出，搜索栏已就绪：只有 App、文件夹和系统设置——绝不会出现聚焦搜索翻出来的文档、压缩包或缓存。macOS Tahoe 取消了启动台之后，这是打开任意 App 最快的方式。界面已完整支持简体中文。</p>
+      <div class="features">
+        <div class="feature"><div class="icon">⌘</div><h3>单按 Command</h3><p>单独按下并松开 ⌘ 键，就像 Windows 键一样。⌘C 等快捷键完全不受影响。</p></div>
+        <div class="feature"><div class="icon">⌕</div><h3>即时搜索</h3><p>边输入边为你的 App 排序，并推荐相关的系统设置面板，可用中文或英文名称查找。</p></div>
+        <div class="feature"><div class="icon">⇅</div><h3>随心排序</h3><p>按字母（A–Z）、最近使用、最常用或分类排序，以网格或列表显示。</p></div>
+        <div class="feature"><div class="icon">⏻</div><h3>电源控制触手可及</h3><p>锁定屏幕、退出登录、睡眠、重新启动和关机，还有 App Store、活动监视器和强制退出。</p></div>
+        <div class="feature"><div class="icon">🗑</div><h3>彻底卸载</h3><p>右键点按 App，即可将它连同残留的偏好设置和缓存一起移到废纸篓。</p></div>
+        <div class="feature"><div class="icon">◐</div><h3>隐藏干扰</h3><p>系统 App 无法删除，但你可以隐藏从来不用的那些。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split">
+      <div>
+        <h2>App 和设置，同屏呈现。</h2>
+        <p class="lead">输入几个字：匹配的 App 排在最前，然后是相关的系统设置面板。</p>
+        <ul class="bullets">
+          <li><strong>宽容匹配</strong>——词首、首字母缩写甚至拼写错误都能找到对应的 App。</li>
+          <li><strong>按名称找设置</strong>——输入“显示器”、“wifi”或“声音”即可打开对应面板，中英文名称均可。</li>
+          <li><strong>键盘优先</strong>——方向键移动，Return 键打开，Esc 键关闭。</li>
+        </ul>
+      </div>
+      <img class="shot" src="../img/glass-search.webp" width="1200" height="1200" loading="lazy" alt="搜索“dis”时显示 Discord 和磁盘工具，以及显示器、储存空间和启动磁盘设置。">
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>液态玻璃，或经典。</h2>
+      <p class="lead">采用 macOS Tahoe 原生的液态玻璃设计。更喜欢扁平风格？在排序菜单中切换样式即可。</p>
+      <div class="styles">
+        <figure>
+          <img class="shot" src="../img/glass-categories.webp" width="1200" height="1200" loading="lazy" alt="液态玻璃样式，带玻璃胶囊和成组按钮。">
+          <figcaption>液态玻璃<span>玻璃胶囊，成组控件</span></figcaption>
+        </figure>
+        <figure>
+          <img class="shot" src="../img/classic-list.webp" width="1200" height="1200" loading="lazy" alt="列表视图下的经典样式，每个 App 旁显示其分类。">
+          <figcaption>经典<span>扁平素雅，此处以列表显示</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>快捷键</h2>
+      <p class="lead">一切操作都能用键盘完成。</p>
+      <table class="shortcuts">
+        <tr><td>单按 <span class="key">⌘</span></td><td>打开或关闭菜单</td></tr>
+        <tr><td>直接输入</td><td>搜索 App 和设置</td></tr>
+        <tr><td><span class="key">←</span><span class="key">→</span><span class="key">↑</span><span class="key">↓</span></td><td>在结果中移动</td></tr>
+        <tr><td><span class="key">↩</span></td><td>打开所选项</td></tr>
+        <tr><td><span class="key">esc</span></td><td>关闭</td></tr>
+        <tr><td>菜单打开时按 <span class="key">⌘</span><span class="key">Q</span></td><td>退出 Start Menu</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <h2>常见问题</h2>
+      <div class="faq">
+        <details><summary>Mac 怎么像 Windows 一样使用开始菜单？</summary><p>安装 macOS Start Menu，在“隐私与安全性 › 辅助功能”中允许它，然后单独按一下 ⌘ Command 键。菜单栏下方会弹出 Windows 风格的开始菜单，包含所有 App、搜索栏和电源按钮。</p></details>
+        <details><summary>macOS Tahoe 没有启动台了，有什么替代工具？</summary><p>macOS 26 Tahoe 用 App 视图取代了启动台（Launchpad）。macOS Start Menu 以网格或列表快速展示所有 App，以键盘操作为主，可按字母（A–Z）、最近使用、最常用或分类排序。</p></details>
+        <details><summary>为什么聚焦搜索（Spotlight）只想找 App 却总显示文件？</summary><p>聚焦会隐藏你关闭的类别，但无法归类的文件（游戏资源、压缩包、缓存）仍会出现。Start Menu 直接读取 App 文件夹，因此只列出 App、系统设置面板和你的主要文件夹。</p></details>
+        <details><summary>单按 ⌘ 键会影响快捷键吗？</summary><p>不会。只有在半秒内单独按下并松开 ⌘ 键时才会打开菜单。⌘C、⌘V 等所有快捷键照常使用。</p></details>
+        <details><summary>macOS Start Menu 免费吗？</summary><p>是的，可免费下载，源代码公开在 GitHub 上。</p></details>
+        <details><summary>支持哪些 Mac？</summary><p>搭载 Apple 芯片并运行 macOS 26 Tahoe 或更高版本的 Mac。</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="wrap">
+      <h2>安装 macOS Start Menu</h2>
+      <p class="lead">Start Menu 未经 Apple 公证，因此首次打开时 macOS 会要求你确认。</p>
+      <div class="steps">
+        <div class="step"><div><h3>下载并解压</h3><p>下载 <a href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip">Start-Menu.zip</a>，然后将 <code>Start Menu.app</code> 移到“应用程序”文件夹。</p></div></div>
+        <div class="step"><div><h3>允许首次打开</h3><p>打开 App。macOS 阻止它时，前往“系统设置 › 隐私与安全性”，点按<em>仍要打开</em>。</p></div></div>
+        <div class="step"><div><h3>授予辅助功能权限</h3><p>在“隐私与安全性 › 辅助功能”中打开 <em>Start Menu</em>。这样它才能在任何地方识别 ⌘ 键。</p></div></div>
+        <div class="step"><div><h3>登录时打开</h3><p>在“系统设置 › 通用 › 登录项”中添加 Start Menu，让它随时一键可用。</p></div></div>
+      </div>
+      <p style="margin-top: 32px; color: var(--muted);">也可以从源代码构建（需要 Xcode 或命令行工具）：</p>
+      <pre><code>git clone https://github.com/corentin-gautier/macos-start-menu.git
+cd macos-start-menu
+scripts/setup-signing.sh   # 仅需一次：创建本地签名证书
+scripts/install.sh         # 构建、安装并设为登录时启动</code></pre>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>macOS Start Menu——独立开发项目，与 Apple 无关。</span>
+    <a href="https://github.com/corentin-gautier/macos-start-menu">GitHub 上的源代码</a>
+  </div>
+  <nav class="wrap languages" aria-label="Languages">
+      <a href="https://corentingautier.dev/macos-start-menu/" hreflang="en" lang="en">English</a>
+      <a href="https://corentingautier.dev/macos-start-menu/zh/" hreflang="zh-Hans" lang="zh-Hans">简体中文</a>
+      <a href="https://corentingautier.dev/macos-start-menu/hi/" hreflang="hi" lang="hi">हिन्दी</a>
+      <a href="https://corentingautier.dev/macos-start-menu/es/" hreflang="es" lang="es">Español</a>
+      <a href="https://corentingautier.dev/macos-start-menu/ar/" hreflang="ar" lang="ar">العربية</a>
+      <a href="https://corentingautier.dev/macos-start-menu/fr/" hreflang="fr" lang="fr">Français</a>
+      <a href="https://corentingautier.dev/macos-start-menu/bn/" hreflang="bn" lang="bn">বাংলা</a>
+      <a href="https://corentingautier.dev/macos-start-menu/pt/" hreflang="pt" lang="pt">Português</a>
+      <a href="https://corentingautier.dev/macos-start-menu/ru/" hreflang="ru" lang="ru">Русский</a>
+      <a href="https://corentingautier.dev/macos-start-menu/ja/" hreflang="ja" lang="ja">日本語</a>
+  </nav>
+</footer>
+
+</body>
+</html>

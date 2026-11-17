@@ -13,12 +13,13 @@ struct SettingEntry: Identifiable, Hashable {
 
     init(_ id: String, _ name: String, _ symbol: String, _ color: Color, _ keywords: [String] = []) {
         self.id = id
-        self.name = name
+        let official = SystemPaneNames.names(for: id)
+        self.name = official?.localized ?? L(name)
         self.symbol = symbol
         self.color = color
-        self.keywords = keywords
-        self.key = SearchKey(name)
-        self.keywordKeys = keywords.map(SearchKey.init)
+        self.keywords = keywords + [name] + [official?.english].compactMap { $0 }
+        self.key = SearchKey(self.name)
+        self.keywordKeys = self.keywords.map(SearchKey.init)
     }
 
     /// Name matches rank above keyword matches; keywords never match fuzzily.
@@ -26,6 +27,46 @@ struct SettingEntry: Identifiable, Hashable {
         let nameScore = Search.score(query, key)
         let keywordScore = keywordKeys.compactMap { Search.score(query, $0, fuzzy: false) }.max().map { $0 - 150 }
         return [nameScore, keywordScore].compactMap { $0 }.max()
+    }
+}
+
+/// Official pane names read from the System Settings extensions themselves
+/// (their InfoPlist.loctable holds every macOS language), so names match what
+/// System Settings shows, including Tahoe's renames ("Menu Bar", "AirDrop &
+/// Continuity"). Falls back to Localizable.strings for languages macOS lacks.
+enum SystemPaneNames {
+    private static let extensions: [String: URL] = {
+        let folder = URL(fileURLWithPath: "/System/Library/ExtensionKit/Extensions")
+        var result: [String: URL] = [:]
+        for url in (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
+        where url.pathExtension == "appex" {
+            if let id = Bundle(url: url)?.bundleIdentifier { result[id] = url }
+        }
+        return result
+    }()
+
+    /// `localized` is nil when macOS has no translation in the app's language.
+    static func names(for id: String) -> (localized: String?, english: String?)? {
+        guard let url = extensions[id],
+              let data = try? Data(contentsOf: url.appendingPathComponent("Contents/Resources/InfoPlist.loctable")),
+              let table = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+        else { return nil }
+        let languages = Array(table.keys.filter { $0 != "LocProvenance" })
+        func name(_ language: String) -> String? {
+            (table[language] as? [String: Any])?["CFBundleDisplayName"] as? String
+        }
+        let appLanguage = Bundle.main.preferredLocalizations.first ?? "en"
+        var localized: String?
+        if let match = Bundle.preferredLocalizations(from: languages, forPreferences: [appLanguage]).first,
+           base(match) == base(appLanguage) {
+            localized = name(match)
+        }
+        return (localized, name("en"))
+    }
+
+    /// "zh_CN" and "zh-Hans" both give "zh".
+    private static func base(_ language: String) -> String {
+        String(language.split(whereSeparator: { $0 == "_" || $0 == "-" }).first ?? "")
     }
 }
 

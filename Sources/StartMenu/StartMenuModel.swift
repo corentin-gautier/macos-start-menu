@@ -33,10 +33,10 @@ enum SortMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .alphabetical: "A–Z"
-        case .recent: "Recent"
-        case .mostUsed: "Most used"
-        case .categories: "Categories"
+        case .alphabetical: L("A–Z")
+        case .recent: L("Recent")
+        case .mostUsed: L("Most used")
+        case .categories: L("Categories")
         }
     }
 
@@ -54,7 +54,7 @@ enum UIStyle: String, CaseIterable, Identifiable {
     case glass, classic
 
     var id: String { rawValue }
-    var title: String { self == .glass ? "Liquid Glass" : "Classic" }
+    var title: String { self == .glass ? L("Liquid Glass") : L("Classic") }
     var symbol: String { self == .glass ? "drop" : "square" }
 }
 
@@ -62,7 +62,7 @@ enum AppLayout: String, CaseIterable, Identifiable {
     case grid, list
 
     var id: String { rawValue }
-    var title: String { self == .grid ? "Grid" : "List" }
+    var title: String { self == .grid ? L("Grid") : L("List") }
     var symbol: String { self == .grid ? "square.grid.3x3" : "list.bullet" }
 }
 
@@ -97,6 +97,10 @@ final class StartMenuModel: ObservableObject {
     private var hoverFrames: [String: CGRect] = [:]
     private var mouseLocation: CGPoint?
     @Published private(set) var pendingUninstall: UninstallRequest?
+    /// Apps listed by the in-panel Force Quit window, nil when it is closed.
+    /// (A synthesized ⌥⌘⎋ doesn't open the system one: it is a protected hotkey.)
+    @Published private(set) var forceQuitApps: [NSRunningApplication]?
+    @Published private(set) var forceQuitSelection = 0
 
     let userName = UserProfile.fullName
     var dismiss: () -> Void = {}
@@ -138,10 +142,12 @@ final class StartMenuModel: ObservableObject {
         tooltipTask?.cancel()
         tooltip = nil
         pendingUninstall = nil
+        forceQuitApps = nil
         showsHidden = false
         updateResults() // usage may have changed since last time
         // Screenshots: `STARTMENU_DEMO_QUERY` opens the menu with a search.
         if let demoQuery = ProcessInfo.processInfo.environment["STARTMENU_DEMO_QUERY"] { query = demoQuery }
+        if ProcessInfo.processInfo.environment["STARTMENU_DEMO_FORCEQUIT"] == "1" { showForceQuit() }
         showToken = UUID()
         // Pick up apps installed or removed since last time.
         DispatchQueue.global(qos: .userInitiated).async {
@@ -170,9 +176,9 @@ final class StartMenuModel: ObservableObject {
             let matchedSettings = Self.ranked(SettingsCatalog.all, name: \.name) { $0.score(q) }
                 .prefix(maxSettingResults)
             groups = [
-                ("Apps", layout == .grid, matchedApps.map(StartResult.app)),
-                ("Folders", false, matchedFolders.map(StartResult.folder)),
-                ("Settings", false, matchedSettings.map(StartResult.setting)),
+                (L("Apps"), layout == .grid, matchedApps.map(StartResult.app)),
+                (L("Folders"), false, matchedFolders.map(StartResult.folder)),
+                (L("Settings"), false, matchedSettings.map(StartResult.setting)),
             ]
             showsSelection = true
         }
@@ -204,23 +210,23 @@ final class StartMenuModel: ObservableObject {
         let usage = UsageStore.shared
         switch sortMode {
         case .alphabetical:
-            return [("All apps", apps)]
+            return [(L("All apps"), apps)]
 
         case .mostUsed:
             let sorted = apps.sorted {
                 let (a, b) = (usage.useCount($0), usage.useCount($1))
                 return a != b ? a > b : $0.name.localizedStandardCompare($1.name) == .orderedAscending
             }
-            return [("Most used", sorted)]
+            return [(L("Most used"), sorted)]
 
         case .recent:
             let calendar = Calendar.current
             let now = Date()
             let buckets: [(String, (Date) -> Bool)] = [
-                ("Today", { calendar.isDateInToday($0) }),
-                ("This week", { now.timeIntervalSince($0) < 7 * 86_400 }),
-                ("This month", { now.timeIntervalSince($0) < 31 * 86_400 }),
-                ("Earlier", { _ in true }),
+                (L("Today"), { calendar.isDateInToday($0) }),
+                (L("This week"), { now.timeIntervalSince($0) < 7 * 86_400 }),
+                (L("This month"), { now.timeIntervalSince($0) < 31 * 86_400 }),
+                (L("Earlier"), { _ in true }),
             ]
             let dated = apps.compactMap { app in usage.lastUsed(app).map { (app, $0) } }
                 .sorted { $0.1 > $1.1 }
@@ -230,7 +236,7 @@ final class StartMenuModel: ObservableObject {
                 groups[bucket].1.append(app)
             }
             let undated = apps.filter { usage.lastUsed($0) == nil }
-            return groups + [("Not opened recently", undated)]
+            return groups + [(L("Not opened recently"), undated)]
 
         case .categories:
             let grouped = Dictionary(grouping: apps, by: \.category)
@@ -292,8 +298,8 @@ final class StartMenuModel: ObservableObject {
 
     private func tooltipText(for id: String?) -> (text: String, shortcut: String?)? {
         guard let id else { return nil }
-        if id == HoverSpace.userID { return ("Users & Groups", nil) }
-        if id == HoverSpace.sortID { return ("Sort, hidden apps and style", nil) }
+        if id == HoverSpace.userID { return (L("Users & Groups"), nil) }
+        if id == HoverSpace.sortID { return (L("Sort, hidden apps and style"), nil) }
         return SystemAction.allCases.first { HoverSpace.actionID($0) == id }.map { ($0.title, $0.shortcut) }
     }
 
@@ -329,7 +335,7 @@ final class StartMenuModel: ObservableObject {
 
     private func refreshHover() {
         var hit: String?
-        if let point = mouseLocation, pendingUninstall == nil {
+        if let point = mouseLocation, pendingUninstall == nil, forceQuitApps == nil {
             let under = hoverFrames.filter { $0.value.contains(point) }.map(\.key)
             let overBar = under.contains { $0.hasPrefix("block:") }
             hit = under.first { !$0.hasPrefix("block:") && !(overBar && $0.hasPrefix("result:")) }
@@ -383,6 +389,10 @@ final class StartMenuModel: ObservableObject {
     }
 
     func perform(_ action: SystemAction) {
+        if action == .forceQuit {
+            showForceQuit()
+            return
+        }
         dismiss()
         // Let the panel disappear before keyboard-driven actions fire.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { action.perform() }
@@ -405,6 +415,48 @@ final class StartMenuModel: ObservableObject {
         guard AppUninstaller.perform(request) else { return }
         apps = AppCatalog.scan()
         updateResults()
+    }
+
+    // MARK: - Force Quit
+
+    func showForceQuit() {
+        forceQuitSelection = 0
+        reloadForceQuitApps()
+        refreshHover()
+    }
+
+    /// Regular apps (with a Dock icon), like the system Force Quit window.
+    private func reloadForceQuitApps() {
+        let ownPID = ProcessInfo.processInfo.processIdentifier
+        let apps = NSWorkspace.shared.runningApplications
+            .filter { $0.activationPolicy == .regular && $0.processIdentifier != ownPID && !$0.isTerminated }
+            .sorted { ($0.localizedName ?? "").localizedStandardCompare($1.localizedName ?? "") == .orderedAscending }
+        forceQuitApps = apps
+        forceQuitSelection = min(forceQuitSelection, max(apps.count - 1, 0))
+    }
+
+    func moveForceQuitSelection(by offset: Int) {
+        guard let apps = forceQuitApps, !apps.isEmpty else { return }
+        forceQuitSelection = min(max(forceQuitSelection + offset, 0), apps.count - 1)
+    }
+
+    func selectForceQuit(_ index: Int) {
+        forceQuitSelection = index
+    }
+
+    func forceQuitSelected() {
+        guard let apps = forceQuitApps, apps.indices.contains(forceQuitSelection) else { return }
+        apps[forceQuitSelection].forceTerminate()
+        // The list stays open, like the system window; the app leaves it once gone.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            guard self?.forceQuitApps != nil else { return }
+            self?.reloadForceQuitApps()
+        }
+    }
+
+    func closeForceQuit() {
+        forceQuitApps = nil
+        refreshHover()
     }
 
     func openUserSettings() {

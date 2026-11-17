@@ -50,6 +50,11 @@ Support, containers, saved state, logs, launch agents…) go to the Trash, so
 everything can still be put back. System apps can't be uninstalled; files in
 the system-wide `/Library` are left alone.
 
+**Languages:** the app and the website are available in English, 简体中文,
+हिन्दी, Español, العربية, Français, বাংলা, Português, Русский and 日本語. The app
+follows the Mac's language; System Settings pane names are read from macOS
+itself so they match what System Settings shows.
+
 ## Install
 
 ### Download

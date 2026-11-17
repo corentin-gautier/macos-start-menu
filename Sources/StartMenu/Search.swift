@@ -16,6 +16,7 @@ struct SearchKey: Hashable {
 enum Search {
     static func normalize(_ text: String) -> String {
         text.folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
+            .replacingOccurrences(of: "\u{2011}", with: "-") // Apple's non-breaking hyphen (Wi‑Fi)
     }
 
     /// Splits on separators and camelCase boundaries ("TextEdit" -> "Text", "Edit").

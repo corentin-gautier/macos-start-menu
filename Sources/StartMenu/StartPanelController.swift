@@ -151,6 +151,18 @@ final class StartPanelController: NSObject, NSWindowDelegate {
             let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
 
             // Uninstall confirmation: Escape and Return (the default) cancel.
+            // Force Quit window: arrows choose, Return force quits, Escape closes.
+            if self.model.forceQuitApps != nil {
+                switch event.keyCode {
+                case 53: self.model.closeForceQuit()
+                case 36, 76: self.model.forceQuitSelected()
+                case 125: self.model.moveForceQuitSelection(by: 1)
+                case 126: self.model.moveForceQuitSelection(by: -1)
+                default: return modifiers.contains(.command) ? event : nil
+                }
+                return nil
+            }
+
             if self.model.pendingUninstall != nil {
                 if [53, 36, 76].contains(event.keyCode) {
                     self.model.cancelUninstall()

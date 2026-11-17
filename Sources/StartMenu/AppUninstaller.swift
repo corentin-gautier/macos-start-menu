@@ -28,12 +28,12 @@ enum AppUninstaller {
         quitIfRunning(app)
 
         guard trash(app.url) else {
-            showError("“\(app.name)” couldn’t be moved to the Trash.")
+            showError(L("“%@” couldn’t be moved to the Trash.", app.name))
             return false
         }
         let failed = request.leftovers.filter { !trash($0) }
         if !failed.isEmpty {
-            showError("Some of “\(app.name)”’s files couldn’t be removed:\n"
+            showError(L("Some of “%@”’s files couldn’t be removed:", app.name) + "\n"
                 + failed.map { abbreviate($0) }.joined(separator: "\n"))
         }
         return true

@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>macOS Start Menu — Mac-এর জন্য ফ্রি স্টার্ট মেনু ও Launchpad-এর বিকল্প</title>
+<meta name="description" content="macOS Tahoe-এর জন্য Windows-এর মতো একটি ফ্রি স্টার্ট মেনু। ⌘ চাপলেই সব অ্যাপ খুলে যায়; অ্যাপ, ফোল্ডার ও সিস্টেম সেটিংস খুঁজুন, Mac লক বা শাট ডাউন করুন। Launchpad-এর দ্রুত বিকল্প।">
+<link rel="canonical" href="https://corentingautier.dev/macos-start-menu/bn/">
+<link rel="alternate" hreflang="en" href="https://corentingautier.dev/macos-start-menu/">
+<link rel="alternate" hreflang="zh-Hans" href="https://corentingautier.dev/macos-start-menu/zh/">
+<link rel="alternate" hreflang="hi" href="https://corentingautier.dev/macos-start-menu/hi/">
+<link rel="alternate" hreflang="es" href="https://corentingautier.dev/macos-start-menu/es/">
+<link rel="alternate" hreflang="ar" href="https://corentingautier.dev/macos-start-menu/ar/">
+<link rel="alternate" hreflang="fr" href="https://corentingautier.dev/macos-start-menu/fr/">
+<link rel="alternate" hreflang="bn" href="https://corentingautier.dev/macos-start-menu/bn/">
+<link rel="alternate" hreflang="pt" href="https://corentingautier.dev/macos-start-menu/pt/">
+<link rel="alternate" hreflang="ru" href="https://corentingautier.dev/macos-start-menu/ru/">
+<link rel="alternate" hreflang="ja" href="https://corentingautier.dev/macos-start-menu/ja/">
+<link rel="alternate" hreflang="x-default" href="https://corentingautier.dev/macos-start-menu/">
+<meta name="theme-color" content="#6a5cff">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="bn_BD">
+<meta property="og:site_name" content="macOS Start Menu">
+<meta property="og:url" content="https://corentingautier.dev/macos-start-menu/bn/">
+<meta property="og:title" content="macOS Start Menu — আপনার Mac-এর জন্য স্টার্ট মেনু">
+<meta property="og:description" content="শুধু ⌘ চাপুন: সব অ্যাপ ও সেটিংস, ফাইলের ভিড় ছাড়াই। macOS Tahoe-এর জন্য ফ্রি।">
+<meta property="og:image" content="https://corentingautier.dev/macos-start-menu/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="macOS Start Menu: বিভাগ অনুযায়ী সাজানো অ্যাপসহ প্যানেল।">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="macOS Start Menu — আপনার Mac-এর জন্য স্টার্ট মেনু">
+<meta name="twitter:description" content="শুধু ⌘ চাপুন: সব অ্যাপ ও সেটিংস, ফাইলের ভিড় ছাড়াই। macOS Tahoe-এর জন্য ফ্রি।">
+<meta name="twitter:image" content="https://corentingautier.dev/macos-start-menu/img/og.jpg">
+<link rel="icon" type="image/png" href="../img/icon.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<link rel="preload" as="image" href="../img/glass-categories.webp" fetchpriority="high">
+<script type="application/ld+json">
+[
+ {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "macOS Start Menu",
+  "alternateName": [
+   "Start Menu for Mac",
+   "Mac Start Menu"
+  ],
+  "description": "macOS-এর জন্য Windows-এর মতো একটি ফ্রি স্টার্ট মেনু ও অ্যাপ লঞ্চার: শুধু ⌘ চাপলেই সব অ্যাপ খুলে যায়; অ্যাপ, ফোল্ডার ও সিস্টেম সেটিংস খুঁজুন, আর পাওয়ার ও সেশন কন্ট্রোল হাতের কাছে পান।",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "macOS 26 or later",
+  "softwareVersion": "1.2",
+  "url": "https://corentingautier.dev/macos-start-menu/",
+  "downloadUrl": "https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip",
+  "image": "https://corentingautier.dev/macos-start-menu/img/icon.png",
+  "screenshot": [
+   "https://corentingautier.dev/macos-start-menu/img/glass-categories.webp",
+   "https://corentingautier.dev/macos-start-menu/img/glass-search.webp",
+   "https://corentingautier.dev/macos-start-menu/img/classic-list.webp"
+  ],
+  "offers": {
+   "@type": "Offer",
+   "price": "0",
+   "priceCurrency": "USD"
+  },
+  "featureList": [
+   "শুধু Command কী চাপলেই খোলে",
+   "অ্যাপ, ফোল্ডার ও সিস্টেম সেটিংস খোঁজা",
+   "A–Z, সাম্প্রতিক, সর্বাধিক ব্যবহৃত বা বিভাগ অনুযায়ী সাজানো",
+   "গ্রিড বা তালিকা ভিউ",
+   "লক, লগ আউট, স্লিপ, রিস্টার্ট, শাট ডাউন",
+   "অ্যাপ ও তার রেখে যাওয়া ফাইলসহ আনইনস্টল",
+   "Liquid Glass ও ক্লাসিক স্টাইল"
+  ]
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+   {
+    "@type": "Question",
+    "name": "Mac-এ কীভাবে স্টার্ট মেনু পাবো?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "macOS Start Menu ইনস্টল করুন, Privacy & Security › Accessibility-তে অনুমতি দিন, তারপর শুধু ⌘ Command কী চাপুন। মেনু বারের ঠিক নিচে Windows-এর মতো একটি স্টার্ট মেনু খুলবে — সব অ্যাপ, একটি সার্চ ফিল্ড আর পাওয়ার বোতামসহ।"
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "এটা কি macOS Tahoe-তে Launchpad-এর বিকল্প?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "হ্যাঁ। macOS 26 Tahoe-তে Launchpad-এর জায়গায় এসেছে Apps ভিউ। macOS Start Menu আপনাকে দেয় কীবোর্ড দিয়ে চালানো যায় এমন দ্রুত গ্রিড বা তালিকা, যেখানে সব অ্যাপ A–Z, সাম্প্রতিক ব্যবহার, সর্বাধিক ব্যবহৃত বা বিভাগ অনুযায়ী সাজানো।"
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "শুধু অ্যাপ খুঁজলেও Spotlight কেন ফাইল দেখায়?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "যে বিভাগগুলো আপনি বন্ধ করেন Spotlight সেগুলো লুকায়, কিন্তু যেসব ফাইল সে শ্রেণিবদ্ধ করতে পারে না (গেমের ফাইল, আর্কাইভ, ক্যাশ) সেগুলো তবুও দেখায়। Start Menu সরাসরি আপনার অ্যাপ ফোল্ডার পড়ে, তাই এটি শুধু অ্যাপ, সিস্টেম সেটিংসের প্যানেল আর আপনার প্রধান ফোল্ডারগুলো দেখায়।"
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "⌘ চাপলে কি কীবোর্ড শর্টকাট নষ্ট হয়?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "না। শুধু ⌘ একা চেপে আধা সেকেন্ডের মধ্যে ছেড়ে দিলেই মেনু খোলে। ⌘C, ⌘V এবং অন্য সব শর্টকাট আগের মতোই কাজ করে।"
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "macOS Start Menu কি ফ্রি?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "হ্যাঁ, এটি বিনামূল্যে ডাউনলোড করা যায়। সোর্স কোড GitHub-এ আছে।"
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "কোন কোন Mac সমর্থিত?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Apple silicon চিপযুক্ত Mac, যাতে macOS 26 Tahoe বা তার পরের সংস্করণ চলে।"
+    }
+   }
+  ]
+ }
+]
+</script>
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: rgba(0, 0, 0, 0.08);
+    --accent: #0071e3;
+    --accent-text: #ffffff;
+    --key-bg: linear-gradient(#ffffff, #e9e9ee);
+    --key-border: rgba(0, 0, 0, 0.14);
+    --hero-a: #c9d8ff;
+    --hero-b: #f3d5ff;
+    --hero-c: #d6f2ff;
+    --shadow: 0 30px 80px rgba(20, 30, 60, 0.25), 0 6px 20px rgba(20, 30, 60, 0.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0b0d;
+      --surface: #161618;
+      --text: #f5f5f7;
+      --muted: #a1a1a6;
+      --line: rgba(255, 255, 255, 0.1);
+      --accent: #2997ff;
+      --key-bg: linear-gradient(#3a3a3e, #26262a);
+      --key-border: rgba(255, 255, 255, 0.16);
+      --hero-a: #1b2a55;
+      --hero-b: #3a1d4f;
+      --hero-c: #0f3a4a;
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0b0d; --surface: #161618; --text: #f5f5f7; --muted: #a1a1a6;
+    --line: rgba(255, 255, 255, 0.1); --accent: #2997ff;
+    --key-bg: linear-gradient(#3a3a3e, #26262a); --key-border: rgba(255, 255, 255, 0.16);
+    --hero-a: #1b2a55; --hero-b: #3a1d4f; --hero-c: #0f3a4a;
+    --shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 6px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  /* height: auto keeps the ratio when the width shrinks (width/height
+     attributes alone stretched the screenshots). */
+  img { max-width: 100%; height: auto; display: block; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 96px 0 0;
+    background:
+      radial-gradient(60% 50% at 15% 10%, var(--hero-a), transparent 70%),
+      radial-gradient(50% 45% at 85% 20%, var(--hero-b), transparent 70%),
+      radial-gradient(60% 50% at 50% 100%, var(--hero-c), transparent 70%),
+      var(--bg);
+    text-align: center;
+  }
+  .app-icon { width: 128px; margin: 0 auto 18px; }
+  h1 {
+    font: 700 clamp(44px, 8vw, 80px)/1.04 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -0.03em;
+    margin: 0 0 18px;
+  }
+  .tagline {
+    font-size: clamp(20px, 3vw, 26px);
+    line-height: 1.35;
+    color: var(--muted);
+    margin: 0 auto 32px;
+    max-width: 640px;
+  }
+  .tagline strong { color: var(--text); font-weight: 600; }
+  .key {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.7em;
+    height: 1.7em;
+    padding: 0 0.35em;
+    margin: 0 0.1em;
+    border-radius: 0.38em;
+    border: 1px solid var(--key-border);
+    background: var(--key-bg);
+    box-shadow: 0 2px 0 var(--key-border);
+    font-weight: 600;
+    color: var(--text);
+    vertical-align: 0.05em;
+    font-size: 0.85em;
+  }
+  .key.pulse { animation: tap 2.4s ease-in-out infinite; }
+  @keyframes tap {
+    0%, 70%, 100% { transform: translateY(0); box-shadow: 0 2px 0 var(--key-border); }
+    78% { transform: translateY(2px); box-shadow: 0 0 0 var(--key-border); }
+  }
+  @media (prefers-reduced-motion: reduce) { .key.pulse { animation: none; } }
+
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .button {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 24px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 17px;
+  }
+  .button.primary { background: var(--accent); color: var(--accent-text); }
+  .button.secondary { background: var(--surface); color: var(--text); border: 1px solid var(--line); }
+  .button:hover { text-decoration: none; filter: brightness(1.06); }
+  .note { color: var(--muted); font-size: 14px; margin: 0 0 56px; }
+
+  /* The hero shows the top of the panel, cut by the section edge. */
+  .shot-hero {
+    width: min(620px, 92%);
+    aspect-ratio: 1 / 0.8;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 22px 22px 0 0;
+    box-shadow: var(--shadow);
+  }
+  .shot-hero img { width: 100%; height: auto; }
+
+  /* Sections */
+  section { padding: 100px 0; border-top: 1px solid var(--line); }
+  h2 {
+    font: 700 clamp(32px, 5vw, 48px)/1.1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+  }
+  .lead { color: var(--muted); font-size: 21px; max-width: 680px; margin: 0 0 48px; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .feature {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 26px;
+  }
+  .feature .icon { font-size: 28px; line-height: 1; margin-bottom: 14px; }
+  .feature h3 { font-size: 19px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .feature p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .split.reverse > :first-child { order: 2; }
+  .shot { border-radius: 22px; box-shadow: var(--shadow); }
+  .bullets { list-style: none; padding: 0; margin: 0; }
+  .bullets li { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+  .bullets li strong { color: var(--text); font-weight: 600; }
+
+  .styles { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .styles figure { margin: 0; }
+  .styles figcaption { text-align: center; margin-top: 16px; font-weight: 600; }
+  .styles figcaption span { display: block; font-weight: 400; color: var(--muted); font-size: 15px; }
+
+  .steps { counter-reset: step; display: grid; gap: 16px; max-width: 760px; }
+  .step {
+    counter-increment: step;
+    display: grid; grid-template-columns: 44px 1fr; gap: 16px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px;
+  }
+  .step::before {
+    content: counter(step);
+    display: grid; place-items: center;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-text); font-weight: 700;
+  }
+  .step h3 { margin: 4px 0 4px; font-size: 18px; }
+  .step p { margin: 0; color: var(--muted); font-size: 15px; }
+  code, pre {
+    font: 14px/1.5 ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  code { background: var(--line); padding: 2px 6px; border-radius: 6px; color: var(--text); }
+  pre {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px; overflow-x: auto; margin: 16px 0 0;
+  }
+  pre code { background: none; padding: 0; }
+
+  .faq { max-width: 760px; }
+  .faq details { border-bottom: 1px solid var(--line); padding: 18px 0; }
+  .faq summary { cursor: pointer; font-weight: 600; font-size: 19px; list-style: none; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; float: right; color: var(--muted); font-weight: 400; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq p { color: var(--muted); margin: 10px 0 0; }
+  .shortcuts { width: 100%; max-width: 560px; border-collapse: collapse; }
+  .shortcuts td { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .shortcuts td:first-child { width: 45%; white-space: nowrap; }
+  .shortcuts td:last-child { color: var(--muted); }
+
+  footer { padding: 48px 0 64px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  .languages { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  @media (max-width: 860px) {
+    .features { grid-template-columns: 1fr 1fr; }
+    .split, .styles { grid-template-columns: 1fr; gap: 32px; }
+    .split.reverse > :first-child { order: 0; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 0 16px; }
+    .hero { padding-top: 64px; }
+    .features { grid-template-columns: 1fr; }
+    section { padding: 72px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <img class="app-icon" src="../img/icon.png" width="128" height="128" alt="macOS Start Menu অ্যাপের আইকন">
+    <h1>macOS Start Menu</h1>
+    <p class="tagline">শুধু <span class="key pulse">⌘</span> চাপুন। <strong>সব অ্যাপ, সব সেটিং</strong> — Spotlight বারবার যেসব ফাইল দেখায়, সেগুলো ছাড়াই।</p>
+    <div class="actions">
+      <a class="button primary" href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip">Mac-এর জন্য ডাউনলোড</a>
+      <a class="button secondary" href="https://github.com/corentin-gautier/macos-start-menu">GitHub-এ দেখুন</a>
+    </div>
+    <p class="note">ফ্রি · সোর্স GitHub-এ · macOS 26 Tahoe বা পরের সংস্করণ · Apple silicon</p>
+  </div>
+  <div class="shot-hero">
+    <img src="../img/glass-categories.webp" width="1200" height="1200" fetchpriority="high" alt="Liquid Glass স্টাইলে Start Menu প্যানেল: বিভাগ অনুযায়ী সাজানো অ্যাপ, নিচে অ্যাকাউন্ট ও পাওয়ার বোতাম।">
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <h2>আপনার Mac-এর স্টার্ট মেনু, মাত্র এক কী দূরে।</h2>
+      <p class="lead">macOS Start Menu (ম্যাকের স্টার্ট মেনু) একটি ফ্রি অ্যাপ লঞ্চার, যা Windows-এর স্টার্ট মেনু নিয়ে আসে macOS-এ। মেনু বারের ঠিক নিচে একটি প্যানেল খোলে, সার্চ ফিল্ড আগে থেকেই প্রস্তুত: অ্যাপ, ফোল্ডার ও সিস্টেম সেটিংস — Spotlight যেসব ডকুমেন্ট, আর্কাইভ বা ক্যাশ খুঁড়ে আনে, সেগুলো কখনো নয়। macOS Tahoe-তে Launchpad না থাকায়, যেকোনো অ্যাপে পৌঁছানোর এটাই সবচেয়ে দ্রুত উপায়।</p>
+      <div class="features">
+        <div class="feature"><div class="icon">⌘</div><h3>Command চাপুন</h3><p>Windows কী-এর মতো শুধু ⌘ চেপে ছেড়ে দিন। ⌘C-এর মতো শর্টকাটে কোনো প্রভাব পড়ে না।</p></div>
+        <div class="feature"><div class="icon">⌕</div><h3>তাৎক্ষণিক সার্চ</h3><p>টাইপ করলেই অ্যাপগুলো সাজিয়ে দেখায় এবং মিলে যাওয়া সিস্টেম সেটিংস প্যানেল সাজেস্ট করে — বাংলা বা ইংরেজি নামে।</p></div>
+        <div class="feature"><div class="icon">⇅</div><h3>নিজের মতো সাজান</h3><p>A–Z, সম্প্রতি ব্যবহৃত, সর্বাধিক ব্যবহৃত বা বিভাগ অনুযায়ী — গ্রিডে বা তালিকায়।</p></div>
+        <div class="feature"><div class="icon">⏻</div><h3>পাওয়ার হাতের কাছে</h3><p>লক, লগ আউট, স্লিপ, রিস্টার্ট ও শাট ডাউন, সাথে App Store, অ্যাক্টিভিটি মনিটর ও জোর করে বন্ধ করা।</p></div>
+        <div class="feature"><div class="icon">🗑</div><h3>পরিষ্কার আনইনস্টল</h3><p>কোনো অ্যাপে রাইট-ক্লিক করে সেটিকে এর রেখে যাওয়া সেটিংস ও ক্যাশসহ ট্র্যাশে সরান।</p></div>
+        <div class="feature"><div class="icon">◐</div><h3>অপ্রয়োজনীয় লুকান</h3><p>সিস্টেম অ্যাপ মোছা যায় না, তবে যেগুলো কখনো ব্যবহার করেন না সেগুলো লুকিয়ে রাখতে পারেন।</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split">
+      <div>
+        <h2>অ্যাপ আর সেটিংস, পাশাপাশি।</h2>
+        <p class="lead">কয়েকটি অক্ষর টাইপ করুন: আগে মিলে যাওয়া অ্যাপ, তারপর সংশ্লিষ্ট সিস্টেম সেটিংস প্যানেল।</p>
+        <ul class="bullets">
+          <li><strong>নমনীয় মিল</strong> — শব্দের শুরু, আদ্যক্ষর, এমনকি বানান ভুল হলেও অ্যাপ খুঁজে পাওয়া যায়।</li>
+          <li><strong>অর্থ দিয়ে সেটিংস</strong> — “wifi”, “Bluetooth” বা “সাউন্ড” লিখলেই সঠিক প্যানেল খোলে।</li>
+          <li><strong>কীবোর্ডই প্রধান</strong> — তীর কী দিয়ে চলাচল, Return দিয়ে খোলা, Escape দিয়ে বন্ধ।</li>
+        </ul>
+      </div>
+      <img class="shot" src="../img/glass-search.webp" width="1200" height="1200" loading="lazy" alt="“dis” খুঁজলে Discord ও Disk Utility দেখায়, তারপর ডিসপ্লে, স্টোরেজ ও স্টার্টআপ ডিস্ক সেটিংস।">
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Liquid Glass, নাকি ক্লাসিক।</h2>
+      <p class="lead">macOS Tahoe-এর নিজস্ব Liquid Glass দিয়ে তৈরি। আরও সাদামাটা কিছু চান? সাজানোর মেনু থেকে স্টাইল বদলে নিন।</p>
+      <div class="styles">
+        <figure>
+          <img class="shot" src="../img/glass-categories.webp" width="1200" height="1200" loading="lazy" alt="গ্লাস ক্যাপসুল ও গ্রুপ করা বোতামসহ Liquid Glass স্টাইল।">
+          <figcaption>Liquid Glass<span>গ্লাস ক্যাপসুল, গ্রুপ করা কন্ট্রোল</span></figcaption>
+        </figure>
+        <figure>
+          <img class="shot" src="../img/classic-list.webp" width="1200" height="1200" loading="lazy" alt="তালিকা ভিউতে ক্লাসিক স্টাইল, প্রতিটি অ্যাপের পাশে তার বিভাগ।">
+          <figcaption>ক্লাসিক<span>সমতল ও শান্ত, এখানে তালিকা হিসেবে দেখানো</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>শর্টকাট</h2>
+      <p class="lead">সবকিছুই কীবোর্ড থেকে চলে।</p>
+      <table class="shortcuts">
+        <tr><td><span class="key">⌘</span> একা</td><td>মেনু খুলুন বা বন্ধ করুন</td></tr>
+        <tr><td>টাইপ করুন</td><td>অ্যাপ ও সেটিংস খুঁজুন</td></tr>
+        <tr><td><span class="key">←</span><span class="key">→</span><span class="key">↑</span><span class="key">↓</span></td><td>ফলাফলের মধ্যে চলাচল</td></tr>
+        <tr><td><span class="key">↩</span></td><td>নির্বাচিতটি খুলুন</td></tr>
+        <tr><td><span class="key">esc</span></td><td>বন্ধ করুন</td></tr>
+        <tr><td><span class="key">⌘</span><span class="key">Q</span> খোলা অবস্থায়</td><td>Start Menu থেকে প্রস্থান</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <h2>সাধারণ প্রশ্ন</h2>
+      <div class="faq">
+        <details><summary>Mac-এ কীভাবে স্টার্ট মেনু পাবো?</summary><p>macOS Start Menu ইনস্টল করুন, Privacy & Security › Accessibility-তে অনুমতি দিন, তারপর শুধু ⌘ Command কী চাপুন। মেনু বারের ঠিক নিচে Windows-এর মতো একটি স্টার্ট মেনু খুলবে — সব অ্যাপ, একটি সার্চ ফিল্ড আর পাওয়ার বোতামসহ।</p></details>
+        <details><summary>এটা কি macOS Tahoe-তে Launchpad-এর বিকল্প?</summary><p>হ্যাঁ। macOS 26 Tahoe-তে Launchpad-এর জায়গায় এসেছে Apps ভিউ। macOS Start Menu আপনাকে দেয় কীবোর্ড দিয়ে চালানো যায় এমন দ্রুত গ্রিড বা তালিকা, যেখানে সব অ্যাপ A–Z, সাম্প্রতিক ব্যবহার, সর্বাধিক ব্যবহৃত বা বিভাগ অনুযায়ী সাজানো।</p></details>
+        <details><summary>শুধু অ্যাপ খুঁজলেও Spotlight কেন ফাইল দেখায়?</summary><p>যে বিভাগগুলো আপনি বন্ধ করেন Spotlight সেগুলো লুকায়, কিন্তু যেসব ফাইল সে শ্রেণিবদ্ধ করতে পারে না (গেমের ফাইল, আর্কাইভ, ক্যাশ) সেগুলো তবুও দেখায়। Start Menu সরাসরি আপনার অ্যাপ ফোল্ডার পড়ে, তাই এটি শুধু অ্যাপ, সিস্টেম সেটিংসের প্যানেল আর আপনার প্রধান ফোল্ডারগুলো দেখায়।</p></details>
+        <details><summary>⌘ চাপলে কি কীবোর্ড শর্টকাট নষ্ট হয়?</summary><p>না। শুধু ⌘ একা চেপে আধা সেকেন্ডের মধ্যে ছেড়ে দিলেই মেনু খোলে। ⌘C, ⌘V এবং অন্য সব শর্টকাট আগের মতোই কাজ করে।</p></details>
+        <details><summary>macOS Start Menu কি ফ্রি?</summary><p>হ্যাঁ, এটি বিনামূল্যে ডাউনলোড করা যায়। সোর্স কোড GitHub-এ আছে।</p></details>
+        <details><summary>কোন কোন Mac সমর্থিত?</summary><p>Apple silicon চিপযুক্ত Mac, যাতে macOS 26 Tahoe বা তার পরের সংস্করণ চলে।</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="wrap">
+      <h2>macOS Start Menu ইনস্টল করুন</h2>
+      <p class="lead">Start Menu Apple দ্বারা নোটারাইজড নয়, তাই প্রথমবার চালু করার সময় macOS আপনার নিশ্চিতকরণ চাইবে।</p>
+      <div class="steps">
+        <div class="step"><div><h3>ডাউনলোড করে আনজিপ করুন</h3><p><a href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip">Start-Menu.zip</a> ডাউনলোড করুন, তারপর <code>Start Menu.app</code> আপনার Applications ফোল্ডারে সরান।</p></div></div>
+        <div class="step"><div><h3>প্রথমবার চালুর অনুমতি দিন</h3><p>অ্যাপটি খুলুন। macOS আটকে দিলে System Settings › Privacy &amp; Security-তে গিয়ে <em>Open Anyway</em> ক্লিক করুন।</p></div></div>
+        <div class="step"><div><h3>অ্যাক্সেসিবিলিটি অনুমতি দিন</h3><p>Privacy &amp; Security › Accessibility-তে <em>Start Menu</em> চালু করুন। যেকোনো জায়গা থেকে ⌘ কী শনাক্ত করতে এটি দরকার।</p></div></div>
+        <div class="step"><div><h3>লগইনের সময় চালু</h3><p>System Settings › General › Login Items-এ Start Menu যোগ করুন, যাতে এটি সবসময় এক চাপেই হাতের কাছে থাকে।</p></div></div>
+      </div>
+      <p style="margin-top: 32px; color: var(--muted);">অথবা সোর্স থেকে বিল্ড করুন (Xcode বা Command Line Tools দিয়ে):</p>
+      <pre><code>git clone https://github.com/corentin-gautier/macos-start-menu.git
+cd macos-start-menu
+scripts/setup-signing.sh   # একবারই: লোকাল সাইনিং সার্টিফিকেট
+scripts/install.sh         # বিল্ড, ইনস্টল, লগইনে চালু</code></pre>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>macOS Start Menu — একটি স্বাধীন প্রজেক্ট, Apple-এর সাথে সম্পর্কিত নয়।</span>
+    <a href="https://github.com/corentin-gautier/macos-start-menu">GitHub-এ সোর্স</a>
+  </div>
+  <nav class="wrap languages" aria-label="Languages">
+      <a href="https://corentingautier.dev/macos-start-menu/" hreflang="en" lang="en">English</a>
+      <a href="https://corentingautier.dev/macos-start-menu/zh/" hreflang="zh-Hans" lang="zh-Hans">简体中文</a>
+      <a href="https://corentingautier.dev/macos-start-menu/hi/" hreflang="hi" lang="hi">हिन्दी</a>
+      <a href="https://corentingautier.dev/macos-start-menu/es/" hreflang="es" lang="es">Español</a>
+      <a href="https://corentingautier.dev/macos-start-menu/ar/" hreflang="ar" lang="ar">العربية</a>
+      <a href="https://corentingautier.dev/macos-start-menu/fr/" hreflang="fr" lang="fr">Français</a>
+      <a href="https://corentingautier.dev/macos-start-menu/bn/" hreflang="bn" lang="bn">বাংলা</a>
+      <a href="https://corentingautier.dev/macos-start-menu/pt/" hreflang="pt" lang="pt">Português</a>
+      <a href="https://corentingautier.dev/macos-start-menu/ru/" hreflang="ru" lang="ru">Русский</a>
+      <a href="https://corentingautier.dev/macos-start-menu/ja/" hreflang="ja" lang="ja">日本語</a>
+  </nav>
+</footer>
+
+</body>
+</html>
