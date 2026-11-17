@@ -116,6 +116,8 @@ final class StartMenuModel: ObservableObject {
         selection = 0
         showsSelection = false
         hoveredID = nil
+        tooltipTask?.cancel()
+        tooltip = nil
         pendingUninstall = nil
         showsHidden = false
         updateResults() // usage may have changed since last time
@@ -254,8 +256,39 @@ final class StartMenuModel: ObservableObject {
 
     // MARK: - Hover
 
-    var hoveredAction: SystemAction? {
-        SystemAction.allCases.first { HoverSpace.actionID($0) == hoveredID }
+    struct Tooltip: Equatable {
+        let text: String
+        let anchor: CGRect
+    }
+
+    /// Shown after a short delay on the bottom bar buttons and the sort button.
+    @Published private(set) var tooltip: Tooltip?
+    private var tooltipTask: DispatchWorkItem?
+
+    private func tooltipText(for id: String?) -> String? {
+        guard let id else { return nil }
+        if id == HoverSpace.userID { return "Users & Groups" }
+        if id == HoverSpace.sortID { return "Sort, hidden apps and style" }
+        return SystemAction.allCases.first { HoverSpace.actionID($0) == id }?.title
+    }
+
+    private func updateTooltip() {
+        tooltipTask?.cancel()
+        guard let id = hoveredID, let text = tooltipText(for: id), let anchor = hoverFrames[id] else {
+            tooltip = nil
+            return
+        }
+        // Moving between buttons keeps the tooltip up, like macOS.
+        if tooltip != nil {
+            tooltip = Tooltip(text: text, anchor: anchor)
+            return
+        }
+        let task = DispatchWorkItem { [weak self] in
+            guard let self, self.hoveredID == id else { return }
+            self.tooltip = Tooltip(text: text, anchor: anchor)
+        }
+        tooltipTask = task
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: task)
     }
 
     func mouseMoved(to point: CGPoint?) {
@@ -276,7 +309,10 @@ final class StartMenuModel: ObservableObject {
             let overBar = under.contains { $0.hasPrefix("block:") }
             hit = under.first { !$0.hasPrefix("block:") && !(overBar && $0.hasPrefix("result:")) }
         }
-        if hit != hoveredID { hoveredID = hit }
+        if hit != hoveredID {
+            hoveredID = hit
+            updateTooltip()
+        }
     }
 
     func resultID(at index: Int) -> String? {

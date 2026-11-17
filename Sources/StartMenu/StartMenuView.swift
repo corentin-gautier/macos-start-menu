@@ -46,6 +46,7 @@ struct StartMenuView: View {
         .clipShape(RoundedRectangle(cornerRadius: style.panelCornerRadius, style: .continuous))
         .coordinateSpace(name: HoverSpace.name)
         .onPreferenceChange(HoverFramesKey.self) { model.updateHoverFrames($0) }
+        .overlay { TooltipLayer(model: model) }
         .overlay {
             if let request = model.pendingUninstall {
                 UninstallConfirmation(request: request, model: model)
@@ -98,9 +99,9 @@ struct StartMenuView: View {
         }
         .buttonStyle(.plain)
         .controlSurface(style, interactive: true)
+        .hoverFrame(HoverSpace.sortID)
         .fixedSize()
         .opacity(model.isSearching ? 0.5 : 1)
-        .help("Sort apps")
     }
 
     // MARK: - Results
@@ -325,7 +326,6 @@ private struct BottomBar: View {
                             .glassEffect(.regular.interactive(), in: .capsule)
                         group(SystemAction.session)
                         Spacer(minLength: 4)
-                        caption
                         group(SystemAction.tools)
                         group(SystemAction.power)
                     }
@@ -337,7 +337,6 @@ private struct BottomBar: View {
                     divider
                     buttons(SystemAction.session)
                     Spacer(minLength: 8)
-                    caption.padding(.trailing, 6)
                     buttons(SystemAction.tools)
                     divider
                     buttons(SystemAction.power)
@@ -347,15 +346,6 @@ private struct BottomBar: View {
             }
         }
         .hoverFrame(HoverSpace.blockerID("bottom"))
-    }
-
-    /// Tooltips don't show in a panel of an inactive app, so the hovered
-    /// button's name is shown here instead.
-    private var caption: some View {
-        Text(model.hoveredAction?.title ?? "")
-            .font(.system(size: 11, weight: .medium))
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
     }
 
     private var divider: some View {
@@ -403,7 +393,6 @@ private struct UserButton: View {
         }
         .buttonStyle(.plain)
         .hoverFrame(HoverSpace.userID)
-        .help("Users & Groups")
     }
 }
 
@@ -426,8 +415,50 @@ private struct IconButton: View {
             .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .help(action.title)
         .hoverFrame(HoverSpace.actionID(action))
+    }
+}
+
+// MARK: - Tooltip
+
+/// Native tooltips (`.help`) don't show in a panel of an inactive app, so the
+/// hovered button's name floats above it, without touching the layout.
+private struct TooltipLayer: View {
+    @ObservedObject var model: StartMenuModel
+
+    var body: some View {
+        GeometryReader { geometry in
+            if let tooltip = model.tooltip {
+                let label = Text(tooltip.text)
+                    .font(.system(size: 11, weight: .medium))
+                    .lineLimit(1)
+                    .fixedSize()
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                label
+                    .modifier(TooltipSurface(style: model.style))
+                    .position(
+                        x: min(max(tooltip.anchor.midX, 70), geometry.size.width - 70),
+                        y: tooltip.anchor.minY - 18
+                    )
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeOut(duration: 0.12), value: model.tooltip?.text)
+    }
+}
+
+private struct TooltipSurface: ViewModifier {
+    let style: UIStyle
+
+    func body(content: Content) -> some View {
+        switch style {
+        case .glass:
+            content.glassEffect(.regular, in: .capsule)
+        case .classic:
+            content.background(Capsule().fill(.regularMaterial).shadow(color: .black.opacity(0.15), radius: 4, y: 1))
+        }
     }
 }
 

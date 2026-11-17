@@ -13,6 +13,7 @@ enum HoverSpace {
     static func resultID(_ id: String) -> String { "result:\(id)" }
     static func actionID(_ action: SystemAction) -> String { "action:\(action.rawValue)" }
     static let userID = "user"
+    static let sortID = "sort"
 }
 
 struct HoverFramesKey: PreferenceKey {
