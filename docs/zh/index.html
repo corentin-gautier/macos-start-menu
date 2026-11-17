@@ -326,6 +326,22 @@
   .shortcuts td:first-child { width: 45%; white-space: nowrap; }
   .shortcuts td:last-child { color: var(--muted); }
 
+  /* Recommended companion app */
+  .tip {
+    display: grid; grid-template-columns: 56px 1fr; gap: 18px; align-items: start;
+    max-width: 760px; margin-top: 48px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 24px 26px;
+  }
+  .tip .glyph {
+    display: grid; place-items: center; width: 56px; height: 56px; border-radius: 15px;
+    background: linear-gradient(135deg, var(--hero-a), var(--hero-b));
+    font-size: 26px; font-weight: 600; color: var(--text);
+  }
+  .tip h3 { font-size: 19px; margin: 2px 0 6px; letter-spacing: -0.01em; }
+  .tip p { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
+  .tip a { font-weight: 600; font-size: 15px; }
+  @media (max-width: 560px) { .tip { grid-template-columns: 1fr; } }
+
   footer { padding: 48px 0 64px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
   .languages { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
   footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -421,6 +437,14 @@
         <tr><td><span class="key">esc</span></td><td>关闭</td></tr>
         <tr><td>菜单打开时按 <span class="key">⌘</span><span class="key">Q</span></td><td>退出 Start Menu</td></tr>
       </table>
+      <aside class="tip">
+        <div class="glyph" aria-hidden="true">⇥</div>
+        <div>
+          <h3>推荐搭配 AltTab</h3>
+          <p>Start Menu 用来打开应用。要在已打开的窗口之间切换，推荐使用 <strong>AltTab</strong>：免费开源，把 Windows 那样带预览的窗口切换器带到 <span class="key">⌥</span><span class="key">⇥</span>。两者搭配，程序坞就可有可无了。</p>
+          <a href="https://alt-tab-macos.netlify.app/">获取 AltTab →</a>
+        </div>
+      </aside>
     </div>
   </section>
 

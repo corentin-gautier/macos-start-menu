@@ -326,6 +326,22 @@
   .shortcuts td:first-child { width: 45%; white-space: nowrap; }
   .shortcuts td:last-child { color: var(--muted); }
 
+  /* Recommended companion app */
+  .tip {
+    display: grid; grid-template-columns: 56px 1fr; gap: 18px; align-items: start;
+    max-width: 760px; margin-top: 48px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 24px 26px;
+  }
+  .tip .glyph {
+    display: grid; place-items: center; width: 56px; height: 56px; border-radius: 15px;
+    background: linear-gradient(135deg, var(--hero-a), var(--hero-b));
+    font-size: 26px; font-weight: 600; color: var(--text);
+  }
+  .tip h3 { font-size: 19px; margin: 2px 0 6px; letter-spacing: -0.01em; }
+  .tip p { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
+  .tip a { font-weight: 600; font-size: 15px; }
+  @media (max-width: 560px) { .tip { grid-template-columns: 1fr; } }
+
   footer { padding: 48px 0 64px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
   .languages { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
   footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -421,6 +437,14 @@
         <tr><td><span class="key">esc</span></td><td>閉じる</td></tr>
         <tr><td><span class="key">⌘</span><span class="key">Q</span>（表示中）</td><td>Start Menuを終了</td></tr>
       </table>
+      <aside class="tip">
+        <div class="glyph" aria-hidden="true">⇥</div>
+        <div>
+          <h3>AltTab との併用がおすすめ</h3>
+          <p>Start Menu はアプリを開きます。開いているウインドウの切り替えには <strong>AltTab</strong> がおすすめです。無料のオープンソースで、Windows のようなプレビュー付きのウインドウ切り替えを <span class="key">⌥</span><span class="key">⇥</span> で使えます。2 つを組み合わせれば Dock は不要になります。</p>
+          <a href="https://alt-tab-macos.netlify.app/">AltTab を入手 →</a>
+        </div>
+      </aside>
     </div>
   </section>
 
