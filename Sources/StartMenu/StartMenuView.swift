@@ -183,6 +183,8 @@ struct StartMenuView: View {
                     )
                 case .setting(let setting):
                     SettingRow(setting: setting, state: state)
+                case .folder(let folder):
+                    FolderRow(folder: folder, state: state)
                 }
             }
             .hoverFrame(HoverSpace.resultID(result.id))
@@ -374,6 +376,39 @@ private struct SettingRow: View {
         .padding(.vertical, 7)
         .modifier(ResultHighlight(state: state, cornerRadius: state.style == .glass ? 14 : 10))
         .contentShape(Rectangle())
+    }
+}
+
+private struct FolderRow: View {
+    let folder: FolderEntry
+    let state: HighlightState
+
+    private var whiteText: Bool { state.style == .glass && state.selected }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(nsImage: FolderCatalog.icon(for: folder))
+                .resizable()
+                .frame(width: 30, height: 30)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(folder.name).font(.system(size: 13, weight: .medium))
+                Text(AppUninstaller.abbreviate(folder.url))
+                    .font(.system(size: 11))
+                    .foregroundStyle(whiteText ? .white.opacity(0.8) : .secondary)
+            }
+            .foregroundStyle(whiteText ? .white : .primary)
+            .lineLimit(1)
+            Spacer()
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .modifier(ResultHighlight(state: state, cornerRadius: state.style == .glass ? 14 : 10))
+        .contentShape(Rectangle())
+        .contextMenu {
+            Button("Show in Finder", systemImage: "folder") {
+                NSWorkspace.shared.activateFileViewerSelecting([folder.url])
+            }
+        }
     }
 }
 

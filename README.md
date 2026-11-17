@@ -9,7 +9,9 @@ release, no other key) and a panel opens right below the Apple menu with:
   folders, so no documents, archives or other Spotlight noise ever shows up.
 - A **search field, already focused**: typing filters and ranks the apps and
   also suggests the matching **System Settings** panes (English and French
-  keywords: "wifi", "dark mode", "mode sombre", "luminosité"…).
+  keywords: "wifi", "dark mode", "mode sombre", "luminosité"…) and your
+  **folders** (Home, Desktop, Documents, Downloads, Pictures, Movies, Music,
+  iCloud Drive, Trash… — "images", "vidéos", "téléchargements" work too).
 - A **grid or list** view (list rows show the app's category), picked in the
   sort menu.
 - Two **styles**, picked in the sort menu: **Liquid Glass** (glass capsules,
@@ -111,6 +113,7 @@ Sources/StartMenu/
   UsageStore.swift            recent / most used tracking
   AppUninstaller.swift        uninstall and leftover files detection
   SettingsCatalog.swift       System Settings panes and keywords
+  FolderCatalog.swift         user folders offered in search
   Search.swift                matching and scoring
   SystemActions.swift         power, lock, force quit, avatar
 scripts/                      setup-signing, build, install, uninstall

@@ -4,11 +4,13 @@ import Combine
 enum StartResult: Identifiable {
     case app(AppEntry)
     case setting(SettingEntry)
+    case folder(FolderEntry)
 
     var id: String {
         switch self {
         case .app(let app): "app:\(app.id)"
         case .setting(let setting): "setting:\(setting.id)"
+        case .folder(let folder): "folder:\(folder.id)"
         }
     }
 }
@@ -164,10 +166,12 @@ final class StartMenuModel: ObservableObject {
             showsSelection = false
         } else {
             let matchedApps = Self.ranked(visibleApps, name: \.name) { Search.score(q, $0.key) }
+            let matchedFolders = Self.ranked(FolderCatalog.all, name: \.name) { $0.score(q) }.prefix(4)
             let matchedSettings = Self.ranked(SettingsCatalog.all, name: \.name) { $0.score(q) }
                 .prefix(maxSettingResults)
             groups = [
                 ("Apps", layout == .grid, matchedApps.map(StartResult.app)),
+                ("Folders", false, matchedFolders.map(StartResult.folder)),
                 ("Settings", false, matchedSettings.map(StartResult.setting)),
             ]
             showsSelection = true
@@ -374,6 +378,7 @@ final class StartMenuModel: ObservableObject {
         switch results[index] {
         case .app(let app): SystemAction.openApp(url: app.url)
         case .setting(let setting): NSWorkspace.shared.open(setting.url)
+        case .folder(let folder): NSWorkspace.shared.open(folder.url)
         }
     }
 
