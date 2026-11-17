@@ -39,6 +39,10 @@ release, no other key) and a panel opens right below the Apple menu with:
 | Escape, or click outside | Close |
 | ⌘Q (menu open) | Quit Start Menu |
 
+"Hide the Dock" in the sort menu hides the macOS Dock for good (auto-hide
+with a very long reveal delay); turning it off restores your previous Dock
+setting.
+
 Right-click an app or a setting to **pin** it: pinned items stay at the top
 of the menu, above the apps, in every sort.
 

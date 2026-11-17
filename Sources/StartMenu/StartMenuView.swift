@@ -657,6 +657,10 @@ private enum SortMenu {
             model.toggleOpensAtLogin()
         }
 
+        @objc func toggleDock(_ item: NSMenuItem) {
+            model.toggleHidesDock()
+        }
+
         @objc func toggleHidden(_ item: NSMenuItem) {
             model.toggleShowsHidden()
         }
@@ -705,6 +709,8 @@ private enum SortMenu {
         menu.addItem(.separator())
         _ = addItem(L("Open at Login"), symbol: "power.circle", action: #selector(Target.toggleLogin(_:)),
                     object: nil, checked: model.opensAtLogin)
+        _ = addItem(L("Hide the Dock"), symbol: "dock.rectangle", action: #selector(Target.toggleDock(_:)),
+                    object: nil, checked: model.hidesDock)
 
         var origin = NSEvent.mouseLocation
         if let panel = NSApp.windows.first(where: { $0 is StartPanel && $0.isVisible }) {

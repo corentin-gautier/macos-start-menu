@@ -110,6 +110,7 @@ final class StartMenuModel: ObservableObject {
     /// First-launch card: asks for Accessibility, then confirms it works.
     @Published var onboarding: Onboarding? { didSet { refreshHover() } }
     @Published private(set) var opensAtLogin = LoginItem.isEnabled
+    @Published private(set) var hidesDock = Dock.isHidden
     @Published private(set) var forceQuitSelection = 0
 
     let userName = UserProfile.fullName
@@ -158,6 +159,7 @@ final class StartMenuModel: ObservableObject {
         forceQuitApps = nil
         onboarding = nil
         opensAtLogin = LoginItem.isEnabled
+        hidesDock = Dock.isHidden
         showsHidden = false
         updateResults() // usage may have changed since last time
         // Screenshots: `STARTMENU_DEMO_QUERY` opens the menu with a search.
@@ -468,6 +470,11 @@ final class StartMenuModel: ObservableObject {
     func toggleOpensAtLogin() {
         LoginItem.setEnabled(!opensAtLogin)
         opensAtLogin = LoginItem.isEnabled
+    }
+
+    func toggleHidesDock() {
+        Dock.setHidden(!hidesDock)
+        hidesDock = Dock.isHidden
     }
 
     // MARK: - Force Quit
