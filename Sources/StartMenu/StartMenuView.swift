@@ -4,8 +4,8 @@ import SwiftUI
 /// - Liquid Glass: glass capsules for the controls and grouped bottom
 ///   buttons, glass highlights, radii concentric with the panel's.
 /// - Classic: flat translucent fills, a divider above a single bottom bar.
-/// The bottom bar sits below the list; the results scroll under the glass
-/// top controls (soft scroll edge effect), and below the classic ones.
+/// Glass: the results scroll under the top and bottom controls (soft scroll
+/// edge effect, bottom fade). Classic: the bars sit above and below the list.
 struct StartMenuView: View {
     @ObservedObject var model: StartMenuModel
     @FocusState private var searchFocused: Bool
@@ -31,8 +31,15 @@ struct StartMenuView: View {
                 }
                 .scrollIndicators(.never)
                 .scrollEdgeEffectStyle(.soft, for: .vertical)
+                .mask { if style == .glass { bottomFade } else { Color.black } }
                 .safeAreaInset(edge: .top, spacing: 6) {
                     if style == .glass { topBar }
+                }
+                // An overlay, not a safe area inset: the inset shrinks the
+                // scroll view, which put the fade above the capsules.
+                .contentMargins(.bottom, style == .glass ? Self.glassBottomBarHeight : 0, for: .scrollContent)
+                .overlay(alignment: .bottom) {
+                    if style == .glass { BottomBar(model: model) }
                 }
                 .onChange(of: model.selection) { _, index in
                     guard model.showsSelection, let id = model.resultID(at: index) else { return }
@@ -42,9 +49,10 @@ struct StartMenuView: View {
                     proxy.scrollTo(Self.topID, anchor: .top)
                 }
             }
-            if style == .classic { Divider().opacity(0.6) }
-            BottomBar(model: model)
-                .padding(.top, style == .glass ? 6 : 0)
+            if style == .classic {
+                Divider().opacity(0.6)
+                BottomBar(model: model)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         // NSGlassEffectView doesn't clip its content to its rounded shape.
@@ -58,6 +66,21 @@ struct StartMenuView: View {
         }
         .onAppear { searchFocused = true }
         .onChange(of: model.showToken) { _, _ in searchFocused = true }
+    }
+
+    /// Capsules (40) plus their bottom inset, and a little air.
+    static let glassBottomBarHeight: CGFloat = 40 + inset + 8
+
+    /// Glass: the list scrolls under the bottom capsules and fades out before
+    /// the panel edge, so nothing shows below them.
+    private var bottomFade: some View {
+        VStack(spacing: 0) {
+            Color.black
+            LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
+                .frame(height: 40)
+            // Fully gone from the capsules' bottom edge down.
+            Color.clear.frame(height: Self.inset + 4)
+        }
     }
 
     // MARK: - Top bar
