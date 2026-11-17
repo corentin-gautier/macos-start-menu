@@ -412,7 +412,7 @@ private struct IconButton: View {
                 if let url = action.appIconURL {
                     Image(nsImage: IconCache.shared.icon(for: url)).resizable().frame(width: 22, height: 22)
                 } else {
-                    Image(systemName: action.symbol).font(.system(size: 14, weight: .medium))
+                    Image(systemName: action.symbol).font(.system(size: action.symbolSize, weight: .medium))
                 }
             }
             .frame(width: 34, height: 34)

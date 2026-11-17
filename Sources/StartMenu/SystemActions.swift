@@ -11,6 +11,15 @@ enum SystemAction: String, CaseIterable, Identifiable {
     static let session: [SystemAction] = [.lock, .logOut]
     static let power: [SystemAction] = [.sleep, .restart, .shutDown]
 
+    /// Symbol point size: narrow glyphs are bumped up to look as big as the
+    /// others (the lock looked smaller than the log out arrow).
+    var symbolSize: CGFloat {
+        switch self {
+        case .lock: 16
+        default: 14
+        }
+    }
+
     /// Shown with the app's real icon instead of a symbol.
     var appIconURL: URL? {
         switch self {
