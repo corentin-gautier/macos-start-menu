@@ -191,8 +191,10 @@ button points to, and bumps the Homebrew cask (version and sha256) in
 `docs/img` screenshots are taken in demo mode (`STARTMENU_DEMO=1` shows a
 generic account, `STARTMENU_DEMO_QUERY` pre-fills the search,
 `STARTMENU_DEMO_BACKDROP=<image>` centers the panel over that image so the
-glass has colors to refract), capturing the panel and its backdrop with
-`screencapture -R`.
+glass has colors to refract, and recent files are generic examples),
+capturing the panel and its backdrop with `screencapture -R`, then resized
+to 1200 px and converted with `cwebp`. `docs/img/og.jpg` is
+`docs/src/og.html` rendered by headless Chrome at 1200×630.
 
 ## Support
 

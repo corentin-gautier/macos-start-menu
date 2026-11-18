@@ -61,6 +61,10 @@ final class RecentFiles {
 
     /// Runs a new query unless one is already running; cheap enough on every opening.
     func refresh() {
+        if UserProfile.isDemo {
+            loadDemoFiles()
+            return
+        }
         guard query == nil else { return }
         let query = NSMetadataQuery()
         query.searchScopes = [NSMetadataQueryUserHomeScope]
@@ -71,6 +75,25 @@ final class RecentFiles {
         ) { [weak self] _ in self?.finish() }
         self.query = query
         query.start()
+    }
+
+    /// Screenshots (`STARTMENU_DEMO=1`): generic documents, not the user's.
+    private func loadDemoFiles() {
+        guard files.isEmpty else { return }
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let demo: [(String, String, TimeInterval)] = [
+            ("Documents/Q4 Report.pdf", "com.adobe.pdf", 12 * 60),
+            ("Documents/Trip to Lisbon.key", "com.apple.iwork.keynote.key", 2 * 3600),
+            ("Pictures/Sunset.heic", "public.heic", 5 * 3600),
+            ("Documents/Budget 2027.numbers", "com.apple.iwork.numbers.numbers", 26 * 3600),
+            ("Music/Podcast Intro.mp3", "public.mp3", 3 * 86_400),
+            ("Desktop/Notes.txt", "public.plain-text", 6 * 86_400),
+        ]
+        files = demo.map { path, type, age in
+            FileEntry(url: home.appendingPathComponent(path), typeIdentifier: type,
+                      lastUsed: Date(timeIntervalSinceNow: -age))
+        }
+        onChange()
     }
 
     private func finish() {
