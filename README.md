@@ -28,7 +28,8 @@ release, no other key) and a panel opens right below the Apple menu with:
   the Shortcuts app), and a **Search the web** row (Google by default; Bing,
   DuckDuckGo, Brave Search, Ecosia, Startpage, Qwant, Kagi, Yahoo, Yandex,
   Baidu, Naver, or an AI assistant: Perplexity, ChatGPT, Claude; picked in
-  the settings menu).
+  the settings menu), and a **Search files** row that opens a Finder window
+  searching file names and contents.
 - A **dot under running apps**; right-click one to Quit or Force Quit it.
 - A **grid or list** view (list rows show the app's category), picked in the
   sort menu.

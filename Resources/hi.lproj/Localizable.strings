@@ -120,7 +120,6 @@
 "Recent files" = "हाल की फ़ाइलें";
 "Calculator" = "कैलकुलेटर";
 "Shortcuts" = "शॉर्टकट";
-"Web" = "वेब";
 "Search the web for “%@”" = "वेब पर “%@” खोजें";
 "Return copies the result" = "Return परिणाम कॉपी करता है";
 "Quit" = "बंद करें";
@@ -140,3 +139,6 @@
 "Include Desktop, Documents and Downloads…" = "डेस्कटॉप, दस्तावेज़ और डाउनलोड शामिल करें…";
 "AI Assistants" = "AI सहायक";
 "Ask “%@”" = "“%@” पूछें";
+"Search files for “%@”" = "फ़ाइलों में “%@” खोजें";
+"Names and contents, in the Finder" = "नाम और सामग्री, Finder में";
+"Search" = "खोजें";

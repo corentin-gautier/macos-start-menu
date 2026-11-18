@@ -120,7 +120,6 @@
 "Recent files" = "Arquivos recentes";
 "Calculator" = "Calculadora";
 "Shortcuts" = "Atalhos";
-"Web" = "Web";
 "Search the web for “%@”" = "Pesquisar “%@” na web";
 "Return copies the result" = "Return copia o resultado";
 "Quit" = "Encerrar";
@@ -140,3 +139,6 @@
 "Include Desktop, Documents and Downloads…" = "Incluir Mesa, Documentos e Transferências…";
 "AI Assistants" = "Assistentes de IA";
 "Ask “%@”" = "Perguntar “%@”";
+"Search files for “%@”" = "Buscar “%@” nos arquivos";
+"Names and contents, in the Finder" = "Nomes e conteúdo, no Finder";
+"Search" = "Buscar";

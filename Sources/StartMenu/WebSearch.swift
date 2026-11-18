@@ -74,3 +74,44 @@ enum WebSearchEngine: String, CaseIterable, Identifiable {
         if let url = url(for: query) { NSWorkspace.shared.open(url) }
     }
 }
+
+/// "Search files for …": a Finder window searching file names and contents,
+/// opened from a saved search (the Finder has no scriptable search command).
+enum FileSearch {
+    private static let folder = FileManager.default.temporaryDirectory.appendingPathComponent("StartMenu Searches")
+
+    static func open(_ text: String) {
+        let escaped = text.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
+        let query = "(** = \"\(escaped)*\"cdw)"
+        let plist: [String: Any] = [
+            "CompatibleVersion": 1,
+            "RawQuery": query,
+            "RawQueryDict": [
+                "FinderFilesOnly": true,
+                "RawQuery": query,
+                "SearchScopes": ["kMDQueryScopeMyFiles"],
+                "UserFilesOnly": true,
+            ],
+            "SearchCriteria": [
+                "AnyAttributeContains": text,
+                "CurrentFolderPath": ["/Users"],
+                "FXCriteriaSlices": [Any](),
+                "FXScope": 1_396_925_814,
+                "FXScopeArrayOfPaths": ["kMDQueryScopeMyFiles"],
+            ],
+        ]
+        // The file name is the Finder window's title.
+        var name = String(text.map { "/:".contains($0) ? "-" : $0 }.prefix(80))
+        if name.trimmingCharacters(in: .whitespaces).isEmpty { name = "Search" }
+        var url = folder.appendingPathComponent(name).appendingPathExtension("savedSearch")
+        try? FileManager.default.removeItem(at: folder) // earlier searches
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        guard let data = try? PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0),
+              (try? data.write(to: url)) != nil
+        else { return }
+        var values = URLResourceValues()
+        values.hasHiddenExtension = true
+        try? url.setResourceValues(values)
+        NSWorkspace.shared.open(url)
+    }
+}

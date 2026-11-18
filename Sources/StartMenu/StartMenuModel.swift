@@ -9,6 +9,7 @@ enum StartResult: Identifiable {
     case file(FileEntry)
     case shortcut(ShortcutEntry)
     case calculation(Calculation)
+    case fileSearch(String)
     case webSearch(String)
 
     var id: String {
@@ -19,13 +20,14 @@ enum StartResult: Identifiable {
         case .file(let file): "file:\(file.id)"
         case .shortcut(let shortcut): "shortcut:\(shortcut.id)"
         case .calculation: "calculation"
+        case .fileSearch: "fileSearch"
         case .webSearch: "web"
         }
     }
 
     var isPinnable: Bool {
         switch self {
-        case .calculation, .webSearch: false
+        case .calculation, .fileSearch, .webSearch: false
         default: true
         }
     }
@@ -284,7 +286,7 @@ final class StartMenuModel: ObservableObject {
                 (L("Settings"), .rows, matchedSettings.map(StartResult.setting)),
                 (L("Shortcuts"), .rows, matchedShortcuts.map(StartResult.shortcut)),
                 (L("Recent files"), .rows, matchedFiles.map(StartResult.file)),
-                (L("Web"), .rows, [.webSearch(trimmed)]),
+                (L("Search"), .rows, [.fileSearch(trimmed), .webSearch(trimmed)]),
             ]
             showsSelection = true
         }
@@ -609,6 +611,7 @@ final class StartMenuModel: ObservableObject {
         case .file(let file): NSWorkspace.shared.open(file.url)
         case .shortcut(let shortcut): shortcut.run()
         case .calculation(let calculation): calculation.copy()
+        case .fileSearch(let text): FileSearch.open(text)
         case .webSearch(let text): webSearchEngine.search(text)
         }
     }

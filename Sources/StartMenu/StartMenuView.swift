@@ -417,10 +417,12 @@ private struct ResultView: View {
         case .calculation:
             if let url = Self.calculatorURL { image(IconCache.shared.icon(for: url), size: size) }
             else { symbolIcon("equal", color: .orange, size: size) }
+        case .fileSearch: image(IconCache.shared.icon(for: Self.finderURL), size: size)
         case .webSearch: symbolIcon("magnifyingglass", color: .blue, size: size)
         }
     }
 
+    private static let finderURL = URL(fileURLWithPath: "/System/Library/CoreServices/Finder.app")
     private static let calculatorURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.calculator")
 
     private func image(_ image: NSImage, size: CGFloat) -> some View {
@@ -448,6 +450,7 @@ private struct ResultView: View {
         case .file(let file): file.name
         case .shortcut(let shortcut): shortcut.name
         case .calculation(let calculation): "= \(calculation.display)"
+        case .fileSearch(let text): L("Search files for “%@”", text)
         case .webSearch(let text):
             model.webSearchEngine.isAssistant ? L("Ask “%@”", text) : L("Search the web for “%@”", text)
         }
@@ -461,6 +464,7 @@ private struct ResultView: View {
         case .file(let file): file.subtitle
         case .shortcut: L("Shortcuts")
         case .calculation: L("Return copies the result")
+        case .fileSearch: L("Names and contents, in the Finder")
         case .webSearch: model.webSearchEngine.title
         }
     }
@@ -498,7 +502,7 @@ private struct ResultView: View {
                 if let url = components?.url { NSWorkspace.shared.open(url) }
                 model.dismiss()
             }
-        case .setting, .calculation, .webSearch:
+        case .setting, .calculation, .fileSearch, .webSearch:
             EmptyView()
         }
     }
