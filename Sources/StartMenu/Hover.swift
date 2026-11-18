@@ -25,7 +25,26 @@ final class HoverRegistry {
     var onChange: ([String: CGRect]) -> Void = { _ in }
     private var scheduled = false
 
-    func set(_ id: String, _ frame: CGRect?) {
+    /// Frames per ID and per reporting view, latest last. Two views can
+    /// share an ID for a moment (old and new bottom bar on a style switch,
+    /// both reporting): the one that leaves must not erase the other's frame.
+    private var reports: [String: [(owner: UUID, frame: CGRect)]] = [:]
+
+    func set(_ id: String, _ frame: CGRect, owner: UUID) {
+        var list = reports[id, default: []].filter { $0.owner != owner }
+        list.append((owner, frame))
+        reports[id] = list
+        update(id)
+    }
+
+    func remove(_ id: String, owner: UUID) {
+        reports[id]?.removeAll { $0.owner == owner }
+        if reports[id]?.isEmpty == true { reports[id] = nil }
+        update(id)
+    }
+
+    private func update(_ id: String) {
+        let frame = reports[id]?.last?.frame
         guard frames[id] != frame else { return }
         frames[id] = frame
         guard !scheduled else { return }
@@ -40,10 +59,20 @@ final class HoverRegistry {
 extension View {
     /// Reports this view's frame for hover hit-testing under `id`.
     func hoverFrame(_ id: String) -> some View {
-        onGeometryChange(for: CGRect.self) { $0.frame(in: .named(HoverSpace.name)) } action: {
-            HoverRegistry.shared.set(id, $0)
-        }
-        .onDisappear { HoverRegistry.shared.set(id, nil) }
+        modifier(HoverFrame(id: id))
+    }
+}
+
+private struct HoverFrame: ViewModifier {
+    let id: String
+    @State private var owner = UUID()
+
+    func body(content: Content) -> some View {
+        content
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(HoverSpace.name)) } action: {
+                HoverRegistry.shared.set(id, $0, owner: owner)
+            }
+            .onDisappear { HoverRegistry.shared.remove(id, owner: owner) }
     }
 }
 
