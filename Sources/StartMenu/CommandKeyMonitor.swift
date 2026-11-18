@@ -122,6 +122,8 @@ final class CommandKeyMonitor {
     private func handle(_ type: CGEventType, _ event: CGEvent) {
         switch type {
         case .tapDisabledByTimeout, .tapDisabledByUserInput:
+            // Events were lost while the tap was off: drop the press in progress.
+            pressStart = nil
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
 
         case .flagsChanged:
@@ -135,7 +137,8 @@ final class CommandKeyMonitor {
                 }
             } else if keyCode == pressedKey, !active.contains(trigger.flag) {
                 if let start = pressStart, !cancelled, active.isEmpty,
-                   ProcessInfo.processInfo.systemUptime - start < maxTapDuration {
+                   ProcessInfo.processInfo.systemUptime - start < maxTapDuration,
+                   !Self.inputSince(ProcessInfo.processInfo.systemUptime - start) {
                     DispatchQueue.main.async { [onTap] in onTap() }
                 }
                 pressStart = nil
@@ -148,6 +151,16 @@ final class CommandKeyMonitor {
         default:
             // Any key or click while the key is down means it was a shortcut.
             if pressStart != nil { cancelled = true }
+        }
+    }
+
+    /// Whether a key or click reached the system in the last `interval`
+    /// seconds. Catches what the tap never sees: system shortcuts such as
+    /// ⌘Tab are consumed before session taps, and a disabled tap drops events.
+    private static func inputSince(_ interval: TimeInterval) -> Bool {
+        let types: [CGEventType] = [.keyDown, .leftMouseDown, .rightMouseDown, .otherMouseDown]
+        return types.contains {
+            CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: $0) < interval
         }
     }
 }
