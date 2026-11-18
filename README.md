@@ -96,10 +96,9 @@ itself so they match what System Settings shows.
 ### Download
 
 1. Download [Start-Menu.zip](https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip),
-   unzip it and move `Start Menu.app` to Applications.
-2. Open it. The app isn't notarized: when macOS blocks it, go to System
-   Settings › Privacy & Security and click **Open Anyway**.
-3. On first launch, Start Menu asks for the Accessibility permission (it opens
+   unzip it and move `Start Menu.app` to Applications. The app is signed and
+   notarized by Apple.
+2. On first launch, Start Menu asks for the Accessibility permission (it opens
    Privacy & Security › Accessibility: turn *Start Menu* on) and adds itself to
    the Login Items. "Open at Login" in the settings menu turns that off.
 
