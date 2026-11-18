@@ -31,13 +31,17 @@ struct StartMenuView: View {
                 }
                 .scrollIndicators(.never)
                 .scrollEdgeEffectStyle(.soft, for: .vertical)
-                .mask { if style == .glass { bottomFade } else { Color.black } }
-                .safeAreaInset(edge: .top, spacing: 6) {
+                // Glass: the fades below replace the edge effect, which hid
+                // the tiles under the search capsules (nothing to refract).
+                .scrollEdgeEffectHidden(style == .glass, for: .vertical)
+                .mask { if style == .glass { edgeFades } else { Color.black } }
+                // Overlays, not safe area insets: an inset shrinks the scroll
+                // view, so the results wouldn't pass under the capsules.
+                .contentMargins(.top, style == .glass ? Self.glassTopBarHeight : 0, for: .scrollContent)
+                .contentMargins(.bottom, style == .glass ? Self.glassBottomBarHeight : 0, for: .scrollContent)
+                .overlay(alignment: .top) {
                     if style == .glass { topBar }
                 }
-                // An overlay, not a safe area inset: the inset shrinks the
-                // scroll view, which put the fade above the capsules.
-                .contentMargins(.bottom, style == .glass ? Self.glassBottomBarHeight : 0, for: .scrollContent)
                 .overlay(alignment: .bottom) {
                     if style == .glass { BottomBar(model: model) }
                 }
@@ -74,11 +78,16 @@ struct StartMenuView: View {
 
     /// Capsules (40) plus their bottom inset, and a little air.
     static let glassBottomBarHeight: CGFloat = 40 + inset + 8
+    /// Search field plus its top inset, and a little air.
+    static let glassTopBarHeight: CGFloat = inset + controlHeight + 6
 
-    /// Glass: the list scrolls under the bottom capsules and fades out before
-    /// the panel edge, so nothing shows below them.
-    private var bottomFade: some View {
+    /// Glass: the list scrolls under the top and bottom capsules and fades
+    /// out before the panel edges, so nothing shows beyond them.
+    private var edgeFades: some View {
         VStack(spacing: 0) {
+            Color.clear.frame(height: Self.inset - 4)
+            LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom)
+                .frame(height: 24)
             Color.black
             LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
                 .frame(height: 40)
@@ -97,6 +106,7 @@ struct StartMenuView: View {
             }
         }
         .padding([.horizontal, .top], Self.inset)
+        .blocksClicks()
         .hoverFrame(HoverSpace.blockerID("top"))
     }
 
@@ -229,6 +239,12 @@ extension UIStyle {
 }
 
 private extension View {
+    /// A floating bar's gaps and margins swallow clicks, which would
+    /// otherwise reach the results scrolled under it.
+    func blocksClicks() -> some View {
+        background(Color.clear.contentShape(Rectangle()).onTapGesture {})
+    }
+
     /// Background of the search field and sort button.
     @ViewBuilder
     func controlSurface(_ style: UIStyle, interactive: Bool = false) -> some View {
@@ -515,6 +531,7 @@ private struct BottomBar: View {
                 .padding(.vertical, 8)
             }
         }
+        .blocksClicks()
         .hoverFrame(HoverSpace.blockerID("bottom"))
     }
 
