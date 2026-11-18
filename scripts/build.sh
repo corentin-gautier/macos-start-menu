@@ -16,7 +16,12 @@ cp Resources/Info.plist "$APP/Contents/Info.plist"
 [ -f Resources/AppIcon.icns ] && cp Resources/AppIcon.icns "$APP/Contents/Resources/"
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
 
-if security find-certificate -c "$IDENTITY" >/dev/null 2>&1; then
+# Developer ID (notarizable, hardened runtime) when available, else the local certificate.
+DEVID=$(security find-identity -v -p codesigning | sed -nE 's/.*"(Developer ID Application: [^"]+)".*/\1/p' | head -1)
+if [ -n "$DEVID" ]; then
+    codesign --force --options runtime --timestamp \
+        --entitlements Resources/StartMenu.entitlements --sign "$DEVID" "$APP"
+elif security find-certificate -c "$IDENTITY" >/dev/null 2>&1; then
     codesign --force --sign "$IDENTITY" "$APP"
 else
     echo "warning: no \"$IDENTITY\" certificate (run scripts/setup-signing.sh)," \
