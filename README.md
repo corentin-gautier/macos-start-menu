@@ -25,8 +25,10 @@ release, no other key) and a panel opens right below the Apple menu with:
   Desktop, Documents and Downloads…" in the settings menu asks for it.
 - A **calculator** in the search field (`12*7`, `(3+4)/2`, `2^10`, `20% of
   85`; Return copies the result), your **Shortcuts** (run without opening
-  the Shortcuts app), and a **Search the web** row (Google, DuckDuckGo, Bing
-  or Ecosia, picked in the settings menu).
+  the Shortcuts app), and a **Search the web** row (Google by default; Bing,
+  DuckDuckGo, Brave Search, Ecosia, Startpage, Qwant, Kagi, Yahoo, Yandex,
+  Baidu, Naver, or an AI assistant: Perplexity, ChatGPT, Claude; picked in
+  the settings menu).
 - A **dot under running apps**; right-click one to Quit or Force Quit it.
 - A **grid or list** view (list rows show the app's category), picked in the
   sort menu.

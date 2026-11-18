@@ -448,7 +448,8 @@ private struct ResultView: View {
         case .file(let file): file.name
         case .shortcut(let shortcut): shortcut.name
         case .calculation(let calculation): "= \(calculation.display)"
-        case .webSearch(let text): L("Search the web for “%@”", text)
+        case .webSearch(let text):
+            model.webSearchEngine.isAssistant ? L("Ask “%@”", text) : L("Search the web for “%@”", text)
         }
     }
 
@@ -802,7 +803,13 @@ private enum OptionsMenu {
                         action: #selector(Target.allowFolders(_:)), checked: false)
             }
             let engines = addSubmenu(L("Web Search"), symbol: "globe")
-            for engine in WebSearchEngine.allCases {
+            for engine in WebSearchEngine.searchEngines {
+                addItem(engine.title, symbol: nil, action: #selector(Target.pickEngine(_:)),
+                        object: engine, checked: engine == model.webSearchEngine, to: engines)
+            }
+            engines.addItem(.separator())
+            engines.addItem(NSMenuItem.sectionHeader(title: L("AI Assistants")))
+            for engine in WebSearchEngine.assistants {
                 addItem(engine.title, symbol: nil, action: #selector(Target.pickEngine(_:)),
                         object: engine, checked: engine == model.webSearchEngine, to: engines)
             }
