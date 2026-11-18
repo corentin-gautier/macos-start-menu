@@ -738,6 +738,11 @@ private enum OptionsMenu {
             model.dismiss()
             NSWorkspace.shared.open(UpdateChecker.releasesPage)
         }
+
+        @objc func openKofi(_ item: NSMenuItem) {
+            model.dismiss()
+            NSWorkspace.shared.open(URL(string: "https://ko-fi.com/corentingautier")!)
+        }
     }
 
     static func show(_ kind: Kind, model: StartMenuModel) {
@@ -834,6 +839,10 @@ private enum OptionsMenu {
                     checked: model.opensAtLogin)
             addItem(L("Hide the Dock"), symbol: "dock.rectangle", action: #selector(Target.toggleDock(_:)),
                     checked: model.hidesDock)
+
+            menu.addItem(.separator())
+            addItem(L("Buy Me a Coffee on Ko-fi…"), symbol: "cup.and.heat.waves",
+                    action: #selector(Target.openKofi(_:)), checked: false)
         }
 
         var origin = NSEvent.mouseLocation
