@@ -7,7 +7,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-APP="$HOME/Applications/Start Menu.app"
+APP="/Applications/Start Menu.app"
 BIN="$APP/Contents/MacOS/StartMenu"
 DOMAIN=local.mac-start-menu
 OUT=docs/img
