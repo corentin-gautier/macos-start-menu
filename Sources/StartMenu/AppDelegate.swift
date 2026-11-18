@@ -3,6 +3,7 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var panelController: StartPanelController!
     private var commandMonitor: CommandKeyMonitor!
+    private var appleMenuMonitor: AppleMenuClickMonitor!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Used by scripts/uninstall.sh before deleting the app.
@@ -15,10 +16,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         commandMonitor = CommandKeyMonitor { [weak self] in
             self?.panelController.toggle()
         }
+        appleMenuMonitor = AppleMenuClickMonitor { [weak self] in
+            self?.panelController.toggle()
+        }
         commandMonitor.onPermissionGranted = { [weak self] in
+            self?.appleMenuMonitor.update()
             self?.panelController.showOnboarding(.ready)
         }
         commandMonitor.start()
+        appleMenuMonitor.update()
+        panelController.model.onTriggerKeyChange = { [weak self] in self?.commandMonitor.trigger = $0 }
+        panelController.model.onAppleMenuClickChange = { [weak self] in self?.appleMenuMonitor.update() }
+        UpdateChecker.shared.start()
 
         LoginItem.registerOnFirstLaunch()
         if !CommandKeyMonitor.isTrusted {

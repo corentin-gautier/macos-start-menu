@@ -7,6 +7,13 @@ VERSION="$1"
 NOTES="${2:-}"
 TAP_DIR="${TAP_DIR:-$HOME/Projects/homebrew-tap}"
 
+# The update check compares this version with the latest release's tag.
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Resources/Info.plist
+if ! git diff --quiet Resources/Info.plist; then
+    git commit -qm "Version $VERSION" Resources/Info.plist
+    git push -q
+fi
+
 scripts/package.sh
 gh release create "v$VERSION" build/Start-Menu.zip --title "macOS Start Menu $VERSION" --notes "$NOTES"
 

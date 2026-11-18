@@ -1,24 +1,58 @@
 import AppKit
 import Combine
+import UniformTypeIdentifiers
 
 enum StartResult: Identifiable {
     case app(AppEntry)
     case setting(SettingEntry)
     case folder(FolderEntry)
+    case file(FileEntry)
+    case shortcut(ShortcutEntry)
+    case calculation(Calculation)
+    case webSearch(String)
 
     var id: String {
         switch self {
         case .app(let app): "app:\(app.id)"
         case .setting(let setting): "setting:\(setting.id)"
         case .folder(let folder): "folder:\(folder.id)"
+        case .file(let file): "file:\(file.id)"
+        case .shortcut(let shortcut): "shortcut:\(shortcut.id)"
+        case .calculation: "calculation"
+        case .webSearch: "web"
+        }
+    }
+
+    var isPinnable: Bool {
+        switch self {
+        case .calculation, .webSearch: false
+        default: true
         }
     }
 }
 
-/// A titled block of results: apps are shown as a grid, settings as a list.
+/// How a section lays out its items.
+enum SectionStyle {
+    /// Icon tiles, `Layout.gridColumns` per row.
+    case tiles
+    /// Full-width rows.
+    case rows
+    /// Rows in two columns (recent files).
+    case twoColumns
+
+    var columns: Int {
+        switch self {
+        case .tiles: Layout.gridColumns
+        case .rows: 1
+        case .twoColumns: 2
+        }
+    }
+}
+
+/// A titled block of results.
 struct ResultSection: Identifiable {
     let title: String
-    let isGrid: Bool
+    let style: SectionStyle
     let items: [StartResult]
     /// Index of the first item in the flat result list.
     let startIndex: Int
@@ -26,6 +60,7 @@ struct ResultSection: Identifiable {
     var keyPrefix = ""
 
     var id: String { title }
+    var isPinned: Bool { !keyPrefix.isEmpty }
 
     /// View identity of an item (scroll target, hover ID).
     func key(for result: StartResult) -> String { keyPrefix + result.id }
@@ -112,6 +147,33 @@ final class StartMenuModel: ObservableObject {
     @Published private(set) var opensAtLogin = LoginItem.isEnabled
     @Published private(set) var hidesDock = Dock.isHidden
     @Published private(set) var forceQuitSelection = 0
+    /// Bundle paths of the running apps (dot under their tile).
+    @Published private(set) var runningPaths = RunningApps.shared.paths
+    /// A newer release on GitHub, shown in the sort menu.
+    @Published private(set) var availableUpdate = UpdateChecker.shared.availableVersion
+    @Published var showsRecentFiles = UserDefaults.standard.object(forKey: "showsRecentFiles") as? Bool ?? true {
+        didSet {
+            UserDefaults.standard.set(showsRecentFiles, forKey: "showsRecentFiles")
+            updateResults()
+        }
+    }
+    @Published var triggerKey = TriggerKey.current {
+        didSet {
+            TriggerKey.current = triggerKey
+            onTriggerKeyChange(triggerKey)
+        }
+    }
+    @Published var opensOnAppleMenuClick = AppleMenuClickMonitor.isEnabled {
+        didSet {
+            AppleMenuClickMonitor.isEnabled = opensOnAppleMenuClick
+            onAppleMenuClickChange()
+        }
+    }
+    @Published var webSearchEngine = WebSearchEngine.current {
+        didSet { WebSearchEngine.current = webSearchEngine }
+    }
+    var onTriggerKeyChange: (TriggerKey) -> Void = { _ in }
+    var onAppleMenuClickChange: () -> Void = {}
 
     let userName = UserProfile.fullName
     var dismiss: () -> Void = {}
@@ -128,6 +190,9 @@ final class StartMenuModel: ObservableObject {
     /// Result indices per visual row, for up/down navigation.
     private var rows: [[Int]] = []
     private let maxSettingResults = 6
+    private let maxRecentFiles = 6
+    private let maxSearchedFiles = 4
+    private let maxShortcutResults = 4
 
     init() {
         let saved = UserDefaults.standard.string(forKey: "sortMode").flatMap(SortMode.init(rawValue:))
@@ -138,6 +203,12 @@ final class StartMenuModel: ObservableObject {
         avatar = UserProfile.loadAvatar()
         IconCache.shared.preload(apps.map(\.url))
         HoverRegistry.shared.onChange = { [weak self] in self?.updateHoverFrames($0) }
+        RunningApps.shared.onChange = { [weak self] in self?.runningPaths = RunningApps.shared.paths }
+        UpdateChecker.shared.onChange = { [weak self] in self?.availableUpdate = UpdateChecker.shared.availableVersion }
+        RecentFiles.shared.onChange = { [weak self] in self?.refreshResults() }
+        ShortcutCatalog.shared.onChange = { [weak self] in self?.refreshResults() }
+        RecentFiles.shared.refresh()
+        ShortcutCatalog.shared.refresh()
     }
 
     var isSearching: Bool { !normalizedQuery.isEmpty }
@@ -162,6 +233,8 @@ final class StartMenuModel: ObservableObject {
         hidesDock = Dock.isHidden
         showsHidden = false
         updateResults() // usage may have changed since last time
+        RecentFiles.shared.refresh()
+        ShortcutCatalog.shared.refresh()
         // Screenshots: `STARTMENU_DEMO_QUERY` opens the menu with a search.
         if let demoQuery = ProcessInfo.processInfo.environment["STARTMENU_DEMO_QUERY"] { query = demoQuery }
         if ProcessInfo.processInfo.environment["STARTMENU_DEMO_FORCEQUIT"] == "1" { showForceQuit() }
@@ -182,22 +255,36 @@ final class StartMenuModel: ObservableObject {
 
     private func updateResults() {
         let q = normalizedQuery
-        var groups: [(title: String, isGrid: Bool, items: [StartResult])]
+        var groups: [(title: String, style: SectionStyle, items: [StartResult])]
         let pinnedItems = q.isEmpty ? pinnedResults : []
+        let appStyle: SectionStyle = layout == .grid ? .tiles : .rows
 
         if q.isEmpty {
-            groups = [(L("Pinned"), layout == .grid, pinnedItems)]
-                + browseGroups().map { ($0.title, layout == .grid, $0.apps.map(StartResult.app)) }
+            let recent = showsRecentFiles ? RecentFiles.shared.files.prefix(maxRecentFiles).map(StartResult.file) : []
+            groups = [(L("Pinned"), appStyle, pinnedItems), (L("Recent files"), .twoColumns, recent)]
+                + browseGroups().map { ($0.title, appStyle, $0.apps.map(StartResult.app)) }
             showsSelection = false
         } else {
+            let trimmed = query.trimmingCharacters(in: .whitespaces)
+            let calculation = Calculator.evaluate(trimmed).map { [StartResult.calculation($0)] } ?? []
             let matchedApps = Self.ranked(visibleApps, name: \.name) { Search.score(q, $0.key) }
             let matchedFolders = Self.ranked(FolderCatalog.all, name: \.name) { $0.score(q) }.prefix(4)
             let matchedSettings = Self.ranked(SettingsCatalog.all, name: \.name) { $0.score(q) }
                 .prefix(maxSettingResults)
+            let matchedShortcuts = Self.ranked(ShortcutCatalog.shared.all, name: \.name) { Search.score(q, $0.key) }
+                .prefix(maxShortcutResults)
+            // Files keep their recency order: names are too varied to rank well.
+            let matchedFiles = RecentFiles.shared.files
+                .filter { Search.score(q, $0.key, fuzzy: false) != nil }
+                .prefix(maxSearchedFiles)
             groups = [
-                (L("Apps"), layout == .grid, matchedApps.map(StartResult.app)),
-                (L("Folders"), false, matchedFolders.map(StartResult.folder)),
-                (L("Settings"), false, matchedSettings.map(StartResult.setting)),
+                (L("Calculator"), .rows, calculation),
+                (L("Apps"), appStyle, matchedApps.map(StartResult.app)),
+                (L("Folders"), .rows, matchedFolders.map(StartResult.folder)),
+                (L("Settings"), .rows, matchedSettings.map(StartResult.setting)),
+                (L("Shortcuts"), .rows, matchedShortcuts.map(StartResult.shortcut)),
+                (L("Recent files"), .rows, matchedFiles.map(StartResult.file)),
+                (L("Web"), .rows, [.webSearch(trimmed)]),
             ]
             showsSelection = true
         }
@@ -206,16 +293,13 @@ final class StartMenuModel: ObservableObject {
         var newRows: [[Int]] = []
         var index = 0
         for group in groups where !group.items.isEmpty {
-            var section = ResultSection(title: group.title, isGrid: group.isGrid, items: group.items, startIndex: index)
+            var section = ResultSection(title: group.title, style: group.style, items: group.items, startIndex: index)
             if newSections.isEmpty && !pinnedItems.isEmpty { section.keyPrefix = "pinned/" }
             newSections.append(section)
             let indices = Array(index..<index + group.items.count)
-            if group.isGrid {
-                newRows += stride(from: 0, to: indices.count, by: Layout.gridColumns).map {
-                    Array(indices[$0..<min($0 + Layout.gridColumns, indices.count)])
-                }
-            } else {
-                newRows += indices.map { [$0] }
+            let columns = group.style.columns
+            newRows += stride(from: 0, to: indices.count, by: columns).map {
+                Array(indices[$0..<min($0 + columns, indices.count)])
             }
             index += group.items.count
         }
@@ -224,6 +308,16 @@ final class StartMenuModel: ObservableObject {
         resultKeys = newSections.flatMap { section in section.items.map(section.key) }
         rows = newRows
         selection = 0
+    }
+
+    /// Rebuilds the results without losing the keyboard selection (data
+    /// arriving in the background, pins, hidden apps).
+    private func refreshResults() {
+        let keptSelection = selection
+        let keptShowsSelection = showsSelection
+        updateResults()
+        showsSelection = keptShowsSelection
+        selection = min(keptSelection, max(resultCount - 1, 0))
     }
 
     /// The app list shown when not searching, per sort mode.
@@ -286,17 +380,103 @@ final class StartMenuModel: ObservableObject {
         var byID: [String: StartResult] = [:]
         for app in visibleApps { byID[StartResult.app(app).id] = .app(app) }
         for setting in SettingsCatalog.all { byID[StartResult.setting(setting).id] = .setting(setting) }
-        return pinned.compactMap { byID[$0] }
+        for folder in FolderCatalog.all { byID[StartResult.folder(folder).id] = .folder(folder) }
+        for shortcut in ShortcutCatalog.shared.all { byID[StartResult.shortcut(shortcut).id] = .shortcut(shortcut) }
+        return pinned.compactMap { id in
+            if let result = byID[id] { return result }
+            // Files and folders dropped on the menu. Their existence isn't
+            // checked: that would ask for access to Documents, Desktop…
+            if id.hasPrefix("file:") {
+                return .file(FileEntry(url: URL(fileURLWithPath: String(id.dropFirst(5)))))
+            }
+            if id.hasPrefix("folder:") {
+                let url = URL(fileURLWithPath: String(id.dropFirst(7)))
+                let name = FileManager.default.displayName(atPath: url.path)
+                return .folder(FolderEntry(url: url, name: name, keywords: []))
+            }
+            return nil
+        }
     }
 
     func isPinned(_ result: StartResult) -> Bool { pinned.contains(result.id) }
 
     func togglePinned(_ result: StartResult) {
         if let index = pinned.firstIndex(of: result.id) { pinned.remove(at: index) } else { pinned.append(result.id) }
+        savePinned()
+    }
+
+    private func savePinned() {
         UserDefaults.standard.set(pinned, forKey: "pinned")
-        let keptSelection = selection
-        updateResults()
-        selection = min(keptSelection, max(resultCount - 1, 0))
+        refreshResults()
+    }
+
+    // MARK: - Drag and drop
+
+    /// Dragging a result carries its ID, visible to this process only: an
+    /// app's file URL dropped on the desktop would copy the whole app.
+    static let dragType = UTType.plainText
+
+    func dragProvider(for result: StartResult) -> NSItemProvider {
+        let provider = NSItemProvider()
+        let data = Data(result.id.utf8)
+        provider.registerDataRepresentation(forTypeIdentifier: Self.dragType.identifier, visibility: .ownProcess) {
+            $0(data, nil)
+            return nil
+        }
+        return provider
+    }
+
+    /// Results dragged inside the menu, or files, folders and apps dropped
+    /// from the Finder: pinned before `targetID` (a pinned item), or at the end.
+    func drop(_ providers: [NSItemProvider], before targetID: String?) -> Bool {
+        // No mouse moves during a drag: the last known position is stale.
+        mouseMoved(to: nil)
+        var handled = false
+        for provider in providers {
+            if provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) {
+                handled = true
+                _ = provider.loadObject(ofClass: NSURL.self) { [weak self] url, _ in
+                    guard let url = url as? URL else { return }
+                    DispatchQueue.main.async { self?.pin(self?.resultID(forDropped: url), before: targetID) }
+                }
+            } else if provider.hasItemConformingToTypeIdentifier(Self.dragType.identifier) {
+                handled = true
+                provider.loadDataRepresentation(forTypeIdentifier: Self.dragType.identifier) { [weak self] data, _ in
+                    guard let data else { return }
+                    let id = String(decoding: data, as: UTF8.self)
+                    DispatchQueue.main.async {
+                        // Only IDs of known results: plain text from another app is ignored.
+                        guard let self, self.results.contains(where: { $0.id == id && $0.isPinnable }) else { return }
+                        self.pin(id, before: targetID)
+                    }
+                }
+            }
+        }
+        return handled
+    }
+
+    private func pin(_ id: String?, before targetID: String?) {
+        guard let id, id != targetID else { return }
+        if let targetID, pinned.contains(targetID) {
+            pinned.removeAll { $0 == id }
+            pinned.insert(id, at: pinned.firstIndex(of: targetID) ?? pinned.endIndex)
+        } else if !pinned.contains(id) {
+            pinned.append(id)
+        } else {
+            return
+        }
+        savePinned()
+    }
+
+    private func resultID(forDropped url: URL) -> String? {
+        guard url.isFileURL else { return nil }
+        let path = url.standardizedFileURL.path
+        let resolved = url.resolvingSymlinksInPath().path
+        if let app = apps.first(where: { $0.path == resolved }) { return StartResult.app(app).id }
+        if let folder = FolderCatalog.all.first(where: { $0.url.path == path }) { return StartResult.folder(folder).id }
+        let isDirectory = url.hasDirectoryPath
+            || (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
+        return isDirectory && url.pathExtension.isEmpty ? "folder:\(path)" : "file:\(path)"
     }
 
     // MARK: - Hidden apps
@@ -316,9 +496,7 @@ final class StartMenuModel: ObservableObject {
         if isHidden { hidden.insert(key) } else { hidden.remove(key) }
         UserDefaults.standard.set(hidden.sorted(), forKey: "hiddenApps")
         if hiddenCount == 0 { showsHidden = false }
-        let keptSelection = selection
-        updateResults()
-        selection = min(keptSelection, max(resultCount - 1, 0))
+        refreshResults()
     }
 
     func toggleShowsHidden() {
@@ -427,8 +605,16 @@ final class StartMenuModel: ObservableObject {
         case .app(let app): SystemAction.openApp(url: app.url)
         case .setting(let setting): NSWorkspace.shared.open(setting.url)
         case .folder(let folder): NSWorkspace.shared.open(folder.url)
+        case .file(let file): NSWorkspace.shared.open(file.url)
+        case .shortcut(let shortcut): shortcut.run()
+        case .calculation(let calculation): calculation.copy()
+        case .webSearch(let text): webSearchEngine.search(text)
         }
     }
+
+    func isRunning(_ app: AppEntry) -> Bool { runningPaths.contains(app.path) }
+    func quit(_ app: AppEntry) { RunningApps.shared.quit(app) }
+    func forceQuit(_ app: AppEntry) { RunningApps.shared.forceQuit(app) }
 
     func perform(_ action: SystemAction) {
         if action == .forceQuit {

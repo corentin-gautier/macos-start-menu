@@ -37,7 +37,7 @@ enum Layout {
 
 final class StartPanelController: NSObject, NSWindowDelegate {
     private let panel = StartPanel()
-    private let model = StartMenuModel()
+    let model = StartMenuModel()
     private var keyMonitor: Any?
     private let demoBackdrop = DemoBackdrop.fromEnvironment()
     private var styleObserver: AnyCancellable?

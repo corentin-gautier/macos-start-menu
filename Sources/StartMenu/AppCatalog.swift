@@ -1,5 +1,6 @@
 import AppKit
 import CoreServices
+import UniformTypeIdentifiers
 
 struct AppEntry: Identifiable, Hashable {
     var id: String { path }
@@ -102,6 +103,16 @@ final class IconCache {
         if let cached = cache.object(forKey: url.path as NSString) { return cached }
         let icon = rasterize(NSWorkspace.shared.icon(forFile: url.path))
         cache.setObject(icon, forKey: url.path as NSString)
+        return icon
+    }
+
+    /// The generic icon of a file type (no file access).
+    func icon(forType identifier: String?) -> NSImage {
+        let key = "type:\(identifier ?? "")" as NSString
+        if let cached = cache.object(forKey: key) { return cached }
+        let type = identifier.flatMap(UTType.init) ?? .data
+        let icon = rasterize(NSWorkspace.shared.icon(for: type))
+        cache.setObject(icon, forKey: key)
         return icon
     }
 

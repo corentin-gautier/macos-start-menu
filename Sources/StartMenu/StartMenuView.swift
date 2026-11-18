@@ -130,6 +130,12 @@ struct StartMenuView: View {
         }
         .buttonStyle(.plain)
         .controlSurface(style, interactive: true)
+        .overlay(alignment: .topTrailing) {
+            // A newer version is available (listed in the menu).
+            if model.availableUpdate != nil {
+                Circle().fill(Color.accentColor).frame(width: 8, height: 8).offset(x: -4, y: 4)
+            }
+        }
         .hoverFrame(HoverSpace.sortID)
         .fixedSize()
         .opacity(model.isSearching ? 0.5 : 1)
@@ -137,66 +143,81 @@ struct StartMenuView: View {
 
     // MARK: - Results
 
-    @ViewBuilder
+    /// Pinned item a drag hovers: the dropped item goes before it.
+    @State private var dropTarget: String?
+
     private var results: some View {
-        if model.isSearching && model.resultCount == 0 {
-            Text("No Results")
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 80)
-        } else {
-            LazyVStack(alignment: .leading, spacing: 4) {
-                Color.clear.frame(height: 0).id(Self.topID)
-                ForEach(model.sections) { section in
-                    SectionHeader(title: section.title)
-                    if section.isGrid {
-                        LazyVGrid(
-                            columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: Layout.gridColumns),
-                            spacing: 4
-                        ) {
-                            items(of: section)
-                        }
-                        .padding(.bottom, 10)
-                    } else {
+        LazyVStack(alignment: .leading, spacing: 4) {
+            Color.clear.frame(height: 0).id(Self.topID)
+            ForEach(model.sections) { section in
+                SectionHeader(title: section.title)
+                if section.style == .rows {
+                    items(of: section)
+                } else {
+                    LazyVGrid(
+                        columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: section.style.columns),
+                        spacing: 4
+                    ) {
                         items(of: section)
                     }
+                    .padding(.bottom, section.style == .tiles ? 10 : 6)
                 }
             }
         }
+        // Files, folders and apps dropped from the Finder are pinned.
+        .onDrop(of: [.fileURL, StartMenuModel.dragType], isTargeted: nil) { model.drop($0, before: nil) }
     }
 
     private func items(of section: ResultSection) -> some View {
         ForEach(Array(section.items.enumerated()), id: \.element.id) { offset, result in
             let index = section.startIndex + offset
             let key = section.key(for: result)
-            let state = HighlightState(
-                style: style,
-                selected: model.highlightedIndex == index,
-                hovered: model.hoveredID == HoverSpace.resultID(key)
+            ResultView(
+                result: result,
+                asTile: section.style == .tiles,
+                state: HighlightState(
+                    style: style,
+                    selected: model.highlightedIndex == index,
+                    hovered: model.hoveredID == HoverSpace.resultID(key) || dropTarget == key
+                ),
+                isPinned: model.isPinned(result),
+                isHidden: { if case .app(let app) = result { model.isHidden(app) } else { false } }(),
+                isRunning: { if case .app(let app) = result { model.isRunning(app) } else { false } }(),
+                model: model
             )
-            let pin = PinToggle(isPinned: model.isPinned(result)) { model.togglePinned(result) }
-            Group {
-                switch result {
-                case .app(let app):
-                    AppTile(
-                        app: app,
-                        asRow: !section.isGrid,
-                        state: state,
-                        pin: pin,
-                        isHidden: model.isHidden(app),
-                        onToggleHidden: { model.setHidden(app, !model.isHidden(app)) },
-                        onUninstall: AppUninstaller.canUninstall(app) ? { model.uninstall(app) } : nil
-                    )
-                case .setting(let setting):
-                    SettingRow(setting: setting, asTile: section.isGrid, state: state, pin: pin)
-                case .folder(let folder):
-                    FolderRow(folder: folder, state: state)
-                }
-            }
             .id(key)
             .hoverFrame(HoverSpace.resultID(key))
             .onTapGesture { model.activate(index: index) }
+            .modifier(DragAndDrop(result: result, key: key, isPinnedSection: section.isPinned,
+                                  dropTarget: $dropTarget, model: model))
+        }
+    }
+}
+
+/// Results can be dragged inside the menu (to pin them, or to reorder the
+/// pinned ones); pinned items take drops, which land before them.
+private struct DragAndDrop: ViewModifier {
+    let result: StartResult
+    let key: String
+    let isPinnedSection: Bool
+    @Binding var dropTarget: String?
+    let model: StartMenuModel
+
+    func body(content: Content) -> some View {
+        if result.isPinnable {
+            let draggable = content.onDrag { model.dragProvider(for: result) }
+            if isPinnedSection {
+                draggable.onDrop(of: [.fileURL, StartMenuModel.dragType], isTargeted: Binding(
+                    get: { dropTarget == key },
+                    set: { targeted in
+                        if targeted { dropTarget = key } else if dropTarget == key { dropTarget = nil }
+                    }
+                )) { model.drop($0, before: result.id) }
+            } else {
+                draggable
+            }
+        } else {
+            content
         }
     }
 }
@@ -267,16 +288,6 @@ private struct ResultHighlight: ViewModifier {
 
 // MARK: - Results views
 
-/// Pin / Unpin context menu item of apps and settings.
-private struct PinToggle {
-    let isPinned: Bool
-    let toggle: () -> Void
-
-    var button: some View {
-        Button(isPinned ? L("Unpin") : L("Pin"), systemImage: isPinned ? "pin.slash" : "pin", action: toggle)
-    }
-}
-
 private struct SectionHeader: View {
     let title: String
 
@@ -290,20 +301,21 @@ private struct SectionHeader: View {
     }
 }
 
-/// An app as a grid tile, or as a list row (icon, name, category).
-private struct AppTile: View {
-    let app: AppEntry
-    let asRow: Bool
+/// Any result, as a grid tile (icon over name) or a row (icon, name, detail).
+private struct ResultView: View {
+    let result: StartResult
+    let asTile: Bool
     let state: HighlightState
-    let pin: PinToggle
+    let isPinned: Bool
     let isHidden: Bool
-    let onToggleHidden: () -> Void
-    let onUninstall: (() -> Void)?
+    let isRunning: Bool
+    /// Not observed: the parent passes the state, the menu only calls actions.
+    let model: StartMenuModel
 
     private var cornerRadius: CGFloat {
-        switch (state.style, asRow) {
-        case (.glass, false): 18
-        case (.glass, true): 14
+        switch (state.style, asTile) {
+        case (.glass, true): 18
+        case (.glass, false): 14
         case (.classic, _): 10
         }
     }
@@ -312,30 +324,18 @@ private struct AppTile: View {
 
     var body: some View {
         Group {
-            if asRow { row } else { tile }
+            if asTile { tile } else { row }
         }
         .opacity(isHidden ? 0.4 : 1)
         .modifier(ResultHighlight(state: state, cornerRadius: cornerRadius))
         .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        .contextMenu {
-            pin.button
-            Button("Show in Finder", systemImage: "folder") {
-                NSWorkspace.shared.activateFileViewerSelecting([app.url])
-            }
-            Button(isHidden ? L("Unhide") : L("Hide"), systemImage: isHidden ? "eye" : "eye.slash", action: onToggleHidden)
-            if let onUninstall {
-                Divider()
-                Button("Uninstall…", systemImage: "trash", role: .destructive, action: onUninstall)
-            }
-        }
+        .contextMenu { menu }
     }
 
     private var tile: some View {
         VStack(spacing: 6) {
-            Image(nsImage: IconCache.shared.icon(for: app.url))
-                .resizable()
-                .frame(width: 50, height: 50)
-            Text(app.name)
+            icon(size: 50).overlay(alignment: .bottom) { runningDot.offset(y: 5) }
+            Text(title)
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(whiteText ? .white : .primary)
                 .lineLimit(2)
@@ -349,124 +349,133 @@ private struct AppTile: View {
 
     private var row: some View {
         HStack(spacing: 12) {
-            Image(nsImage: IconCache.shared.icon(for: app.url))
-                .resizable()
-                .frame(width: 32, height: 32)
+            icon(size: 32).overlay(alignment: .leading) { runningDot.offset(x: -7) }
             VStack(alignment: .leading, spacing: 1) {
-                Text(app.name).font(.system(size: 13, weight: .medium))
-                Text(app.category.title)
+                Text(title).font(.system(size: 13, weight: .medium))
+                Text(subtitle)
                     .font(.system(size: 11))
                     .foregroundStyle(whiteText ? .white.opacity(0.8) : .secondary)
             }
             .foregroundStyle(whiteText ? .white : .primary)
             .lineLimit(1)
-            Spacer()
+            .truncationMode(.middle)
+            Spacer(minLength: 0)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
     }
-}
 
-/// A System Settings pane as a list row, or as a grid tile (pinned, grid view).
-private struct SettingRow: View {
-    let setting: SettingEntry
-    let asTile: Bool
-    let state: HighlightState
-    let pin: PinToggle
-
-    private var whiteText: Bool { state.style == .glass && state.selected }
-    private var cornerRadius: CGFloat {
-        switch (state.style, asTile) {
-        case (.glass, true): 18
-        case (.glass, false): 14
-        case (.classic, _): 10
+    @ViewBuilder
+    private var runningDot: some View {
+        if isRunning {
+            Circle()
+                .fill(whiteText ? Color.white : Color.primary.opacity(0.55))
+                .frame(width: 4, height: 4)
         }
     }
 
-    var body: some View {
-        Group {
-            if asTile { tile } else { row }
-        }
-        .modifier(ResultHighlight(state: state, cornerRadius: cornerRadius))
-        .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        .contextMenu { pin.button }
-    }
-
+    /// `size` is the footprint of an app icon, whose artwork has a margin.
+    @ViewBuilder
     private func icon(size: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: size * 0.27, style: .continuous)
-            .fill(setting.color.gradient)
-            .frame(width: size, height: size)
+        switch result {
+        case .app(let app): image(IconCache.shared.icon(for: app.url), size: size)
+        case .setting(let setting): symbolIcon(setting.symbol, color: setting.color, size: size)
+        case .folder(let folder): image(FolderCatalog.icon(for: folder), size: size)
+        case .file(let file): image(file.icon, size: size)
+        case .shortcut:
+            if let url = ShortcutCatalog.appURL { image(IconCache.shared.icon(for: url), size: size) }
+            else { symbolIcon("square.stack.3d.up.fill", color: .pink, size: size) }
+        case .calculation:
+            if let url = Self.calculatorURL { image(IconCache.shared.icon(for: url), size: size) }
+            else { symbolIcon("equal", color: .orange, size: size) }
+        case .webSearch: symbolIcon("magnifyingglass", color: .blue, size: size)
+        }
+    }
+
+    private static let calculatorURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.calculator")
+
+    private func image(_ image: NSImage, size: CGFloat) -> some View {
+        Image(nsImage: image).resizable().frame(width: size, height: size)
+    }
+
+    private func symbolIcon(_ symbol: String, color: Color, size: CGFloat) -> some View {
+        let inner = size * 0.84
+        return RoundedRectangle(cornerRadius: inner * 0.27, style: .continuous)
+            .fill(color.gradient)
+            .frame(width: inner, height: inner)
             .overlay(
-                Image(systemName: setting.symbol)
-                    .font(.system(size: size / 2, weight: .semibold))
+                Image(systemName: symbol)
+                    .font(.system(size: inner / 2, weight: .semibold))
                     .foregroundStyle(.white)
             )
+            .frame(width: size, height: size)
     }
 
-    private var tile: some View {
-        VStack(spacing: 6) {
-            // Same footprint as an app icon, whose artwork has a margin.
-            icon(size: 42).frame(width: 50, height: 50)
-            Text(setting.name)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(whiteText ? .white : .primary)
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
-                .frame(height: 28, alignment: .top)
+    private var title: String {
+        switch result {
+        case .app(let app): app.name
+        case .setting(let setting): setting.name
+        case .folder(let folder): folder.name
+        case .file(let file): file.name
+        case .shortcut(let shortcut): shortcut.name
+        case .calculation(let calculation): "= \(calculation.display)"
+        case .webSearch(let text): L("Search the web for “%@”", text)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-        .padding(.horizontal, 4)
     }
 
-    private var row: some View {
-        HStack(spacing: 12) {
-            icon(size: 30)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(setting.name).font(.system(size: 13, weight: .medium))
-                Text("System Settings")
-                    .font(.system(size: 11))
-                    .foregroundStyle(whiteText ? .white.opacity(0.8) : .secondary)
-            }
-            .foregroundStyle(whiteText ? .white : .primary)
-            Spacer()
+    private var subtitle: String {
+        switch result {
+        case .app(let app): app.category.title
+        case .setting: L("System Settings")
+        case .folder(let folder): folder.isFinderLocation ? "Finder" : AppUninstaller.abbreviate(folder.url)
+        case .file(let file): file.subtitle
+        case .shortcut: L("Shortcuts")
+        case .calculation: L("Return copies the result")
+        case .webSearch: model.webSearchEngine.title
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 7)
     }
-}
 
-private struct FolderRow: View {
-    let folder: FolderEntry
-    let state: HighlightState
-
-    private var whiteText: Bool { state.style == .glass && state.selected }
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(nsImage: FolderCatalog.icon(for: folder))
-                .resizable()
-                .frame(width: 30, height: 30)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(folder.name).font(.system(size: 13, weight: .medium))
-                Text(folder.isFinderLocation ? "Finder" : AppUninstaller.abbreviate(folder.url))
-                    .font(.system(size: 11))
-                    .foregroundStyle(whiteText ? .white.opacity(0.8) : .secondary)
+    @ViewBuilder
+    private var menu: some View {
+        if result.isPinnable {
+            Button(isPinned ? L("Unpin") : L("Pin"), systemImage: isPinned ? "pin.slash" : "pin") {
+                model.togglePinned(result)
             }
-            .foregroundStyle(whiteText ? .white : .primary)
-            .lineLimit(1)
-            Spacer()
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 7)
-        .modifier(ResultHighlight(state: state, cornerRadius: state.style == .glass ? 14 : 10))
-        .contentShape(Rectangle())
-        .contextMenu {
-            if !folder.isFinderLocation {
-                Button("Show in Finder", systemImage: "folder") {
-                    NSWorkspace.shared.activateFileViewerSelecting([folder.url])
-                }
+        switch result {
+        case .app(let app):
+            showInFinder(app.url)
+            Button(isHidden ? L("Unhide") : L("Hide"), systemImage: isHidden ? "eye" : "eye.slash") {
+                model.setHidden(app, !isHidden)
             }
+            if isRunning {
+                Divider()
+                Button(L("Quit"), systemImage: "xmark.circle") { model.quit(app) }
+                Button(L("Force Quit"), systemImage: "xmark.octagon") { model.forceQuit(app) }
+            }
+            if AppUninstaller.canUninstall(app) {
+                Divider()
+                Button(L("Uninstall…"), systemImage: "trash", role: .destructive) { model.uninstall(app) }
+            }
+        case .folder(let folder):
+            if !folder.isFinderLocation { showInFinder(folder.url) }
+        case .file(let file):
+            showInFinder(file.url)
+        case .shortcut(let shortcut):
+            Button(L("Edit in Shortcuts"), systemImage: "pencil") {
+                var components = URLComponents(string: "shortcuts://open-shortcut")
+                components?.queryItems = [URLQueryItem(name: "name", value: shortcut.name)]
+                if let url = components?.url { NSWorkspace.shared.open(url) }
+                model.dismiss()
+            }
+        case .setting, .calculation, .webSearch:
+            EmptyView()
+        }
+    }
+
+    private func showInFinder(_ url: URL) -> some View {
+        Button(L("Show in Finder"), systemImage: "folder") {
+            NSWorkspace.shared.activateFileViewerSelecting([url])
         }
     }
 }
@@ -666,6 +675,32 @@ private enum SortMenu {
         @objc func toggleHidden(_ item: NSMenuItem) {
             model.toggleShowsHidden()
         }
+
+        @objc func toggleRecentFiles(_ item: NSMenuItem) {
+            model.showsRecentFiles.toggle()
+        }
+
+        @objc func allowFolders(_ item: NSMenuItem) {
+            model.dismiss()
+            RecentFiles.shared.requestFolderAccess()
+        }
+
+        @objc func pickTrigger(_ item: NSMenuItem) {
+            if let key = item.representedObject as? TriggerKey { model.triggerKey = key }
+        }
+
+        @objc func toggleAppleMenuClick(_ item: NSMenuItem) {
+            model.opensOnAppleMenuClick.toggle()
+        }
+
+        @objc func pickEngine(_ item: NSMenuItem) {
+            if let engine = item.representedObject as? WebSearchEngine { model.webSearchEngine = engine }
+        }
+
+        @objc func openUpdate(_ item: NSMenuItem) {
+            model.dismiss()
+            NSWorkspace.shared.open(UpdateChecker.releasesPage)
+        }
     }
 
     static func show(model: StartMenuModel) {
@@ -673,46 +708,85 @@ private enum SortMenu {
         let menu = NSMenu()
         menu.autoenablesItems = false
 
-        func addItem(_ title: String, symbol: String, action: Selector, object: Any?, checked: Bool) -> NSMenuItem {
+        @discardableResult
+        func addItem(_ title: String, symbol: String?, action: Selector, object: Any? = nil, checked: Bool,
+                     to parent: NSMenu? = nil) -> NSMenuItem {
             let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
             item.target = target
             item.representedObject = object
-            item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
+            item.image = symbol.flatMap { NSImage(systemSymbolName: $0, accessibilityDescription: nil) }
             item.state = checked ? .on : .off
-            menu.addItem(item)
+            (parent ?? menu).addItem(item)
             return item
+        }
+
+        func addSubmenu(_ title: String, symbol: String) -> NSMenu {
+            let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+            item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
+            let submenu = NSMenu()
+            submenu.autoenablesItems = false
+            item.submenu = submenu
+            menu.addItem(item)
+            return submenu
+        }
+
+        if let version = model.availableUpdate {
+            addItem(L("Update Available: Start Menu %@", version), symbol: "arrow.down.circle",
+                    action: #selector(Target.openUpdate(_:)), checked: false)
+            menu.addItem(.separator())
         }
 
         menu.addItem(NSMenuItem.sectionHeader(title: L("Sort apps")))
         for mode in SortMode.allCases {
-            _ = addItem(mode.title, symbol: mode.symbol, action: #selector(Target.pickSort(_:)),
-                        object: mode, checked: mode == model.sortMode)
+            addItem(mode.title, symbol: mode.symbol, action: #selector(Target.pickSort(_:)),
+                    object: mode, checked: mode == model.sortMode)
         }
         menu.addItem(.separator())
         let count = model.hiddenCount
         let hidden = addItem(count == 0 ? L("No Hidden Apps") : L("Show Hidden Apps (%d)", count), symbol: "eye.slash",
-                             action: #selector(Target.toggleHidden(_:)), object: nil, checked: model.showsHidden)
+                             action: #selector(Target.toggleHidden(_:)), checked: model.showsHidden)
         hidden.isEnabled = count > 0
 
         menu.addItem(.separator())
         menu.addItem(NSMenuItem.sectionHeader(title: L("View")))
         for layout in AppLayout.allCases {
-            _ = addItem(layout.title, symbol: layout.symbol, action: #selector(Target.pickLayout(_:)),
-                        object: layout, checked: layout == model.layout)
+            addItem(layout.title, symbol: layout.symbol, action: #selector(Target.pickLayout(_:)),
+                    object: layout, checked: layout == model.layout)
+        }
+        addItem(L("Show Recent Files"), symbol: "doc", action: #selector(Target.toggleRecentFiles(_:)),
+                checked: model.showsRecentFiles)
+        if model.showsRecentFiles && RecentFiles.needsFolderAccess {
+            addItem(L("Include Desktop, Documents and Downloads…"), symbol: "lock.open",
+                    action: #selector(Target.allowFolders(_:)), checked: false)
         }
 
         menu.addItem(.separator())
         menu.addItem(NSMenuItem.sectionHeader(title: L("Style")))
         for style in UIStyle.allCases {
-            _ = addItem(style.title, symbol: style.symbol, action: #selector(Target.pickStyle(_:)),
-                        object: style, checked: style == model.style)
+            addItem(style.title, symbol: style.symbol, action: #selector(Target.pickStyle(_:)),
+                    object: style, checked: style == model.style)
         }
 
         menu.addItem(.separator())
-        _ = addItem(L("Open at Login"), symbol: "power.circle", action: #selector(Target.toggleLogin(_:)),
-                    object: nil, checked: model.opensAtLogin)
-        _ = addItem(L("Hide the Dock"), symbol: "dock.rectangle", action: #selector(Target.toggleDock(_:)),
-                    object: nil, checked: model.hidesDock)
+        let triggers = addSubmenu(L("Open Menu With"), symbol: "keyboard")
+        for key in TriggerKey.allCases {
+            addItem(key.title, symbol: nil, action: #selector(Target.pickTrigger(_:)),
+                    object: key, checked: key == model.triggerKey, to: triggers)
+        }
+        let appleClick = addItem(L("Open on Apple Menu Click"), symbol: "apple.logo",
+                                 action: #selector(Target.toggleAppleMenuClick(_:)), checked: model.opensOnAppleMenuClick)
+        appleClick.toolTip = L("⌥-click the Apple logo for the Apple menu.")
+        let engines = addSubmenu(L("Web Search"), symbol: "globe")
+        for engine in WebSearchEngine.allCases {
+            addItem(engine.title, symbol: nil, action: #selector(Target.pickEngine(_:)),
+                    object: engine, checked: engine == model.webSearchEngine, to: engines)
+        }
+
+        menu.addItem(.separator())
+        addItem(L("Open at Login"), symbol: "power.circle", action: #selector(Target.toggleLogin(_:)),
+                checked: model.opensAtLogin)
+        addItem(L("Hide the Dock"), symbol: "dock.rectangle", action: #selector(Target.toggleDock(_:)),
+                checked: model.hidesDock)
 
         var origin = NSEvent.mouseLocation
         if let panel = NSApp.windows.first(where: { $0 is StartPanel && $0.isVisible }) {
