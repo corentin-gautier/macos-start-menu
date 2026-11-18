@@ -519,7 +519,8 @@ final class StartMenuModel: ObservableObject {
     private func tooltipText(for id: String?) -> (text: String, shortcut: String?)? {
         guard let id else { return nil }
         if id == HoverSpace.userID { return (L("Users & Groups"), nil) }
-        if id == HoverSpace.sortID { return (L("Sort, hidden apps and style"), nil) }
+        if id == HoverSpace.sortID { return (L("Sort and view"), nil) }
+        if id == HoverSpace.settingsID { return (L("Start Menu Settings"), nil) }
         return SystemAction.allCases.first { HoverSpace.actionID($0) == id }.map { ($0.title, $0.shortcut) }
     }
 

@@ -103,6 +103,7 @@ struct StartMenuView: View {
             HStack(spacing: 8) {
                 searchField
                 sortButton
+                settingsButton
             }
         }
         .padding([.horizontal, .top], Self.inset)
@@ -128,7 +129,7 @@ struct StartMenuView: View {
     private var sortButton: some View {
         // A plain button over the whole surface (a SwiftUI Menu only reacts
         // on its label), opening a native menu below itself.
-        Button { SortMenu.show(model: model) } label: {
+        Button { OptionsMenu.show(.sort, model: model) } label: {
             HStack(spacing: 6) {
                 Image(systemName: "arrow.up.arrow.down")
                 Text(model.sortMode.title)
@@ -140,15 +141,27 @@ struct StartMenuView: View {
         }
         .buttonStyle(.plain)
         .controlSurface(style, interactive: true)
-        .overlay(alignment: .topTrailing) {
-            // A newer version is available (listed in the menu).
-            if model.availableUpdate != nil {
-                Circle().fill(Color.accentColor).frame(width: 8, height: 8).offset(x: -4, y: 4)
-            }
-        }
         .hoverFrame(HoverSpace.sortID)
         .fixedSize()
         .opacity(model.isSearching ? 0.5 : 1)
+    }
+
+    private var settingsButton: some View {
+        Button { OptionsMenu.show(.settings, model: model) } label: {
+            Image(systemName: "slider.horizontal.3")
+                .font(.system(size: 15, weight: .medium))
+                .frame(width: Self.controlHeight, height: Self.controlHeight)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .controlSurface(style, interactive: true)
+        .overlay(alignment: .topTrailing) {
+            // A newer version is available (listed in the menu).
+            if model.availableUpdate != nil {
+                Circle().fill(Color.accentColor).frame(width: 8, height: 8).offset(x: -2, y: 2)
+            }
+        }
+        .hoverFrame(HoverSpace.settingsID)
     }
 
     // MARK: - Results
@@ -660,11 +673,13 @@ private struct TooltipSurface: ViewModifier {
     }
 }
 
-// MARK: - Sort menu
+// MARK: - Sort and settings menus
 
-/// Sort choices, hidden apps, view and style as a native menu, right-aligned under
-/// the sort button.
-private enum SortMenu {
+/// Native menus right-aligned under their button: sort, view and hidden apps
+/// for the sort button; everything else for the settings button.
+private enum OptionsMenu {
+    enum Kind { case sort, settings }
+
     private final class Target: NSObject {
         let model: StartMenuModel
         init(model: StartMenuModel) { self.model = model }
@@ -720,7 +735,7 @@ private enum SortMenu {
         }
     }
 
-    static func show(model: StartMenuModel) {
+    static func show(_ kind: Kind, model: StartMenuModel) {
         let target = Target(model: model)
         let menu = NSMenu()
         menu.autoenablesItems = false
@@ -747,69 +762,77 @@ private enum SortMenu {
             return submenu
         }
 
-        if let version = model.availableUpdate {
-            addItem(L("Update Available: Start Menu %@", version), symbol: "arrow.down.circle",
-                    action: #selector(Target.openUpdate(_:)), checked: false)
+        switch kind {
+        case .sort:
+            menu.addItem(NSMenuItem.sectionHeader(title: L("Sort apps")))
+            for mode in SortMode.allCases {
+                addItem(mode.title, symbol: mode.symbol, action: #selector(Target.pickSort(_:)),
+                        object: mode, checked: mode == model.sortMode)
+            }
             menu.addItem(.separator())
-        }
+            menu.addItem(NSMenuItem.sectionHeader(title: L("View")))
+            for layout in AppLayout.allCases {
+                addItem(layout.title, symbol: layout.symbol, action: #selector(Target.pickLayout(_:)),
+                        object: layout, checked: layout == model.layout)
+            }
+            menu.addItem(.separator())
+            let count = model.hiddenCount
+            let hidden = addItem(count == 0 ? L("No Hidden Apps") : L("Show Hidden Apps (%d)", count),
+                                 symbol: "eye.slash", action: #selector(Target.toggleHidden(_:)),
+                                 checked: model.showsHidden)
+            hidden.isEnabled = count > 0
 
-        menu.addItem(NSMenuItem.sectionHeader(title: L("Sort apps")))
-        for mode in SortMode.allCases {
-            addItem(mode.title, symbol: mode.symbol, action: #selector(Target.pickSort(_:)),
-                    object: mode, checked: mode == model.sortMode)
-        }
-        menu.addItem(.separator())
-        let count = model.hiddenCount
-        let hidden = addItem(count == 0 ? L("No Hidden Apps") : L("Show Hidden Apps (%d)", count), symbol: "eye.slash",
-                             action: #selector(Target.toggleHidden(_:)), checked: model.showsHidden)
-        hidden.isEnabled = count > 0
+        case .settings:
+            if let version = model.availableUpdate {
+                addItem(L("Update Available: Start Menu %@", version), symbol: "arrow.down.circle",
+                        action: #selector(Target.openUpdate(_:)), checked: false)
+                menu.addItem(.separator())
+            }
+            menu.addItem(NSMenuItem.sectionHeader(title: L("Style")))
+            for style in UIStyle.allCases {
+                addItem(style.title, symbol: style.symbol, action: #selector(Target.pickStyle(_:)),
+                        object: style, checked: style == model.style)
+            }
 
-        menu.addItem(.separator())
-        menu.addItem(NSMenuItem.sectionHeader(title: L("View")))
-        for layout in AppLayout.allCases {
-            addItem(layout.title, symbol: layout.symbol, action: #selector(Target.pickLayout(_:)),
-                    object: layout, checked: layout == model.layout)
-        }
-        addItem(L("Show Recent Files"), symbol: "doc", action: #selector(Target.toggleRecentFiles(_:)),
-                checked: model.showsRecentFiles)
-        if model.showsRecentFiles && RecentFiles.needsFolderAccess {
-            addItem(L("Include Desktop, Documents and Downloads…"), symbol: "lock.open",
-                    action: #selector(Target.allowFolders(_:)), checked: false)
-        }
+            menu.addItem(.separator())
+            addItem(L("Show Recent Files"), symbol: "doc", action: #selector(Target.toggleRecentFiles(_:)),
+                    checked: model.showsRecentFiles)
+            if model.showsRecentFiles && RecentFiles.needsFolderAccess {
+                addItem(L("Include Desktop, Documents and Downloads…"), symbol: "lock.open",
+                        action: #selector(Target.allowFolders(_:)), checked: false)
+            }
+            let engines = addSubmenu(L("Web Search"), symbol: "globe")
+            for engine in WebSearchEngine.allCases {
+                addItem(engine.title, symbol: nil, action: #selector(Target.pickEngine(_:)),
+                        object: engine, checked: engine == model.webSearchEngine, to: engines)
+            }
 
-        menu.addItem(.separator())
-        menu.addItem(NSMenuItem.sectionHeader(title: L("Style")))
-        for style in UIStyle.allCases {
-            addItem(style.title, symbol: style.symbol, action: #selector(Target.pickStyle(_:)),
-                    object: style, checked: style == model.style)
-        }
+            menu.addItem(.separator())
+            let triggers = addSubmenu(L("Open Menu With"), symbol: "keyboard")
+            for key in TriggerKey.allCases {
+                addItem(key.title, symbol: nil, action: #selector(Target.pickTrigger(_:)),
+                        object: key, checked: key == model.triggerKey, to: triggers)
+            }
+            let appleClick = addItem(L("Open on Apple Menu Click"), symbol: "apple.logo",
+                                     action: #selector(Target.toggleAppleMenuClick(_:)),
+                                     checked: model.opensOnAppleMenuClick)
+            appleClick.toolTip = L("⌥-click the Apple logo for the Apple menu.")
 
-        menu.addItem(.separator())
-        let triggers = addSubmenu(L("Open Menu With"), symbol: "keyboard")
-        for key in TriggerKey.allCases {
-            addItem(key.title, symbol: nil, action: #selector(Target.pickTrigger(_:)),
-                    object: key, checked: key == model.triggerKey, to: triggers)
+            menu.addItem(.separator())
+            addItem(L("Open at Login"), symbol: "power.circle", action: #selector(Target.toggleLogin(_:)),
+                    checked: model.opensAtLogin)
+            addItem(L("Hide the Dock"), symbol: "dock.rectangle", action: #selector(Target.toggleDock(_:)),
+                    checked: model.hidesDock)
         }
-        let appleClick = addItem(L("Open on Apple Menu Click"), symbol: "apple.logo",
-                                 action: #selector(Target.toggleAppleMenuClick(_:)), checked: model.opensOnAppleMenuClick)
-        appleClick.toolTip = L("⌥-click the Apple logo for the Apple menu.")
-        let engines = addSubmenu(L("Web Search"), symbol: "globe")
-        for engine in WebSearchEngine.allCases {
-            addItem(engine.title, symbol: nil, action: #selector(Target.pickEngine(_:)),
-                    object: engine, checked: engine == model.webSearchEngine, to: engines)
-        }
-
-        menu.addItem(.separator())
-        addItem(L("Open at Login"), symbol: "power.circle", action: #selector(Target.toggleLogin(_:)),
-                checked: model.opensAtLogin)
-        addItem(L("Hide the Dock"), symbol: "dock.rectangle", action: #selector(Target.toggleDock(_:)),
-                checked: model.hidesDock)
 
         var origin = NSEvent.mouseLocation
-        if let panel = NSApp.windows.first(where: { $0 is StartPanel && $0.isVisible }) {
+        // The button's frame is in the panel's top-left coordinates.
+        let buttonID = kind == .sort ? HoverSpace.sortID : HoverSpace.settingsID
+        if let panel = NSApp.windows.first(where: { $0 is StartPanel && $0.isVisible }),
+           let button = HoverRegistry.shared.frames[buttonID] {
             origin = NSPoint(
-                x: panel.frame.maxX - StartMenuView.inset - menu.size.width,
-                y: panel.frame.maxY - StartMenuView.inset - StartMenuView.controlHeight - 6
+                x: panel.frame.minX + button.maxX - menu.size.width,
+                y: panel.frame.maxY - button.maxY - 6
             )
         }
         // popUp blocks until the menu closes, which keeps `target` alive.

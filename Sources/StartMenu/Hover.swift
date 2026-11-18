@@ -14,6 +14,7 @@ enum HoverSpace {
     static func actionID(_ action: SystemAction) -> String { "action:\(action.rawValue)" }
     static let userID = "user"
     static let sortID = "sort"
+    static let settingsID = "settings"
 }
 
 /// Frames of the hoverable views, in the root coordinate space. Views write

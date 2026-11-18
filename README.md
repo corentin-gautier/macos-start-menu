@@ -22,18 +22,20 @@ release, no other key) and a panel opens right below the Apple menu with:
 - Your **recent files** above the apps (documents opened in the last 30
   days, as in the Finder's Recents), also found by the search. macOS hides
   the files of Desktop, Documents and Downloads until you allow it: "Include
-  Desktop, Documents and Downloads…" in the sort menu asks for it.
+  Desktop, Documents and Downloads…" in the settings menu asks for it.
 - A **calculator** in the search field (`12*7`, `(3+4)/2`, `2^10`, `20% of
   85`; Return copies the result), your **Shortcuts** (run without opening
   the Shortcuts app), and a **Search the web** row (Google, DuckDuckGo, Bing
-  or Ecosia, picked in the sort menu).
+  or Ecosia, picked in the settings menu).
 - A **dot under running apps**; right-click one to Quit or Force Quit it.
 - A **grid or list** view (list rows show the app's category), picked in the
   sort menu.
-- Two **styles**, picked in the sort menu: **Liquid Glass** (glass capsules,
+- Two **styles**, picked in the settings menu: **Liquid Glass** (glass capsules,
   grouped buttons, glass highlights, the default) or **Classic** (flat fills).
 - A **sort button** next to the search field: A–Z, Recent (grouped by Today,
   This week…), Most used, or Categories (Productivity, Music, Games…).
+- A **settings button** next to it: style, recent files, web search engine,
+  the key that opens the menu, Apple logo click, Open at Login, Hide the Dock.
 - **Your account** with its avatar (opens Users & Groups), followed by the
   session buttons: Lock and Log Out.
 - **Icon buttons**: App Store, Activity Monitor, Force Quit, System Settings,
@@ -48,7 +50,7 @@ release, no other key) and a panel opens right below the Apple menu with:
 | Escape, or click outside | Close |
 | ⌘Q (menu open) | Quit Start Menu |
 
-"Hide the Dock" in the sort menu hides the macOS Dock for good (auto-hide
+"Hide the Dock" in the settings menu hides the macOS Dock for good (auto-hide
 with a very long reveal delay); turning it off restores your previous Dock
 setting.
 
@@ -57,7 +59,7 @@ pinned items stay at the top of the menu, above the apps, in every sort.
 Dragging a file, folder or app from the Finder onto the menu pins it too, and
 dragging a pinned item onto another one moves it there.
 
-**Opening it your way:** "Open Menu With" in the sort menu picks the key
+**Opening it your way:** "Open Menu With" in the settings menu picks the key
 whose lone tap opens the menu: either ⌘ (the default), only the right or the
 left ⌘, either ⌥, the right ⌥, or the 🌐 Globe key (set *Press 🌐 key to* to
 *Do Nothing* in Keyboard settings so macOS doesn't act on it too). "Open on
@@ -67,7 +69,7 @@ App Store, Force Quit, Sleep, Restart, Shut Down, Lock, Log Out, recent
 files); ⌥-click the logo for the real Apple menu.
 
 **Updates:** Start Menu checks GitHub for a newer release at launch and once
-a day; when there is one, a dot shows on the sort button and the sort menu
+a day; when there is one, a dot shows on the settings button and the settings menu
 links to it.
 
 Right-click an app to **hide** it (system apps can't be deleted: they live on
@@ -96,7 +98,7 @@ itself so they match what System Settings shows.
    Settings › Privacy & Security and click **Open Anyway**.
 3. On first launch, Start Menu asks for the Accessibility permission (it opens
    Privacy & Security › Accessibility: turn *Start Menu* on) and adds itself to
-   the Login Items. "Open at Login" in the sort menu turns that off.
+   the Login Items. "Open at Login" in the settings menu turns that off.
 
 ### Homebrew
 
