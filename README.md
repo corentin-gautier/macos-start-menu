@@ -133,69 +133,6 @@ macOS may ask to let Start Menu control "loginwindow": accept.
 
 Uninstall: `scripts/uninstall.sh`.
 
-## How it works
-
-- **Command tap**: a listen-only `CGEventTap` watches modifier changes. A
-  Command press counts as a tap only if it is released within 0.45 s with no
-  key, click or other modifier in between, so shortcuts like ⌘C are never
-  affected.
-- **Panel**: a borderless, non-activating `NSPanel` (glass background on
-  macOS 26+) hosting a SwiftUI view. It takes the keyboard without making the
-  frontmost app lose focus, and hides as soon as it loses focus.
-- **Apps**: `/Applications`, `/System/Applications` and `~/Applications`,
-  scanned two levels deep (Utilities and vendor folders included), rescanned
-  every time the menu opens.
-- **Sorting**: Start Menu records every app that comes to the front (stored
-  in its user defaults) for Recent and Most used; Spotlight's usage data is only
-  a fallback since it is often missing. Categories come from the bundle ID
-  rules in `AppCategory.swift`, then the app's declared
-  `LSApplicationCategoryType`, then its install folder.
-- **Settings**: a curated list of System Settings panes, opened through
-  `x-apple.systempreferences:<extension bundle id>`.
-- **Signing**: builds are signed with a self-signed certificate so the
-  Accessibility permission survives rebuilds (an ad-hoc signature changes with
-  every build and macOS would ask again).
-
-## Project layout
-
-```
-Package.swift                 SwiftPM executable target
-Resources/Info.plist          bundle info (agent app: no Dock icon, no menu bar)
-Sources/StartMenu/
-  main.swift, AppDelegate.swift
-  CommandKeyMonitor.swift     lone ⌘ tap detection
-  StartPanelController.swift  panel window, position, keyboard
-  StartMenuModel.swift        search state, ranking, navigation, actions
-  StartMenuView.swift         SwiftUI interface
-  AppCatalog.swift            app discovery and icon cache
-  AppCategory.swift           groups for the Categories sort
-  UsageStore.swift            recent / most used tracking
-  AppUninstaller.swift        uninstall and leftover files detection
-  SettingsCatalog.swift       System Settings panes and keywords
-  FolderCatalog.swift         user folders offered in search
-  Search.swift                matching and scoring
-  SystemActions.swift         power, lock, force quit, avatar
-Resources/AppIcon.svg         app icon source (scripts/make-icon.sh → AppIcon.icns, site icons)
-scripts/                      setup-signing, build, install, uninstall, package, make-icon
-```
-
-## Release
-
-`scripts/release.sh <version> "<notes>"` builds and zips the app
-(`scripts/package.sh`), publishes the GitHub release the website's Download
-button points to, and bumps the Homebrew cask (version and sha256) in
-`corentin-gautier/homebrew-tap`.
-
-## Screenshots
-
-`docs/img` screenshots are taken in demo mode (`STARTMENU_DEMO=1` shows a
-generic account, `STARTMENU_DEMO_QUERY` pre-fills the search,
-`STARTMENU_DEMO_BACKDROP=<image>` centers the panel over that image so the
-glass has colors to refract, and recent files are generic examples),
-capturing the panel and its backdrop with `screencapture -R`, then resized
-to 1200 px and converted with `cwebp`. `docs/img/og.jpg` is
-`docs/src/og.html` rendered by headless Chrome at 1200×630.
-
 ## Support
 
 If Start Menu is useful to you, you can support my work with a small donation on [Ko-fi](https://ko-fi.com/corentingautier). Thank you!
