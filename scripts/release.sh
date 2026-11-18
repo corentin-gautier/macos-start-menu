@@ -15,7 +15,7 @@ if ! git diff --quiet Resources/Info.plist; then
 fi
 
 scripts/package.sh
-gh release create "v$VERSION" build/Start-Menu.zip --title "macOS Start Menu $VERSION" --notes "$NOTES"
+gh release create "v$VERSION" build/Start-Menu.dmg build/Start-Menu.zip --title "macOS Start Menu $VERSION" --notes "$NOTES"
 
 SHA=$(shasum -a 256 build/Start-Menu.zip | cut -d' ' -f1)
 [ -d "$TAP_DIR" ] || gh repo clone corentin-gautier/homebrew-tap "$TAP_DIR"

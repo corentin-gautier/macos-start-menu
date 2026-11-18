@@ -2,7 +2,7 @@
 
 <h1 align="center">macOS Start Menu</h1>
 
-<p align="center"><b><a href="https://corentingautier.dev/macos-start-menu/">Website</a> · <a href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip">Download</a> · <a href="https://ko-fi.com/corentingautier">Ko-fi</a></b></p>
+<p align="center"><b><a href="https://corentingautier.dev/macos-start-menu/">Website</a> · <a href="https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.dmg">Download</a> · <a href="https://ko-fi.com/corentingautier">Ko-fi</a></b></p>
 
 <p align="center">
   <img src="docs/img/glass-categories.webp" width="380" alt="Liquid Glass style: apps grouped by category, with account and power buttons">
@@ -95,9 +95,9 @@ itself so they match what System Settings shows.
 
 ### Download
 
-1. Download [Start-Menu.zip](https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.zip),
-   unzip it and move `Start Menu.app` to Applications. The app is signed and
-   notarized by Apple.
+1. Download [Start-Menu.dmg](https://github.com/corentin-gautier/macos-start-menu/releases/latest/download/Start-Menu.dmg),
+   open it and drag Start Menu onto the Applications folder. The app is signed
+   and notarized by Apple.
 2. On first launch, Start Menu asks for the Accessibility permission (it opens
    Privacy & Security › Accessibility: turn *Start Menu* on) and adds itself to
    the Login Items. "Open at Login" in the settings menu turns that off.
