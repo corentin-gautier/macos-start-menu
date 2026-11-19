@@ -418,7 +418,12 @@ final class StartMenuModel: ObservableObject {
     /// app's file URL dropped on the desktop would copy the whole app.
     static let dragType = UTType.plainText
 
+    /// Pinned item being dragged inside the menu: the pins reorder live as
+    /// it passes over them. Cleared by the next mouse move (drags send none).
+    private(set) var draggedPinID: String?
+
     func dragProvider(for result: StartResult) -> NSItemProvider {
+        draggedPinID = isPinned(result) ? result.id : nil
         let provider = NSItemProvider()
         let data = Data(result.id.utf8)
         provider.registerDataRepresentation(forTypeIdentifier: Self.dragType.identifier, visibility: .ownProcess) {
@@ -455,6 +460,20 @@ final class StartMenuModel: ObservableObject {
             }
         }
         return handled
+    }
+
+    /// Moves the dragged pin to the place of the pin it enters.
+    func moveDraggedPin(to targetID: String) {
+        guard let id = draggedPinID, id != targetID,
+              let from = pinned.firstIndex(of: id), let to = pinned.firstIndex(of: targetID) else { return }
+        // Moving forward lands after the target, backward before it.
+        pinned.insert(pinned.remove(at: from), at: to)
+        savePinned()
+    }
+
+    func endPinDrag() {
+        draggedPinID = nil
+        mouseMoved(to: nil)
     }
 
     private func pin(_ id: String?, before targetID: String?) {
@@ -546,6 +565,7 @@ final class StartMenuModel: ObservableObject {
     }
 
     func mouseMoved(to point: CGPoint?) {
+        if point != nil { draggedPinID = nil }
         mouseLocation = point
         refreshHover()
     }

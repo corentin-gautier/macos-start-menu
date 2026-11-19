@@ -218,7 +218,8 @@ struct StartMenuView: View {
 }
 
 /// Results can be dragged inside the menu (to pin them, or to reorder the
-/// pinned ones); pinned items take drops, which land before them.
+/// pinned ones). A dragged pin moves live through the pins it passes; other
+/// drops land before the pinned item they hover.
 private struct DragAndDrop: ViewModifier {
     let result: StartResult
     let key: String
@@ -230,18 +231,52 @@ private struct DragAndDrop: ViewModifier {
         if result.isPinnable {
             let draggable = content.onDrag { model.dragProvider(for: result) }
             if isPinnedSection {
-                draggable.onDrop(of: [.fileURL, StartMenuModel.dragType], isTargeted: Binding(
-                    get: { dropTarget == key },
-                    set: { targeted in
-                        if targeted { dropTarget = key } else if dropTarget == key { dropTarget = nil }
-                    }
-                )) { model.drop($0, before: result.id) }
+                draggable.onDrop(of: [.fileURL, StartMenuModel.dragType],
+                                 delegate: PinDropDelegate(result: result, key: key,
+                                                           dropTarget: $dropTarget, model: model))
             } else {
                 draggable
             }
         } else {
             content
         }
+    }
+}
+
+private struct PinDropDelegate: DropDelegate {
+    let result: StartResult
+    let key: String
+    @Binding var dropTarget: String?
+    let model: StartMenuModel
+
+    /// A pin dragged inside the menu (a Finder drag carries file URLs).
+    private func isPinDrag(_ info: DropInfo) -> Bool {
+        model.draggedPinID != nil && !info.hasItemsConforming(to: [.fileURL])
+    }
+
+    func dropEntered(info: DropInfo) {
+        if isPinDrag(info) {
+            withAnimation(.snappy(duration: 0.25)) { model.moveDraggedPin(to: result.id) }
+        } else {
+            dropTarget = key
+        }
+    }
+
+    func dropExited(info: DropInfo) {
+        if dropTarget == key { dropTarget = nil }
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: isPinDrag(info) ? .move : .copy)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        dropTarget = nil
+        if isPinDrag(info) {
+            model.endPinDrag()
+            return true
+        }
+        return model.drop(info.itemProviders(for: [.fileURL, StartMenuModel.dragType]), before: result.id)
     }
 }
 
