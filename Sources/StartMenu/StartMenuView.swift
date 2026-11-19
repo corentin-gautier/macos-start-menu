@@ -208,6 +208,8 @@ struct StartMenuView: View {
                 isRunning: { if case .app(let app) = result { model.isRunning(app) } else { false } }(),
                 model: model
             )
+            // A dragged pin leaves a gap that follows the drag image.
+            .opacity(section.isPinned && model.hiddenPinID == result.id ? 0 : 1)
             .id(key)
             .hoverFrame(HoverSpace.resultID(key))
             .onTapGesture { model.activate(index: index) }
@@ -255,19 +257,22 @@ private struct PinDropDelegate: DropDelegate {
     }
 
     func dropEntered(info: DropInfo) {
-        if isPinDrag(info) {
-            withAnimation(.snappy(duration: 0.25)) { model.moveDraggedPin(to: result.id) }
-        } else {
-            dropTarget = key
-        }
+        if isPinDrag(info) { movePin() } else { dropTarget = key }
+    }
+
+    private func movePin() {
+        withAnimation(.snappy(duration: StartMenuModel.pinMoveAnimation)) { model.moveDraggedPin(to: result.id) }
     }
 
     func dropExited(info: DropInfo) {
         if dropTarget == key { dropTarget = nil }
     }
 
+    /// Also retries the move skipped while the tiles were sliding.
     func dropUpdated(info: DropInfo) -> DropProposal? {
-        DropProposal(operation: isPinDrag(info) ? .move : .copy)
+        guard isPinDrag(info) else { return DropProposal(operation: .copy) }
+        movePin()
+        return DropProposal(operation: .move)
     }
 
     func performDrop(info: DropInfo) -> Bool {

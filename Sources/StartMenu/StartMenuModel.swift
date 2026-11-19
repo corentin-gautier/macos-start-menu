@@ -222,6 +222,7 @@ final class StartMenuModel: ObservableObject {
     }
 
     func prepareForShow() {
+        finishPinDrag()
         query = ""
         selection = 0
         showsSelection = false
@@ -419,8 +420,17 @@ final class StartMenuModel: ObservableObject {
     static let dragType = UTType.plainText
 
     /// Pinned item being dragged inside the menu: the pins reorder live as
-    /// it passes over them. Cleared by the next mouse move (drags send none).
+    /// it passes over them. Cleared by the drop, or by the next mouse move
+    /// once the button is up.
     private(set) var draggedPinID: String?
+    /// Its tile, hidden behind the drag image (set once the drag image is
+    /// captured: main-queue blocks only run after the drag ends).
+    @Published private(set) var hiddenPinID: String?
+    private var pinsMovedByDrag = false
+    private var lastPinMove = Date.distantPast
+    /// Matches the move animation: while tiles slide, the one passing under
+    /// the cursor would send the dragged pin back.
+    static let pinMoveAnimation = 0.2
 
     func dragProvider(for result: StartResult) -> NSItemProvider {
         draggedPinID = isPinned(result) ? result.id : nil
@@ -436,6 +446,7 @@ final class StartMenuModel: ObservableObject {
     /// Results dragged inside the menu, or files, folders and apps dropped
     /// from the Finder: pinned before `targetID` (a pinned item), or at the end.
     func drop(_ providers: [NSItemProvider], before targetID: String?) -> Bool {
+        finishPinDrag()
         // No mouse moves during a drag: the last known position is stale.
         mouseMoved(to: nil)
         var handled = false
@@ -464,16 +475,42 @@ final class StartMenuModel: ObservableObject {
 
     /// Moves the dragged pin to the place of the pin it enters.
     func moveDraggedPin(to targetID: String) {
+        if hiddenPinID == nil {
+            hiddenPinID = draggedPinID
+            mouseMoved(to: nil)  // no stale hover highlight during the drag
+        }
         guard let id = draggedPinID, id != targetID,
+              Date().timeIntervalSince(lastPinMove) > Self.pinMoveAnimation + 0.05,
               let from = pinned.firstIndex(of: id), let to = pinned.firstIndex(of: targetID) else { return }
         // Moving forward lands after the target, backward before it.
         pinned.insert(pinned.remove(at: from), at: to)
-        savePinned()
+        pinsMovedByDrag = true
+        lastPinMove = Date()
+        // Only the pinned section changes: rebuilding every section on each
+        // move made the drag lag. Saved once, when the drag ends.
+        guard let old = sections.first, old.isPinned,
+              let itemFrom = old.items.firstIndex(where: { $0.id == id }),
+              let itemTo = old.items.firstIndex(where: { $0.id == targetID }) else { return refreshResults() }
+        var items = old.items
+        items.insert(items.remove(at: itemFrom), at: itemTo)
+        var section = ResultSection(title: old.title, style: old.style, items: items, startIndex: old.startIndex)
+        section.keyPrefix = old.keyPrefix
+        sections[0] = section
+        results.replaceSubrange(0..<items.count, with: items)
+        resultKeys.replaceSubrange(0..<items.count, with: items.map(section.key))
     }
 
     func endPinDrag() {
-        draggedPinID = nil
+        finishPinDrag()
         mouseMoved(to: nil)
+    }
+
+    private func finishPinDrag() {
+        guard draggedPinID != nil else { return }
+        draggedPinID = nil
+        hiddenPinID = nil
+        if pinsMovedByDrag { UserDefaults.standard.set(pinned, forKey: "pinned") }
+        pinsMovedByDrag = false
     }
 
     private func pin(_ id: String?, before targetID: String?) {
@@ -565,7 +602,8 @@ final class StartMenuModel: ObservableObject {
     }
 
     func mouseMoved(to point: CGPoint?) {
-        if point != nil { draggedPinID = nil }
+        // A cancelled drag sends no drop: the next move without a button ends it.
+        if point != nil && NSEvent.pressedMouseButtons == 0 { finishPinDrag() }
         mouseLocation = point
         refreshHover()
     }
