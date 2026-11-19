@@ -62,6 +62,7 @@ struct StartMenuView: View {
         // NSGlassEffectView doesn't clip its content to its rounded shape.
         .clipShape(RoundedRectangle(cornerRadius: style.panelCornerRadius, style: .continuous))
         .coordinateSpace(name: HoverSpace.name)
+        .overlay(alignment: .topLeading) { draggedPin }
         .overlay { TooltipLayer(model: model) }
         .overlay {
             if let request = model.pendingUninstall {
@@ -166,9 +167,6 @@ struct StartMenuView: View {
 
     // MARK: - Results
 
-    /// Pinned item a drag hovers: the dropped item goes before it.
-    @State private var dropTarget: String?
-
     private var results: some View {
         LazyVStack(alignment: .leading, spacing: 4) {
             Color.clear.frame(height: 0).id(Self.topID)
@@ -188,7 +186,34 @@ struct StartMenuView: View {
             }
         }
         // Files, folders and apps dropped from the Finder are pinned.
-        .onDrop(of: [.fileURL, StartMenuModel.dragType], isTargeted: nil) { model.drop($0, before: nil) }
+        .onDrop(of: [.fileURL], isTargeted: nil) { model.dropFromFinder($0) }
+    }
+
+    /// Pins reorder by dragging; nothing else drags out of the menu.
+    private func pinDragGesture(_ result: StartResult, key: String) -> some Gesture {
+        DragGesture(minimumDistance: 4, coordinateSpace: .named(HoverSpace.name))
+            .onChanged { model.dragPin(result, key: key, start: $0.startLocation, location: $0.location) }
+            .onEnded { _ in withAnimation(.snappy(duration: 0.2)) { model.endPinDrag() } }
+    }
+
+    /// The copy of the dragged pin, under the mouse.
+    @ViewBuilder private var draggedPin: some View {
+        if let drag = model.pinDrag {
+            ResultView(
+                result: drag.result,
+                asTile: model.sections.first?.style == .tiles,
+                state: HighlightState(style: style, selected: false, hovered: true),
+                isPinned: true,
+                isHidden: false,
+                isRunning: { if case .app(let app) = drag.result { model.isRunning(app) } else { false } }(),
+                model: model
+            )
+            .frame(width: drag.size.width, height: drag.size.height)
+            .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
+            .scaleEffect(1.05)
+            .offset(x: drag.origin.x, y: drag.origin.y)
+            .allowsHitTesting(false)
+        }
     }
 
     private func items(of section: ResultSection) -> some View {
@@ -201,87 +226,20 @@ struct StartMenuView: View {
                 state: HighlightState(
                     style: style,
                     selected: model.highlightedIndex == index,
-                    hovered: model.hoveredID == HoverSpace.resultID(key) || dropTarget == key
+                    hovered: model.hoveredID == HoverSpace.resultID(key)
                 ),
                 isPinned: model.isPinned(result),
                 isHidden: { if case .app(let app) = result { model.isHidden(app) } else { false } }(),
                 isRunning: { if case .app(let app) = result { model.isRunning(app) } else { false } }(),
                 model: model
             )
-            // A dragged pin leaves a gap that follows the drag image.
-            .opacity(section.isPinned && model.hiddenPinID == result.id ? 0 : 1)
+            // A dragged pin leaves a gap; a copy follows the mouse.
+            .opacity(section.isPinned && model.pinDrag?.result.id == result.id ? 0 : 1)
             .id(key)
             .hoverFrame(HoverSpace.resultID(key))
             .onTapGesture { model.activate(index: index) }
-            .modifier(DragAndDrop(result: result, key: key, isPinnedSection: section.isPinned,
-                                  dropTarget: $dropTarget, model: model))
+            .gesture(section.isPinned ? pinDragGesture(result, key: key) : nil)
         }
-    }
-}
-
-/// Results can be dragged inside the menu (to pin them, or to reorder the
-/// pinned ones). A dragged pin moves live through the pins it passes; other
-/// drops land before the pinned item they hover.
-private struct DragAndDrop: ViewModifier {
-    let result: StartResult
-    let key: String
-    let isPinnedSection: Bool
-    @Binding var dropTarget: String?
-    let model: StartMenuModel
-
-    func body(content: Content) -> some View {
-        if result.isPinnable {
-            let draggable = content.onDrag { model.dragProvider(for: result) }
-            if isPinnedSection {
-                draggable.onDrop(of: [.fileURL, StartMenuModel.dragType],
-                                 delegate: PinDropDelegate(result: result, key: key,
-                                                           dropTarget: $dropTarget, model: model))
-            } else {
-                draggable
-            }
-        } else {
-            content
-        }
-    }
-}
-
-private struct PinDropDelegate: DropDelegate {
-    let result: StartResult
-    let key: String
-    @Binding var dropTarget: String?
-    let model: StartMenuModel
-
-    /// A pin dragged inside the menu (a Finder drag carries file URLs).
-    private func isPinDrag(_ info: DropInfo) -> Bool {
-        model.draggedPinID != nil && !info.hasItemsConforming(to: [.fileURL])
-    }
-
-    func dropEntered(info: DropInfo) {
-        if isPinDrag(info) { movePin() } else { dropTarget = key }
-    }
-
-    private func movePin() {
-        withAnimation(.snappy(duration: StartMenuModel.pinMoveAnimation)) { model.moveDraggedPin(to: result.id) }
-    }
-
-    func dropExited(info: DropInfo) {
-        if dropTarget == key { dropTarget = nil }
-    }
-
-    /// Also retries the move skipped while the tiles were sliding.
-    func dropUpdated(info: DropInfo) -> DropProposal? {
-        guard isPinDrag(info) else { return DropProposal(operation: .copy) }
-        movePin()
-        return DropProposal(operation: .move)
-    }
-
-    func performDrop(info: DropInfo) -> Bool {
-        dropTarget = nil
-        if isPinDrag(info) {
-            model.endPinDrag()
-            return true
-        }
-        return model.drop(info.itemProviders(for: [.fileURL, StartMenuModel.dragType]), before: result.id)
     }
 }
 

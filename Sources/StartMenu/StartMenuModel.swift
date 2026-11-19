@@ -1,6 +1,6 @@
 import AppKit
+import SwiftUI
 import Combine
-import UniformTypeIdentifiers
 
 enum StartResult: Identifiable {
     case app(AppEntry)
@@ -222,7 +222,7 @@ final class StartMenuModel: ObservableObject {
     }
 
     func prepareForShow() {
-        finishPinDrag()
+        endPinDrag()
         query = ""
         selection = 0
         showsSelection = false
@@ -413,117 +413,23 @@ final class StartMenuModel: ObservableObject {
         refreshResults()
     }
 
-    // MARK: - Drag and drop
+    // MARK: - Finder drops
 
-    /// Dragging a result carries its ID, visible to this process only: an
-    /// app's file URL dropped on the desktop would copy the whole app.
-    static let dragType = UTType.plainText
-
-    /// Pinned item being dragged inside the menu: the pins reorder live as
-    /// it passes over them. Cleared by the drop, or by the next mouse move
-    /// once the button is up.
-    private(set) var draggedPinID: String?
-    /// Its tile, hidden behind the drag image (set once the drag image is
-    /// captured: main-queue blocks only run after the drag ends).
-    @Published private(set) var hiddenPinID: String?
-    private var pinsMovedByDrag = false
-    private var lastPinMove = Date.distantPast
-    /// Matches the move animation: while tiles slide, the one passing under
-    /// the cursor would send the dragged pin back.
-    static let pinMoveAnimation = 0.2
-
-    func dragProvider(for result: StartResult) -> NSItemProvider {
-        draggedPinID = isPinned(result) ? result.id : nil
-        let provider = NSItemProvider()
-        let data = Data(result.id.utf8)
-        provider.registerDataRepresentation(forTypeIdentifier: Self.dragType.identifier, visibility: .ownProcess) {
-            $0(data, nil)
-            return nil
-        }
-        return provider
-    }
-
-    /// Results dragged inside the menu, or files, folders and apps dropped
-    /// from the Finder: pinned before `targetID` (a pinned item), or at the end.
-    func drop(_ providers: [NSItemProvider], before targetID: String?) -> Bool {
-        finishPinDrag()
-        // No mouse moves during a drag: the last known position is stale.
-        mouseMoved(to: nil)
+    /// Files, folders and apps dropped from the Finder are pinned at the end.
+    func dropFromFinder(_ providers: [NSItemProvider]) -> Bool {
         var handled = false
-        for provider in providers {
-            if provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) {
-                handled = true
-                _ = provider.loadObject(ofClass: NSURL.self) { [weak self] url, _ in
-                    guard let url = url as? URL else { return }
-                    DispatchQueue.main.async { self?.pin(self?.resultID(forDropped: url), before: targetID) }
-                }
-            } else if provider.hasItemConformingToTypeIdentifier(Self.dragType.identifier) {
-                handled = true
-                provider.loadDataRepresentation(forTypeIdentifier: Self.dragType.identifier) { [weak self] data, _ in
-                    guard let data else { return }
-                    let id = String(decoding: data, as: UTF8.self)
-                    DispatchQueue.main.async {
-                        // Only IDs of known results: plain text from another app is ignored.
-                        guard let self, self.results.contains(where: { $0.id == id && $0.isPinnable }) else { return }
-                        self.pin(id, before: targetID)
-                    }
+        for provider in providers where provider.canLoadObject(ofClass: NSURL.self) {
+            handled = true
+            _ = provider.loadObject(ofClass: NSURL.self) { [weak self] url, _ in
+                guard let url = url as? URL else { return }
+                DispatchQueue.main.async {
+                    guard let self, let id = self.resultID(forDropped: url), !self.pinned.contains(id) else { return }
+                    self.pinned.append(id)
+                    self.savePinned()
                 }
             }
         }
         return handled
-    }
-
-    /// Moves the dragged pin to the place of the pin it enters.
-    func moveDraggedPin(to targetID: String) {
-        if hiddenPinID == nil {
-            hiddenPinID = draggedPinID
-            mouseMoved(to: nil)  // no stale hover highlight during the drag
-        }
-        guard let id = draggedPinID, id != targetID,
-              Date().timeIntervalSince(lastPinMove) > Self.pinMoveAnimation + 0.05,
-              let from = pinned.firstIndex(of: id), let to = pinned.firstIndex(of: targetID) else { return }
-        // Moving forward lands after the target, backward before it.
-        pinned.insert(pinned.remove(at: from), at: to)
-        pinsMovedByDrag = true
-        lastPinMove = Date()
-        // Only the pinned section changes: rebuilding every section on each
-        // move made the drag lag. Saved once, when the drag ends.
-        guard let old = sections.first, old.isPinned,
-              let itemFrom = old.items.firstIndex(where: { $0.id == id }),
-              let itemTo = old.items.firstIndex(where: { $0.id == targetID }) else { return refreshResults() }
-        var items = old.items
-        items.insert(items.remove(at: itemFrom), at: itemTo)
-        var section = ResultSection(title: old.title, style: old.style, items: items, startIndex: old.startIndex)
-        section.keyPrefix = old.keyPrefix
-        sections[0] = section
-        results.replaceSubrange(0..<items.count, with: items)
-        resultKeys.replaceSubrange(0..<items.count, with: items.map(section.key))
-    }
-
-    func endPinDrag() {
-        finishPinDrag()
-        mouseMoved(to: nil)
-    }
-
-    private func finishPinDrag() {
-        guard draggedPinID != nil else { return }
-        draggedPinID = nil
-        hiddenPinID = nil
-        if pinsMovedByDrag { UserDefaults.standard.set(pinned, forKey: "pinned") }
-        pinsMovedByDrag = false
-    }
-
-    private func pin(_ id: String?, before targetID: String?) {
-        guard let id, id != targetID else { return }
-        if let targetID, pinned.contains(targetID) {
-            pinned.removeAll { $0 == id }
-            pinned.insert(id, at: pinned.firstIndex(of: targetID) ?? pinned.endIndex)
-        } else if !pinned.contains(id) {
-            pinned.append(id)
-        } else {
-            return
-        }
-        savePinned()
     }
 
     private func resultID(forDropped url: URL) -> String? {
@@ -535,6 +441,68 @@ final class StartMenuModel: ObservableObject {
         let isDirectory = url.hasDirectoryPath
             || (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
         return isDirectory && url.pathExtension.isEmpty ? "folder:\(path)" : "file:\(path)"
+    }
+
+    // MARK: - Reordering pins
+
+    /// A pin dragged by hand (no AppKit drag session: its end animation
+    /// lagged and a second drag fell back to a plain one). Its tile is hidden
+    /// and a copy follows the mouse; the pins reorder live as it passes them.
+    struct PinDrag {
+        let result: StartResult
+        /// Mouse position, and its offset in the tile, in `HoverSpace`.
+        var location: CGPoint
+        let grabOffset: CGSize
+        let size: CGSize
+        var origin: CGPoint { CGPoint(x: location.x - grabOffset.width, y: location.y - grabOffset.height) }
+    }
+
+    @Published private(set) var pinDrag: PinDrag?
+    private var pinsMovedByDrag = false
+    /// Frames still show the order before the last move: hit-testing them
+    /// would send the pin back.
+    private var awaitingPinLayout = false
+
+    func dragPin(_ result: StartResult, key: String, start: CGPoint, location: CGPoint) {
+        if pinDrag == nil {
+            guard let frame = hoverFrames[HoverSpace.resultID(key)] else { return }
+            pinDrag = PinDrag(result: result, location: location,
+                              grabOffset: CGSize(width: start.x - frame.minX, height: start.y - frame.minY),
+                              size: frame.size)
+            mouseMoved(to: nil)  // no hover highlight during the drag
+        }
+        pinDrag?.location = location
+        guard !awaitingPinLayout, let section = sections.first, section.isPinned,
+              let target = section.items.first(where: {
+                  $0.id != result.id && hoverFrames[HoverSpace.resultID(section.key(for: $0))]?.contains(location) == true
+              }) else { return }
+        withAnimation(.snappy(duration: 0.2)) { moveDraggedPin(result.id, to: target.id, in: section) }
+    }
+
+    /// Moving forward lands after the target, backward before it.
+    private func moveDraggedPin(_ id: String, to targetID: String, in old: ResultSection) {
+        guard let from = pinned.firstIndex(of: id), let to = pinned.firstIndex(of: targetID),
+              let itemFrom = old.items.firstIndex(where: { $0.id == id }),
+              let itemTo = old.items.firstIndex(where: { $0.id == targetID }) else { return }
+        pinned.insert(pinned.remove(at: from), at: to)
+        pinsMovedByDrag = true
+        awaitingPinLayout = true
+        // Only the pinned section changes; saved once, when the drag ends.
+        var items = old.items
+        items.insert(items.remove(at: itemFrom), at: itemTo)
+        var section = ResultSection(title: old.title, style: old.style, items: items, startIndex: old.startIndex)
+        section.keyPrefix = old.keyPrefix
+        sections[0] = section
+        results.replaceSubrange(0..<items.count, with: items)
+        resultKeys.replaceSubrange(0..<items.count, with: items.map(section.key))
+    }
+
+    func endPinDrag() {
+        guard pinDrag != nil else { return }
+        pinDrag = nil
+        awaitingPinLayout = false
+        if pinsMovedByDrag { UserDefaults.standard.set(pinned, forKey: "pinned") }
+        pinsMovedByDrag = false
     }
 
     // MARK: - Hidden apps
@@ -602,8 +570,6 @@ final class StartMenuModel: ObservableObject {
     }
 
     func mouseMoved(to point: CGPoint?) {
-        // A cancelled drag sends no drop: the next move without a button ends it.
-        if point != nil && NSEvent.pressedMouseButtons == 0 { finishPinDrag() }
         mouseLocation = point
         refreshHover()
     }
@@ -611,6 +577,7 @@ final class StartMenuModel: ObservableObject {
     /// Frames change on scroll and on new results, under a still mouse too.
     func updateHoverFrames(_ frames: [String: CGRect]) {
         hoverFrames = frames
+        awaitingPinLayout = false
         refreshHover()
     }
 
