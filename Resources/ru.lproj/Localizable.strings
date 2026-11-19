@@ -143,3 +143,7 @@
 "Search files for “%@”" = "Искать «%@» в файлах";
 "Names and contents, in the Finder" = "Имена и содержимое, в Finder";
 "Search" = "Поиск";
+"Rename…" = "Переименовать…";
+"Rename" = "Переименовать";
+"Rename “%@”" = "Переименовать «%@»";
+"Use Original Name" = "Использовать исходное имя";

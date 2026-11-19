@@ -75,6 +75,9 @@ files); ⌥-click the logo for the real Apple menu.
 a day; when there is one, a dot shows on the settings button and the settings menu
 links to it.
 
+Right-click an app to **rename** it in the menu: the search finds it by both
+names, and clearing the name brings back the original one.
+
 Right-click an app to **hide** it (system apps can't be deleted: they live on
 macOS's sealed, read-only system volume). Hidden apps leave the list and the
 search; the sort menu's "Show Hidden Apps" lists them dimmed so they can be

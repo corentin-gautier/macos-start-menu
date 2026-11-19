@@ -143,3 +143,7 @@
 "Search files for “%@”" = "फ़ाइलों में “%@” खोजें";
 "Names and contents, in the Finder" = "नाम और सामग्री, Finder में";
 "Search" = "खोजें";
+"Rename…" = "नाम बदलें…";
+"Rename" = "नाम बदलें";
+"Rename “%@”" = "“%@” का नाम बदलें";
+"Use Original Name" = "मूल नाम का उपयोग करें";

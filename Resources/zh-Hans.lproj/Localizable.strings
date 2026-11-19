@@ -143,3 +143,7 @@
 "Search files for “%@”" = "在文件中搜索“%@”";
 "Names and contents, in the Finder" = "在访达中搜索名称和内容";
 "Search" = "搜索";
+"Rename…" = "重新命名…";
+"Rename" = "重新命名";
+"Rename “%@”" = "重新命名“%@”";
+"Use Original Name" = "使用原始名称";

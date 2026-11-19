@@ -4,7 +4,8 @@ import UniformTypeIdentifiers
 
 struct AppEntry: Identifiable, Hashable {
     var id: String { path }
-    let name: String
+    /// Display name: the user's custom name, if any (see `StartMenuModel.rename`).
+    var name: String
     let url: URL
     /// Symlink-resolved path, also the key for usage statistics.
     let path: String
@@ -13,7 +14,7 @@ struct AppEntry: Identifiable, Hashable {
     /// Spotlight's usage data, used until Start Menu has its own.
     let spotlightLastUsed: Date?
     let spotlightUseCount: Int
-    let key: SearchKey
+    var key: SearchKey
 }
 
 /// Lists the installed applications by reading the app folders directly

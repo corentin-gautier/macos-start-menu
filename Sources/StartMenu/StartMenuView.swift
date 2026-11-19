@@ -67,6 +67,8 @@ struct StartMenuView: View {
         .overlay {
             if let request = model.pendingUninstall {
                 UninstallConfirmation(request: request, model: model)
+            } else if let app = model.pendingRename {
+                RenameCard(app: app, model: model)
             } else if let apps = model.forceQuitApps {
                 ForceQuitWindow(apps: apps, model: model)
             } else if let step = model.onboarding {
@@ -75,6 +77,7 @@ struct StartMenuView: View {
         }
         .onAppear { searchFocused = true }
         .onChange(of: model.showToken) { _, _ in searchFocused = true }
+        .onChange(of: model.pendingRename == nil) { _, closed in if closed { searchFocused = true } }
     }
 
     /// Capsules (40) plus their bottom inset, and a little air.
@@ -244,6 +247,23 @@ struct StartMenuView: View {
 }
 
 // MARK: - Style helpers
+
+extension View {
+    /// Background of the cards drawn over the panel (confirmations…).
+    @ViewBuilder
+    func cardSurface(_ style: UIStyle) -> some View {
+        switch style {
+        case .glass:
+            glassEffect(.regular, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        case .classic:
+            background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(nsColor: .windowBackgroundColor))
+                    .shadow(radius: 20)
+            )
+        }
+    }
+}
 
 extension UIStyle {
     var panelCornerRadius: CGFloat { self == .glass ? 28 : 20 }
@@ -477,6 +497,7 @@ private struct ResultView: View {
         switch result {
         case .app(let app):
             showInFinder(app.url)
+            Button(L("Rename…"), systemImage: "character.cursor.ibeam") { model.rename(app) }
             Button(isHidden ? L("Unhide") : L("Hide"), systemImage: isHidden ? "eye" : "eye.slash") {
                 model.setHidden(app, !isHidden)
             }
@@ -909,16 +930,7 @@ private struct UninstallConfirmation: View {
         .padding(22)
         .frame(width: 360)
 
-        switch model.style {
-        case .glass:
-            content.glassEffect(.regular, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        case .classic:
-            content.background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(nsColor: .windowBackgroundColor))
-                    .shadow(radius: 20)
-            )
-        }
+        content.cardSurface(model.style)
     }
 
     /// Stacked full-width buttons, like macOS alerts; Cancel is the default.
@@ -937,6 +949,74 @@ private struct UninstallConfirmation: View {
             } else {
                 trash.buttonStyle(.bordered)
                 cancel.buttonStyle(.borderedProminent)
+            }
+        }
+    }
+}
+
+// MARK: - Rename
+
+/// Custom name of an app in the menu, asked inside the panel (an `NSAlert`
+/// wouldn't get the keyboard).
+private struct RenameCard: View {
+    let app: AppEntry
+    @ObservedObject var model: StartMenuModel
+    @State private var name = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.2)
+                .contentShape(Rectangle())
+                .onTapGesture { model.cancelRename() }
+            card
+        }
+        .onAppear {
+            name = app.name
+            focused = true
+        }
+    }
+
+    private var card: some View {
+        let original = model.originalName(of: app)
+        let content = VStack(alignment: .leading, spacing: 12) {
+            Image(nsImage: IconCache.shared.icon(for: app.url))
+                .resizable()
+                .frame(width: 64, height: 64)
+            Text(L("Rename “%@”", original))
+                .font(.system(size: 15, weight: .bold))
+            TextField(original, text: $name)
+                .textFieldStyle(.roundedBorder)
+                .controlSize(.large)
+                .focused($focused)
+                .onSubmit { model.commitRename(name) }
+            if model.hasCustomName(app) {
+                Button(L("Use Original Name")) { model.commitRename("") }
+                    .buttonStyle(.link)
+                    .font(.system(size: 12))
+            }
+            buttons.controlSize(.large).padding(.top, 6)
+        }
+        .padding(22)
+        .frame(width: 360)
+        return content.cardSurface(model.style)
+    }
+
+    @ViewBuilder
+    private var buttons: some View {
+        let rename = Button { model.commitRename(name) } label: {
+            Text("Rename").frame(maxWidth: .infinity)
+        }
+        let cancel = Button { model.cancelRename() } label: {
+            Text("Cancel").frame(maxWidth: .infinity)
+        }
+        VStack(spacing: 8) {
+            if model.style == .glass {
+                rename.buttonStyle(.glassProminent)
+                cancel.buttonStyle(.glass)
+            } else {
+                rename.buttonStyle(.borderedProminent)
+                cancel.buttonStyle(.bordered)
             }
         }
     }
@@ -983,16 +1063,7 @@ private struct ForceQuitWindow: View {
         .padding(22)
         .frame(width: 380)
 
-        switch model.style {
-        case .glass:
-            content.glassEffect(.regular, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        case .classic:
-            content.background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(nsColor: .windowBackgroundColor))
-                    .shadow(radius: 20)
-            )
-        }
+        content.cardSurface(model.style)
     }
 
     private func row(_ app: NSRunningApplication, selected: Bool) -> some View {
@@ -1069,16 +1140,7 @@ private struct OnboardingCard: View {
         .padding(24)
         .frame(width: 360)
 
-        switch model.style {
-        case .glass:
-            content.glassEffect(.regular, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        case .classic:
-            content.background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(nsColor: .windowBackgroundColor))
-                    .shadow(radius: 20)
-            )
-        }
+        content.cardSurface(model.style)
     }
 
     @ViewBuilder

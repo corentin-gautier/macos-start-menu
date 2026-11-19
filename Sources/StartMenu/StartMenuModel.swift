@@ -230,6 +230,7 @@ final class StartMenuModel: ObservableObject {
         tooltipTask?.cancel()
         tooltip = nil
         pendingUninstall = nil
+        pendingRename = nil
         forceQuitApps = nil
         onboarding = nil
         opensAtLogin = LoginItem.isEnabled
@@ -505,10 +506,59 @@ final class StartMenuModel: ObservableObject {
         pinsMovedByDrag = false
     }
 
+    // MARK: - Custom names
+
+    private var customNames = UserDefaults.standard.dictionary(forKey: "customAppNames") as? [String: String] ?? [:]
+    /// The app being renamed, with its displayed name (asked inside the panel).
+    @Published private(set) var pendingRename: AppEntry?
+
+    private func customNameKey(_ app: AppEntry) -> String { app.bundleID ?? app.path }
+
+    /// Renamed apps answer to both names in searches, and sort by the new one.
+    private func withCustomNames(_ list: [AppEntry]) -> [AppEntry] {
+        guard !customNames.isEmpty else { return list }
+        return list.map { app in
+            guard let custom = customNames[customNameKey(app)] else { return app }
+            var renamed = app
+            renamed.name = custom
+            renamed.key = SearchKey(custom + " " + app.name)
+            return renamed
+        }
+        .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    func originalName(of app: AppEntry) -> String {
+        apps.first { $0.path == app.path }?.name ?? app.name
+    }
+
+    func hasCustomName(_ app: AppEntry) -> Bool { customNames[customNameKey(app)] != nil }
+
+    func rename(_ app: AppEntry) {
+        pendingRename = app
+        refreshHover()
+    }
+
+    func cancelRename() {
+        pendingRename = nil
+        refreshHover()
+    }
+
+    /// An empty name, or the original one, removes the custom name.
+    func commitRename(_ name: String) {
+        guard let app = pendingRename else { return }
+        pendingRename = nil
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = customNameKey(app)
+        if trimmed.isEmpty || trimmed == originalName(of: app) { customNames[key] = nil } else { customNames[key] = trimmed }
+        UserDefaults.standard.set(customNames, forKey: "customAppNames")
+        refreshResults()
+        refreshHover()
+    }
+
     // MARK: - Hidden apps
 
     private var visibleApps: [AppEntry] {
-        showsHidden ? apps : apps.filter { !isHidden($0) }
+        withCustomNames(showsHidden ? apps : apps.filter { !isHidden($0) })
     }
 
     var hiddenCount: Int { apps.filter(isHidden).count }
@@ -583,7 +633,8 @@ final class StartMenuModel: ObservableObject {
 
     private func refreshHover() {
         var hit: String?
-        if let point = mouseLocation, pendingUninstall == nil, forceQuitApps == nil, onboarding == nil {
+        if let point = mouseLocation, pendingUninstall == nil, pendingRename == nil, forceQuitApps == nil,
+           onboarding == nil {
             let under = hoverFrames.filter { $0.value.contains(point) }.map(\.key)
             let overBar = under.contains { $0.hasPrefix("block:") }
             hit = under.first { !$0.hasPrefix("block:") && !(overBar && $0.hasPrefix("result:")) }

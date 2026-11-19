@@ -143,3 +143,7 @@
 "Search files for “%@”" = "Rechercher « %@ » dans les fichiers";
 "Names and contents, in the Finder" = "Noms et contenus, dans le Finder";
 "Search" = "Rechercher";
+"Rename…" = "Renommer…";
+"Rename" = "Renommer";
+"Rename “%@”" = "Renommer « %@ »";
+"Use Original Name" = "Utiliser le nom d’origine";

@@ -200,6 +200,16 @@ final class StartPanelController: NSObject, NSWindowDelegate {
                 return modifiers.contains(.command) ? event : nil
             }
 
+            // Rename card: its text field takes the keys (Return submits),
+            // Escape cancels, ⌘ shortcuts go through the edit routing below.
+            if self.model.pendingRename != nil {
+                if event.keyCode == 53 {
+                    self.model.cancelRename()
+                    return nil
+                }
+                if !modifiers.contains(.command) { return event }
+            }
+
             // An agent app has no Edit menu, so its standard shortcuts are
             // routed by hand to the search field's editor.
             if modifiers == .command || modifiers == [.command, .shift] {
