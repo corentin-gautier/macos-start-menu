@@ -41,6 +41,7 @@ final class StartPanelController: NSObject, NSWindowDelegate {
     private var keyMonitor: Any?
     private let demoBackdrop = DemoBackdrop.fromEnvironment()
     private var styleObserver: AnyCancellable?
+    private var navigationObserver: AnyCancellable?
     private weak var hosting: TrackingHostingView<StartMenuView>?
 
     override init() {
@@ -49,6 +50,10 @@ final class StartPanelController: NSObject, NSWindowDelegate {
         panel.delegate = self
         panel.contentView = makeContentView()
         installKeyMonitor()
+        // The caret hides while the arrows drive the results.
+        navigationObserver = model.$navigatesResults.removeDuplicates().sink { [weak self] navigates in
+            self?.fieldEditor?.insertionPointColor = navigates ? .clear : .textColor
+        }
         // A context or sort menu can leave the panel without keyboard focus.
         NotificationCenter.default.addObserver(
             forName: NSMenu.didEndTrackingNotification, object: nil, queue: .main
@@ -158,6 +163,16 @@ final class StartPanelController: NSObject, NSWindowDelegate {
         return container
     }
 
+    /// The search field's editor, when it has the keyboard.
+    private var fieldEditor: NSTextView? { panel.firstResponder as? NSTextView }
+
+    /// No selected text and the caret after the last character.
+    private var caretAtEnd: Bool {
+        guard let editor = fieldEditor else { return true }
+        let range = editor.selectedRange()
+        return range.length == 0 && range.location == (editor.string as NSString).length
+    }
+
     /// Arrow keys move the selection, Return opens it, Escape closes.
     private func installKeyMonitor() {
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
@@ -231,13 +246,27 @@ final class StartPanelController: NSObject, NSWindowDelegate {
                 }
             }
 
-            // Arrows edit the search text when it has some (←/→) or with a
-            // modifier (⇧ selection, ⌥ word, ⌘ line); plain ↑/↓ always navigate.
+            // With search text, ← and → move the caret until → reaches the end
+            // of the text; that, or ↑/↓, hands the arrows to the results, and ←
+            // on the first result hands them back. A modifier (⇧ selection,
+            // ⌥ word, ⌘ line) always edits the text.
             if (123...126).contains(event.keyCode) {
                 let editing = modifiers.subtracting([.function, .numericPad])
-                let horizontal = event.keyCode == 123 || event.keyCode == 124
-                if !editing.isEmpty || (horizontal && !self.model.query.isEmpty) {
+                if !editing.isEmpty {
+                    self.model.navigatesResults = false
                     return event
+                }
+                if !self.model.query.isEmpty {
+                    if !self.model.navigatesResults {
+                        if event.keyCode == 123 { return event }
+                        self.model.navigatesResults = true
+                        if event.keyCode == 124 {
+                            return self.caretAtEnd ? nil : event
+                        }
+                    } else if event.keyCode == 123, self.model.selection == 0 {
+                        self.model.navigatesResults = false
+                        return nil
+                    }
                 }
             }
 

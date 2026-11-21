@@ -111,7 +111,16 @@ enum AppLayout: String, CaseIterable, Identifiable {
 enum MoveDirection { case left, right, up, down }
 
 final class StartMenuModel: ObservableObject {
-    @Published var query = "" { didSet { if query != oldValue { updateResults() } } }
+    @Published var query = "" {
+        didSet {
+            guard query != oldValue else { return }
+            navigatesResults = false
+            updateResults()
+        }
+    }
+    /// The arrow keys left the search text for the results (→ at the end of
+    /// the text, ↑/↓); typing or ← on the first result goes back to the text.
+    @Published var navigatesResults = false
     @Published var sortMode: SortMode {
         didSet {
             UserDefaults.standard.set(sortMode.rawValue, forKey: "sortMode")
@@ -224,6 +233,7 @@ final class StartMenuModel: ObservableObject {
     func prepareForShow() {
         endPinDrag()
         query = ""
+        navigatesResults = false
         selection = 0
         showsSelection = false
         hoveredID = nil
