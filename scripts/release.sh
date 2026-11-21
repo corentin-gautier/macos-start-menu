@@ -9,8 +9,11 @@ TAP_DIR="${TAP_DIR:-$HOME/Projects/homebrew-tap}"
 
 # The update check compares this version with the latest release's tag.
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Resources/Info.plist
-if ! git diff --quiet Resources/Info.plist; then
-    git commit -qm "Version $VERSION" Resources/Info.plist
+# The website's structured data carries the version too.
+SITE_PAGES=(docs/index.html docs/*/index.html)
+sed -i '' -E "s/\"softwareVersion\": \"[^\"]*\"/\"softwareVersion\": \"$VERSION\"/" "${SITE_PAGES[@]}"
+if ! git diff --quiet Resources/Info.plist "${SITE_PAGES[@]}"; then
+    git commit -qm "Version $VERSION" Resources/Info.plist "${SITE_PAGES[@]}"
     git push -q
 fi
 
