@@ -259,10 +259,8 @@ final class StartPanelController: NSObject, NSWindowDelegate {
                 if !self.model.query.isEmpty {
                     if !self.model.navigatesResults {
                         if event.keyCode == 123 { return event }
+                        if event.keyCode == 124, !self.caretAtEnd { return event }
                         self.model.navigatesResults = true
-                        if event.keyCode == 124 {
-                            return self.caretAtEnd ? nil : event
-                        }
                     } else if event.keyCode == 123, self.model.selection == 0 {
                         self.model.navigatesResults = false
                         return nil
