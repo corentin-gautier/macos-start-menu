@@ -231,6 +231,16 @@ final class StartPanelController: NSObject, NSWindowDelegate {
                 }
             }
 
+            // Arrows edit the search text when it has some (←/→) or with a
+            // modifier (⇧ selection, ⌥ word, ⌘ line); plain ↑/↓ always navigate.
+            if (123...126).contains(event.keyCode) {
+                let editing = modifiers.subtracting([.function, .numericPad])
+                let horizontal = event.keyCode == 123 || event.keyCode == 124
+                if !editing.isEmpty || (horizontal && !self.model.query.isEmpty) {
+                    return event
+                }
+            }
+
             switch event.keyCode {
             case 53: // Escape
                 self.hide()
